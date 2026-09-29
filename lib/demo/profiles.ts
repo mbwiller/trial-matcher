@@ -1,0 +1,1071 @@
+import type { Confidence, Evidence, Extracted, PatientProfile } from "@/lib/types";
+
+/**
+ * Curated structured profiles for the demo patients, keyed by DemoPatient.id.
+ *
+ * These are the profiles the LLM engine is expected to extract from the messy
+ * records in ./patients.ts. Every Evidence.quote is a verbatim substring of the
+ * matching record (enforced by ./profiles.test.ts); character offsets are left
+ * unset because the engine aligns them at runtime.
+ *
+ * Confidence convention: "high" when the record states the value explicitly,
+ * "medium" when it is inferred (subtype from receptor values, current stage
+ * from "mets", CNS status from "no neuro sx" without imaging).
+ */
+
+const ev = (quote: string, source: string): Evidence => ({ quote, source });
+
+function x<T>(value: T, confidence: Confidence, evidence: Evidence[], note?: string): Extracted<T> {
+  const out: Extracted<T> = { value, confidence, evidence };
+  if (note) out.note = note;
+  return out;
+}
+
+const EXTRACTED_AT = "2026-09-28T09:00:00.000Z";
+
+// ---------------------------------------------------------------------------
+// Margaret H. — HR+/HER2-low metastatic, PIK3CA H1047R, progressed on CDK4/6i
+// ---------------------------------------------------------------------------
+
+const M_NOTE = "Oncology follow-up note 2026-09-18";
+const M_PATH = "Pathology report, liver core biopsy 2025-02-19";
+const M_PRIOR = "Prior pathology summary, lumpectomy 2019-04";
+const M_MOL = "Tissue NGS report 2025-03-10";
+const M_CT = "CT chest/abdomen/pelvis 2026-08-14";
+const M_LABS = "Labs 2026-09-15";
+const M_MEDS = "Medication list";
+const M_ALLERGY = "Allergies";
+
+const margaret: PatientProfile = {
+  id: "margaret-h",
+  label: "Margaret H.",
+  demographics: {
+    age: x(58, "high", [ev("58 yo postmenopausal F", M_NOTE)]),
+    sex: x("female" as const, "high", [ev("58 yo postmenopausal F", M_NOTE)]),
+    menopausalStatus: x(
+      "postmenopausal" as const,
+      "high",
+      [ev("58 yo postmenopausal F (natural menopause ~51)", M_NOTE)],
+      "Natural menopause at about 51; no ovarian suppression required.",
+    ),
+  },
+  diagnosis: {
+    primary: x(
+      "Invasive ductal carcinoma of the left breast, now metastatic to bone and liver",
+      "high",
+      [ev("hx L breast IDC dx 3/2019", M_NOTE), ev("Metastatic adenocarcinoma, consistent with breast primary.", M_PATH)],
+    ),
+    histology: x("Invasive ductal carcinoma", "high", [ev("IDC, grade 2 (Nottingham 6/9)", M_PRIOR)]),
+    grade: x("Grade 2 (Nottingham 6/9)", "high", [ev("IDC, grade 2 (Nottingham 6/9)", M_PRIOR)]),
+    laterality: x("left" as const, "high", [ev("hx L breast IDC", M_NOTE)]),
+    diagnosisDate: x("2019-03", "high", [ev("L breast IDC dx 3/2019", M_NOTE)]),
+    stageAtDiagnosis: x("IIB", "high", [ev("stage IIB (pT2 pN1a)", M_NOTE)]),
+    tnm: x(
+      "pT2 pN1a M0",
+      "high",
+      [ev("stage IIB (pT2 pN1a)", M_NOTE), ev("2.4 cm, margins negative, LVI present, 2/14 LNs positive", M_PRIOR)],
+      "M0 inferred from stage IIB at diagnosis.",
+    ),
+    currentStage: x(
+      "IV",
+      "medium",
+      [ev("Metastatic HR+/HER2-low breast ca", M_NOTE)],
+      "Metastatic recurrence February 2025; 'stage IV' is not written explicitly.",
+    ),
+    setting: x(
+      "metastatic" as const,
+      "high",
+      [ev("Metastatic HR+/HER2-low breast ca, PIK3CA H1047R, ESR1 WT, PD on 1L AI + CDK4/6i after ~17 mo.", M_NOTE)],
+      "Recurrent metastatic disease (bone and liver) since February 2025, after adjuvant endocrine therapy.",
+    ),
+    subtype: x(
+      "HR+/HER2-low",
+      "high",
+      [ev("Metastatic HR+/HER2-low breast ca", M_NOTE), ev("HER2 IHC: 1+ (negative by ASCO/CAP; HER2-low)", M_PATH)],
+    ),
+    metastaticSites: x(
+      ["bone (T8, L3, right ilium)", "liver (segments IV, VI, VIII)"],
+      "high",
+      [
+        ev("sclerotic bone mets (T8, L3, R ilium) + 2 liver lesions", M_NOTE),
+        ev(
+          "new 1.8 cm hypoattenuating lesion in segment IV; segment VI lesion increased from 2.4 cm to 3.2 cm; segment VIII lesion 1.5 cm",
+          M_CT,
+        ),
+      ],
+      "No lung, nodal or CNS disease documented.",
+    ),
+    measurableDisease: x(true, "high", [ev("Liver-dominant, measurable disease (seg VI 3.2 cm).", M_NOTE)]),
+    cnsStatus: x(
+      "none" as const,
+      "medium",
+      [
+        ev("Denies neuro sx. Has never had brain imaging.", M_NOTE),
+        ev("No brain MRI at this time (asymptomatic); would obtain if required for trial baseline.", M_NOTE),
+      ],
+      "No known CNS disease, but brain imaging has never been performed.",
+    ),
+  },
+  biomarkers: [
+    {
+      name: "ER",
+      status: "positive",
+      detail: "90%, strong (liver metastasis 2025); 95% strong on the 2019 primary",
+      method: "IHC",
+      date: "2025-02-19",
+      specimen: "liver core biopsy, segment VI",
+      evidence: [ev("ER: positive, 90% of tumor cells, strong intensity", M_PATH), ev("ER 95% strong", M_PRIOR)],
+      confidence: "high",
+    },
+    {
+      name: "PR",
+      status: "positive",
+      detail: "10%, weak to moderate (liver metastasis 2025); 60% on the 2019 primary",
+      method: "IHC",
+      date: "2025-02-19",
+      specimen: "liver core biopsy, segment VI",
+      evidence: [ev("PR: positive, 10% of tumor cells, weak to moderate intensity", M_PATH), ev("PR 60%", M_PRIOR)],
+      confidence: "high",
+    },
+    {
+      name: "HER2",
+      status: "low",
+      detail: "IHC 1+, ISH not amplified (HER2/CEP17 ratio 1.2) — HER2-low; IHC 1+ on the 2019 primary",
+      method: "IHC + ISH",
+      date: "2025-02-19",
+      specimen: "liver core biopsy, segment VI",
+      evidence: [
+        ev("HER2 IHC: 1+ (negative by ASCO/CAP; HER2-low)", M_PATH),
+        ev("HER2 ISH: not amplified (HER2/CEP17 ratio 1.2, mean HER2 copy number 2.1)", M_PATH),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Ki-67",
+      status: "high",
+      detail: "22% (2019 primary; not repeated on the metastatic biopsy)",
+      method: "IHC",
+      date: "2019-04",
+      specimen: "primary 2019",
+      evidence: [ev("Ki-67 22%", M_PRIOR)],
+      confidence: "medium",
+    },
+    {
+      name: "PIK3CA",
+      status: "mutated",
+      detail: "p.H1047R (c.3140A>G), VAF 31%, pathogenic",
+      method: "NGS",
+      date: "2025-03-10",
+      specimen: "liver core biopsy 2025-02",
+      evidence: [ev("PIK3CA p.H1047R (c.3140A>G), VAF 31% - pathogenic", M_MOL), ev("Tissue NGS: PIK3CA H1047R, ESR1 WT.", M_NOTE)],
+      confidence: "high",
+    },
+    {
+      name: "ESR1",
+      status: "wild-type",
+      detail: "No alterations detected on March 2025 tissue; not re-tested at progression on AI + CDK4/6i",
+      method: "NGS",
+      date: "2025-03-10",
+      specimen: "liver core biopsy 2025-02",
+      evidence: [ev("ESR1: no alterations detected (wild-type)", M_MOL)],
+      confidence: "high",
+    },
+    {
+      name: "TP53",
+      status: "wild-type",
+      detail: "No alterations detected",
+      method: "NGS",
+      date: "2025-03-10",
+      specimen: "liver core biopsy 2025-02",
+      evidence: [ev("TP53: no alterations detected", M_MOL)],
+      confidence: "high",
+    },
+    {
+      name: "gBRCA",
+      status: "negative",
+      detail: "Germline multigene panel negative (2019)",
+      method: "germline",
+      date: "2019",
+      specimen: "blood (germline)",
+      evidence: [ev("Germline panel 2019 negative.", M_NOTE)],
+      confidence: "high",
+    },
+    {
+      name: "BRCA1",
+      status: "wild-type",
+      detail: "No somatic alteration on tissue NGS; germline panel negative",
+      method: "NGS",
+      date: "2025-03-10",
+      specimen: "liver core biopsy 2025-02",
+      evidence: [ev("BRCA1/BRCA2: no alterations detected", M_MOL)],
+      confidence: "high",
+    },
+    {
+      name: "BRCA2",
+      status: "wild-type",
+      detail: "No somatic alteration on tissue NGS; germline panel negative",
+      method: "NGS",
+      date: "2025-03-10",
+      specimen: "liver core biopsy 2025-02",
+      evidence: [ev("BRCA1/BRCA2: no alterations detected", M_MOL)],
+      confidence: "high",
+    },
+    {
+      name: "TMB",
+      status: "low",
+      detail: "3.2 mut/Mb",
+      method: "NGS",
+      date: "2025-03-10",
+      specimen: "liver core biopsy 2025-02",
+      evidence: [ev("TMB: 3.2 mut/Mb (low).", M_MOL)],
+      confidence: "high",
+    },
+    {
+      name: "MSI",
+      status: "negative",
+      detail: "Microsatellite stable",
+      method: "NGS",
+      date: "2025-03-10",
+      specimen: "liver core biopsy 2025-02",
+      evidence: [ev("MSI: stable.", M_MOL)],
+      confidence: "high",
+    },
+  ],
+  treatments: [
+    {
+      name: "Left lumpectomy + axillary lymph node dissection",
+      category: "surgery",
+      intent: "unknown",
+      startDate: "2019-04",
+      status: "completed",
+      bestResponse: "pT2 (2.4 cm) pN1a (2/14), margins negative",
+      evidence: [ev("s/p lumpectomy + ALND 4/2019", M_NOTE), ev("L breast lumpectomy + ALND 04/2019", M_PRIOR)],
+      confidence: "high",
+    },
+    {
+      name: "Dose-dense doxorubicin + cyclophosphamide → paclitaxel (ddAC-T)",
+      agents: ["doxorubicin", "cyclophosphamide", "paclitaxel"],
+      category: "chemotherapy",
+      intent: "adjuvant",
+      startDate: "2019-05",
+      endDate: "2019-09",
+      status: "completed",
+      reasonStopped: "completed planned course",
+      evidence: [ev("adj ddAC-T 5/2019-9/2019", M_NOTE)],
+      confidence: "high",
+    },
+    {
+      name: "Whole-breast radiation",
+      category: "radiation",
+      intent: "adjuvant",
+      startDate: "2019-10",
+      endDate: "2019-11",
+      status: "completed",
+      reasonStopped: "completed planned course",
+      evidence: [ev("whole breast RT 10-11/2019", M_NOTE)],
+      confidence: "high",
+    },
+    {
+      name: "Anastrozole",
+      agents: ["anastrozole"],
+      category: "endocrine",
+      intent: "adjuvant",
+      startDate: "2019-12",
+      endDate: "2025-02",
+      status: "discontinued",
+      reasonStopped: "metastatic recurrence (February 2025)",
+      evidence: [
+        ev("then adj anastrozole 12/2019 until recurrence", M_NOTE),
+        ev("Feb 2025 presented w/ worsening low back pain -> bone scan + CT: sclerotic bone mets", M_NOTE),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Letrozole + palbociclib (first-line metastatic, with denosumab)",
+      agents: ["letrozole", "palbociclib"],
+      category: "endocrine",
+      intent: "metastatic",
+      line: 1,
+      startDate: "2025-03",
+      endDate: "2026-08-20",
+      status: "discontinued",
+      bestResponse: "PR",
+      reasonStopped: "progression in the liver on CT 2026-08-14 (~17 months on therapy)",
+      evidence: [
+        ev("Started 1L letrozole + palbociclib + denosumab 3/2025, best response PR.", M_NOTE),
+        ev("Palbo/letrozole stopped 8/20/26.", M_NOTE),
+        ev("letrozole 2.5 mg daily + palbociclib 125 mg - DISCONTINUED 8/20/2026 (PD)", M_MEDS),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Denosumab (bone-targeted supportive therapy)",
+      agents: ["denosumab"],
+      category: "other",
+      intent: "metastatic",
+      startDate: "2025-03",
+      status: "ongoing",
+      evidence: [
+        ev("Started 1L letrozole + palbociclib + denosumab 3/2025, best response PR.", M_NOTE),
+        ev("Bone mets: continue denosumab 120 mg q4w + Ca/vit D.", M_NOTE),
+      ],
+      confidence: "high",
+    },
+  ],
+  performance: {
+    ecog: x(1, "high", [ev("EXAM: ECOG 1.", M_NOTE)], "Moderate fatigue; still manages her own shopping and housework."),
+  },
+  labs: [
+    { name: "WBC", value: "5.1", unit: "x10^9/L", date: "2026-09-15", flag: "normal", evidence: [ev("WBC 5.1", M_LABS)] },
+    { name: "ANC", value: "2.8", unit: "x10^9/L", date: "2026-09-15", flag: "normal", evidence: [ev("ANC 2.8", M_LABS)] },
+    { name: "Hemoglobin", value: "11.2", unit: "g/dL", date: "2026-09-15", flag: "abnormal", evidence: [ev("Hgb 11.2 (L)", M_LABS)] },
+    { name: "Platelets", value: "210", unit: "x10^9/L", date: "2026-09-15", flag: "normal", evidence: [ev("Plt 210", M_LABS)] },
+    { name: "Creatinine", value: "0.8", unit: "mg/dL", date: "2026-09-15", flag: "normal", evidence: [ev("Cr 0.8", M_LABS)] },
+    { name: "AST", value: "34", unit: "U/L", date: "2026-09-15", flag: "normal", evidence: [ev("AST 34", M_LABS)] },
+    { name: "ALT", value: "41", unit: "U/L", date: "2026-09-15", flag: "normal", evidence: [ev("ALT 41", M_LABS)] },
+    { name: "Total bilirubin", value: "0.6", unit: "mg/dL", date: "2026-09-15", flag: "normal", evidence: [ev("T bili 0.6", M_LABS)] },
+    {
+      name: "Alkaline phosphatase",
+      value: "148",
+      unit: "U/L",
+      date: "2026-09-15",
+      flag: "abnormal",
+      evidence: [ev("Alk phos 148 (H)", M_LABS)],
+    },
+    { name: "Albumin", value: "3.9", unit: "g/dL", date: "2026-09-15", flag: "normal", evidence: [ev("Albumin 3.9", M_LABS)] },
+    {
+      name: "Fasting glucose",
+      value: "104",
+      unit: "mg/dL",
+      date: "2026-09-15",
+      flag: "abnormal",
+      evidence: [ev("Glucose (fasting) 104 (H)", M_LABS)],
+    },
+    { name: "CA 15-3", value: "68", unit: "U/mL", date: "2026-09-15", flag: "abnormal", evidence: [ev("CA 15-3 68 (H)", M_LABS)] },
+    {
+      name: "LVEF",
+      value: "62",
+      unit: "%",
+      date: "2019",
+      flag: "normal",
+      evidence: [ev("Echo: last TTE was pre-AC 2019 (LVEF 62%).", M_NOTE)],
+    },
+  ],
+  comorbidities: [
+    x(
+      "Hypertension (controlled on amlodipine)",
+      "high",
+      [ev("HTN - amlodipine, controlled.", M_NOTE)],
+      "No diabetes documented ('No DM.'); fasting glucose 104 mg/dL, HbA1c not on file.",
+    ),
+    x("Hyperlipidemia (atorvastatin)", "high", [ev("HLD - atorvastatin.", M_NOTE)]),
+    x("Osteopenia (DEXA 2023, T-score -1.8)", "high", [ev("osteopenia (DEXA 2023 T-score -1.8)", M_NOTE)]),
+  ],
+  medications: [
+    x("Denosumab 120 mg SC every 4 weeks", "high", [ev("denosumab 120 mg SC q4 weeks", M_MEDS)]),
+    x(
+      "Oxycodone 5 mg PO BID as needed (opioid; back pain)",
+      "high",
+      [ev("oxycodone 5 mg PO BID prn pain", M_MEDS)],
+      "Using roughly once daily; pain controlled.",
+    ),
+    x(
+      "Amlodipine 10 mg daily",
+      "high",
+      [ev("amlodipine 10 mg PO daily", M_MEDS)],
+      "No anticoagulants, systemic steroids or strong CYP3A4 inhibitors/inducers on the list.",
+    ),
+    x("Atorvastatin 20 mg nightly", "high", [ev("atorvastatin 20 mg PO nightly", M_MEDS)]),
+    x("Calcium carbonate 600 mg / vitamin D3 800 IU daily", "high", [ev("calcium carbonate 600 mg / vitamin D3 800 IU daily", M_MEDS)]),
+    x(
+      "Letrozole 2.5 mg + palbociclib 125 mg — discontinued 2026-08-20",
+      "high",
+      [ev("letrozole 2.5 mg daily + palbociclib 125 mg - DISCONTINUED 8/20/2026 (PD)", M_MEDS)],
+      "Listed for washout purposes; not a current medication.",
+    ),
+  ],
+  allergies: [x("Sulfonamides (rash)", "high", [ev("ALLERGIES: sulfa (rash)", M_ALLERGY)])],
+  keyDates: [
+    { label: "Initial diagnosis", date: "2019-03", evidence: [ev("L breast IDC dx 3/2019", M_NOTE)] },
+    { label: "Primary surgery (lumpectomy + ALND)", date: "2019-04", evidence: [ev("s/p lumpectomy + ALND 4/2019", M_NOTE)] },
+    { label: "Last adjuvant chemotherapy", date: "2019-09", evidence: [ev("adj ddAC-T 5/2019-9/2019", M_NOTE)] },
+    { label: "Metastatic recurrence", date: "2025-02", evidence: [ev("Feb 2025 presented w/ worsening low back pain", M_NOTE)] },
+    { label: "Metastatic biopsy (liver)", date: "2025-02-19", evidence: [ev("Collected: 2025-02-19", M_PATH)] },
+    {
+      label: "Start of first-line metastatic therapy",
+      date: "2025-03",
+      evidence: [ev("Started 1L letrozole + palbociclib + denosumab 3/2025", M_NOTE)],
+    },
+    {
+      label: "Progression on first-line therapy (CT)",
+      date: "2026-08-14",
+      evidence: [ev("CT 8/14/26 w/ PD in liver", M_NOTE), ev("CT CHEST/ABDOMEN/PELVIS W/ CONTRAST - 2026-08-14", M_CT)],
+    },
+    { label: "Last dose of palbociclib/letrozole", date: "2026-08-20", evidence: [ev("Palbo/letrozole stopped 8/20/26.", M_NOTE)] },
+    { label: "Last imaging (CT chest/abdomen/pelvis)", date: "2026-08-14", evidence: [ev("CT CHEST/ABDOMEN/PELVIS W/ CONTRAST - 2026-08-14", M_CT)] },
+    { label: "Last echocardiogram", date: "2019", evidence: [ev("Echo: last TTE was pre-AC 2019 (LVEF 62%).", M_NOTE)] },
+    { label: "Most recent labs", date: "2026-09-15", evidence: [ev("LABS 2026-09-15", M_LABS)] },
+    { label: "Most recent clinic visit", date: "2026-09-18", evidence: [ev("Date of service: 09/18/2026", M_NOTE)] },
+  ],
+  openQuestions: [
+    "HbA1c is not documented anywhere (fasting glucose 104 mg/dL on 2026-09-15); PI3K/AKT-pathway trials usually require HbA1c at screening.",
+    "No echocardiogram since the pre-anthracycline study in 2019 (LVEF 62%); most trials require LVEF within the last 6–12 months or at screening.",
+    "Brain imaging has never been performed (asymptomatic); trials that mandate a baseline brain MRI will need one.",
+    "Hepatitis B/C and HIV status are not documented.",
+    "No repeat tumour or ctDNA genotyping at progression on letrozole + palbociclib; ESR1 status is from March 2025 tissue and ESR1 mutations commonly emerge on aromatase inhibitors.",
+    "Confirm 2026-08-20 as the last dose of palbociclib/letrozole for washout windows; the 2026-09-18 A/P also carries a stale copy-forward line ('continue letrozole/palbociclib').",
+    "Prior therapy count: one endocrine-based line in the metastatic setting and no chemotherapy, fulvestrant or PI3K/AKT/mTOR inhibitor to date; confirm nothing else was given between 2019 and 2025.",
+    "ECG/QTc not documented.",
+  ],
+  summary:
+    "58-year-old postmenopausal woman with HR+/HER2-low (IHC 1+, ISH not amplified) metastatic breast cancer, PIK3CA H1047R-mutated and ESR1 wild-type, recurrent to bone and liver in February 2025 after adjuvant anastrozole for stage IIB disease. She progressed in the liver on first-line letrozole + palbociclib (best response PR, about 17 months; stopped 2026-08-20), has measurable liver disease, ECOG 1 and adequate organ function, and has had no chemotherapy or fulvestrant in the metastatic setting. Candidate for second-line PI3K/AKT-pathway therapy or a trial; HbA1c, a recent echocardiogram and baseline brain imaging are not on file.",
+  extractedAt: EXTRACTED_AT,
+  source: "demo",
+};
+
+// ---------------------------------------------------------------------------
+// Danielle R. — TNBC, residual disease after neoadjuvant chemo-immunotherapy, gBRCA1
+// ---------------------------------------------------------------------------
+
+const D_NOTE = "Oncology follow-up note 2026-09-22";
+const D_PATH = "Pathology report, mastectomy 2026-06-11";
+const D_PRIOR = "Prior pathology, core biopsy 2025-11";
+const D_GEN = "Germline panel 2025-12-15";
+const D_CT = "CT chest/abdomen/pelvis 2026-07-09";
+const D_ECHO = "Echocardiogram 2026-03-04";
+const D_LABS = "Labs 2026-09-19";
+const D_MEDS = "Medication list";
+const D_ALLERGY = "Allergies";
+
+const danielle: PatientProfile = {
+  id: "danielle-r",
+  label: "Danielle R.",
+  demographics: {
+    age: x(39, "high", [ev("39 yo premenopausal F", D_NOTE)]),
+    sex: x("female" as const, "high", [ev("39 yo premenopausal F", D_NOTE)]),
+    menopausalStatus: x(
+      "premenopausal" as const,
+      "high",
+      [ev("39 yo premenopausal F, G2P2, LNG-IUD in place", D_NOTE)],
+      "Menses irregular since chemotherapy (last spotting ~8/26); levonorgestrel IUD in place.",
+    ),
+  },
+  diagnosis: {
+    primary: x(
+      "Invasive ductal carcinoma, right breast (triple-negative), residual disease after neoadjuvant therapy",
+      "high",
+      [ev("R breast IDC grade 3, TNBC, cT2 (3.1 cm) cN1 (bx-proven axillary node) M0, stage IIB, dx 11/2025.", D_NOTE)],
+    ),
+    histology: x("Invasive ductal carcinoma", "high", [ev("IDC, grade 3 (Nottingham 9/9)", D_PRIOR)]),
+    grade: x("Grade 3 (Nottingham 9/9)", "high", [ev("IDC, grade 3 (Nottingham 9/9)", D_PRIOR)]),
+    laterality: x("right" as const, "high", [ev("R breast IDC grade 3", D_NOTE)]),
+    diagnosisDate: x("2025-11", "high", [ev("dx 11/2025", D_NOTE)]),
+    stageAtDiagnosis: x("IIB", "high", [ev("stage IIB, dx 11/2025", D_NOTE)]),
+    tnm: x(
+      "cT2 cN1 M0 (clinical, 11/2025); ypT1c ypN1a (pathologic, 2026-06-11)",
+      "high",
+      [ev("cT2 (3.1 cm) cN1 (bx-proven axillary node) M0", D_NOTE), ev("Pathologic stage (AJCC 8th): ypT1c ypN1a", D_PATH)],
+    ),
+    currentStage: x(
+      "No evidence of disease (stage IIB at diagnosis; ypT1c ypN1a after neoadjuvant therapy)",
+      "high",
+      [ev("Currently NED.", D_NOTE), ev("Pathologic stage (AJCC 8th): ypT1c ypN1a", D_PATH)],
+    ),
+    setting: x(
+      "early" as const,
+      "high",
+      [
+        ev("s/p bilat mastectomy + R ALND, PMRT complete. Currently NED. Adj pembro C4 of 9 today.", D_NOTE),
+        ev("No evidence of metastatic disease in the chest, abdomen or pelvis.", D_CT),
+      ],
+      "Early-stage disease in the adjuvant phase, with residual disease after neoadjuvant therapy (RCB class II).",
+    ),
+    subtype: x(
+      "TNBC",
+      "high",
+      [ev("R breast IDC grade 3, TNBC", D_NOTE), ev("ER 0%, PR 0%, HER2 IHC 0 - triple negative, concordant with core bx.", D_PATH)],
+    ),
+    metastaticSites: x([], "high", [ev("No evidence of metastatic disease in the chest, abdomen or pelvis.", D_CT)]),
+    measurableDisease: x(
+      false,
+      "high",
+      [ev("Currently NED.", D_NOTE)],
+      "No evaluable or measurable disease after definitive surgery.",
+    ),
+    cnsStatus: x(
+      "none" as const,
+      "medium",
+      [ev("No new lumps, bone pain, HA or cough.", D_NOTE)],
+      "No brain imaging performed; asymptomatic with no metastatic disease elsewhere.",
+    ),
+  },
+  biomarkers: [
+    {
+      name: "ER",
+      status: "negative",
+      detail: "0% (core biopsy 11/2025; repeated on residual tumour 2026-06, concordant)",
+      method: "IHC",
+      date: "2026-06-11",
+      specimen: "mastectomy 2026-06-11 (concordant with core biopsy 11/2025)",
+      evidence: [
+        ev("ER 0%, PR 0%, HER2 IHC 0 - triple negative, concordant with core bx.", D_PATH),
+        ev("ER 0%, PR 0%, HER2 IHC 0 (negative), Ki-67 75%.", D_PRIOR),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "PR",
+      status: "negative",
+      detail: "0% (core biopsy 11/2025; repeated on residual tumour 2026-06, concordant)",
+      method: "IHC",
+      date: "2026-06-11",
+      specimen: "mastectomy 2026-06-11 (concordant with core biopsy 11/2025)",
+      evidence: [
+        ev("ER 0%, PR 0%, HER2 IHC 0 - triple negative, concordant with core bx.", D_PATH),
+        ev("ER 0%, PR 0%, HER2 IHC 0 (negative), Ki-67 75%.", D_PRIOR),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "HER2",
+      status: "negative",
+      detail: "IHC 0 (not HER2-low), on core biopsy and residual tumour",
+      method: "IHC",
+      date: "2026-06-11",
+      specimen: "mastectomy 2026-06-11 (concordant with core biopsy 11/2025)",
+      evidence: [
+        ev("ER 0%, PR 0%, HER2 IHC 0 - triple negative, concordant with core bx.", D_PATH),
+        ev("HER2 IHC 0 (negative)", D_PRIOR),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Ki-67",
+      status: "high",
+      detail: "75%",
+      method: "IHC",
+      date: "2025-11",
+      specimen: "core biopsy 11/2025",
+      evidence: [ev("Ki-67 75%", D_PRIOR)],
+      confidence: "high",
+    },
+    {
+      name: "PD-L1",
+      status: "positive",
+      detail: "CPS 8 (22C3); below the CPS ≥ 10 threshold used in metastatic TNBC",
+      method: "IHC",
+      date: "2025-11",
+      specimen: "core biopsy 11/2025",
+      evidence: [ev("PD-L1 (22C3) CPS 8.", D_PRIOR)],
+      confidence: "medium",
+    },
+    {
+      name: "BRCA1",
+      status: "mutated",
+      detail: "c.68_69delAG (p.Glu23ValfsTer17), pathogenic — germline",
+      method: "germline",
+      date: "2025-12-15",
+      specimen: "blood (germline multigene panel)",
+      evidence: [
+        ev("BRCA1 c.68_69delAG (p.Glu23ValfsTer17) - PATHOGENIC", D_GEN),
+        ev("Germline BRCA1 pathogenic variant (c.68_69delAG) 12/2025.", D_NOTE),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "gBRCA",
+      status: "positive",
+      detail: "Germline BRCA1 pathogenic variant (c.68_69delAG)",
+      method: "germline",
+      date: "2025-12-15",
+      specimen: "blood (germline multigene panel)",
+      evidence: [ev("BRCA1 c.68_69delAG (p.Glu23ValfsTer17) - PATHOGENIC", D_GEN)],
+      confidence: "high",
+    },
+    {
+      name: "BRCA2",
+      status: "wild-type",
+      detail: "No pathogenic variant (germline)",
+      method: "germline",
+      date: "2025-12-15",
+      specimen: "blood (germline multigene panel)",
+      evidence: [ev("No other pathogenic variants (BRCA2, PALB2, TP53, CHEK2, ATM, PTEN negative).", D_GEN)],
+      confidence: "high",
+    },
+    {
+      name: "PALB2",
+      status: "wild-type",
+      detail: "No pathogenic variant (germline)",
+      method: "germline",
+      date: "2025-12-15",
+      specimen: "blood (germline multigene panel)",
+      evidence: [ev("No other pathogenic variants (BRCA2, PALB2, TP53, CHEK2, ATM, PTEN negative).", D_GEN)],
+      confidence: "high",
+    },
+  ],
+  treatments: [
+    {
+      name: "Pembrolizumab + weekly paclitaxel + carboplatin ×12 weeks (KEYNOTE-522, part 1)",
+      agents: ["pembrolizumab", "paclitaxel", "carboplatin"],
+      category: "chemotherapy",
+      intent: "neoadjuvant",
+      startDate: "2025-12",
+      endDate: "2026-03",
+      status: "completed",
+      bestResponse: "residual disease at surgery (ypT1c ypN1a, RCB class II)",
+      reasonStopped: "completed planned course (grade 2 neuropathy on paclitaxel, now grade 1)",
+      evidence: [
+        ev("pembro + weekly paclitaxel + carboplatin x12 wks (12/2025-3/2026)", D_NOTE),
+        ev("Tox: G2 PN on paclitaxel, now G1 (toes)", D_NOTE),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Pembrolizumab + dose-dense doxorubicin + cyclophosphamide ×4 (KEYNOTE-522, part 2)",
+      agents: ["pembrolizumab", "doxorubicin", "cyclophosphamide"],
+      category: "chemotherapy",
+      intent: "neoadjuvant",
+      startDate: "2026-03",
+      endDate: "2026-05",
+      status: "completed",
+      bestResponse: "residual disease at surgery (ypT1c ypN1a, RCB class II, score 2.6)",
+      reasonStopped: "completed planned course",
+      evidence: [
+        ev("then pembro + ddAC x4 (3/2026-5/2026)", D_NOTE),
+        ev("Residual Cancer Burden: RCB class II (RCB score 2.6)", D_PATH),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Bilateral mastectomy (right therapeutic, left risk-reducing) + right axillary lymph node dissection",
+      category: "surgery",
+      intent: "unknown",
+      startDate: "2026-06-11",
+      status: "completed",
+      bestResponse: "ypT1c (1.2 cm) ypN1a (2/11), RCB class II (score 2.6), margins negative",
+      evidence: [
+        ev(
+          "Surgery 6/11/26: bilateral mastectomy (L risk-reducing) + R ALND -> ypT1c (1.2 cm) ypN1a (2/11), RCB class II (RCB 2.6), margins neg.",
+          D_NOTE,
+        ),
+        ev("Procedure date: 2026-06-11", D_PATH),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Post-mastectomy radiation (PMRT)",
+      category: "radiation",
+      intent: "adjuvant",
+      startDate: "2026-07-20",
+      endDate: "2026-08-28",
+      status: "completed",
+      reasonStopped: "completed planned course",
+      evidence: [ev("PMRT 7/20/26-8/28/26, completed.", D_NOTE)],
+      confidence: "high",
+    },
+    {
+      name: "Pembrolizumab (adjuvant, 9 cycles planned; cycle 4 given 2026-09-22)",
+      agents: ["pembrolizumab"],
+      category: "immunotherapy",
+      intent: "adjuvant",
+      startDate: "2026-07-21",
+      status: "ongoing",
+      evidence: [
+        ev("Adj pembro started 7/21/26 (9 cycles planned).", D_NOTE),
+        ev("pembrolizumab 200 mg IV q3 weeks (adjuvant, C4 of 9)", D_MEDS),
+      ],
+      confidence: "high",
+    },
+  ],
+  performance: {
+    ecog: x(0, "high", [ev("EXAM: ECOG 0.", D_NOTE)]),
+  },
+  labs: [
+    { name: "WBC", value: "3.4", unit: "x10^9/L", date: "2026-09-19", flag: "abnormal", evidence: [ev("WBC 3.4 (L)", D_LABS)] },
+    { name: "ANC", value: "1.9", unit: "x10^9/L", date: "2026-09-19", flag: "normal", evidence: [ev("ANC 1.9", D_LABS)] },
+    { name: "Hemoglobin", value: "12.4", unit: "g/dL", date: "2026-09-19", flag: "normal", evidence: [ev("Hgb 12.4", D_LABS)] },
+    { name: "Platelets", value: "180", unit: "x10^9/L", date: "2026-09-19", flag: "normal", evidence: [ev("Plt 180", D_LABS)] },
+    { name: "Creatinine", value: "0.7", unit: "mg/dL", date: "2026-09-19", flag: "normal", evidence: [ev("Cr 0.7", D_LABS)] },
+    { name: "AST", value: "22", unit: "U/L", date: "2026-09-19", flag: "normal", evidence: [ev("AST 22", D_LABS)] },
+    { name: "ALT", value: "25", unit: "U/L", date: "2026-09-19", flag: "normal", evidence: [ev("ALT 25", D_LABS)] },
+    { name: "Total bilirubin", value: "0.5", unit: "mg/dL", date: "2026-09-19", flag: "normal", evidence: [ev("T bili 0.5", D_LABS)] },
+    { name: "Alkaline phosphatase", value: "71", unit: "U/L", date: "2026-09-19", flag: "normal", evidence: [ev("Alk phos 71", D_LABS)] },
+    { name: "TSH", value: "3.1", unit: "mIU/L", date: "2026-09-19", flag: "normal", evidence: [ev("TSH 3.1", D_LABS)] },
+    { name: "Free T4", value: "1.1", unit: "ng/dL", date: "2026-09-19", flag: "normal", evidence: [ev("free T4 1.1", D_LABS)] },
+    { name: "hCG (serum)", value: "negative", date: "2026-09-19", flag: "normal", evidence: [ev("hCG (serum) negative", D_LABS)] },
+    { name: "LVEF", value: "60", unit: "%", date: "2026-03-04", flag: "normal", evidence: [ev("ECHO 03/04/2026: LVEF 60%", D_ECHO)] },
+  ],
+  comorbidities: [
+    x(
+      "Immune-related hypothyroidism, grade 2 (from pembrolizumab; on levothyroxine, TSH normal)",
+      "high",
+      [ev("irAE hypothyroidism G2 -> levothyroxine, TSH now nl.", D_NOTE)],
+      "No pre-existing autoimmune disease documented ('No autoimmune dz prior to pembro.'); no diabetes.",
+    ),
+    x("Anxiety (sertraline)", "high", [ev("anxiety (sertraline)", D_NOTE)]),
+    x(
+      "Residual grade 1 peripheral sensory neuropathy (paclitaxel; previously grade 2)",
+      "high",
+      [ev("Tox: G2 PN on paclitaxel, now G1 (toes)", D_NOTE), ev("PN stable G1, no functional limitation.", D_NOTE)],
+    ),
+  ],
+  medications: [
+    x(
+      "Pembrolizumab 200 mg IV every 3 weeks (adjuvant, cycle 4 of 9)",
+      "high",
+      [ev("pembrolizumab 200 mg IV q3 weeks (adjuvant, C4 of 9)", D_MEDS)],
+      "Only anticancer agent currently being given; no anticoagulants, systemic steroids or strong CYP3A4 modulators listed.",
+    ),
+    x("Levothyroxine 75 mcg daily", "high", [ev("levothyroxine 75 mcg PO daily", D_MEDS)]),
+    x("Sertraline 50 mg daily", "high", [ev("sertraline 50 mg PO daily", D_MEDS)]),
+    x(
+      "Levonorgestrel IUD (placed 2023)",
+      "high",
+      [ev("levonorgestrel IUD (placed 2023)", D_MEDS)],
+      "Highly effective contraception in place; not pregnant, not breastfeeding.",
+    ),
+  ],
+  allergies: [x("No known drug allergies", "high", [ev("ALLERGIES: NKDA", D_ALLERGY)])],
+  keyDates: [
+    { label: "Initial diagnosis", date: "2025-11", evidence: [ev("dx 11/2025", D_NOTE)] },
+    { label: "Germline BRCA1 result", date: "2025-12-15", evidence: [ev("Germline multigene panel (blood), reported 2025-12-15", D_GEN)] },
+    {
+      label: "Start of neoadjuvant therapy",
+      date: "2025-12",
+      evidence: [ev("pembro + weekly paclitaxel + carboplatin x12 wks (12/2025-3/2026)", D_NOTE)],
+    },
+    { label: "Echocardiogram (pre-anthracycline)", date: "2026-03-04", evidence: [ev("ECHO 03/04/2026: LVEF 60%", D_ECHO)] },
+    { label: "Last dose of neoadjuvant chemotherapy", date: "2026-05", evidence: [ev("then pembro + ddAC x4 (3/2026-5/2026)", D_NOTE)] },
+    { label: "Surgery (bilateral mastectomy + right ALND)", date: "2026-06-11", evidence: [ev("Procedure date: 2026-06-11", D_PATH)] },
+    {
+      label: "Post-operative staging CT (no metastatic disease)",
+      date: "2026-07-09",
+      evidence: [ev("CT CHEST/ABDOMEN/PELVIS W/ CONTRAST - 07/09/2026", D_CT)],
+    },
+    { label: "Start of adjuvant pembrolizumab", date: "2026-07-21", evidence: [ev("Adj pembro started 7/21/26 (9 cycles planned).", D_NOTE)] },
+    { label: "ctDNA (Signatera) drawn, result pending", date: "2026-08-25", evidence: [ev("Signatera (ctDNA) sent 8/25/26 - result pending.", D_NOTE)] },
+    { label: "Radiation completed", date: "2026-08-28", evidence: [ev("PMRT 7/20/26-8/28/26, completed.", D_NOTE)] },
+    { label: "Most recent labs", date: "2026-09-19", evidence: [ev("LABS 2026-09-19", D_LABS)] },
+    { label: "Most recent clinic visit", date: "2026-09-22", evidence: [ev("Date of service: 2026-09-22", D_NOTE)] },
+  ],
+  openQuestions: [
+    "Signatera ctDNA result (drawn 2026-08-25) is pending; ctDNA-directed post-neoadjuvant trials hinge on it.",
+    "Adjuvant olaparib vs capecitabine has not been decided; starting either would exclude her from most post-neoadjuvant residual-disease trials, and neither has been studied in combination with pembrolizumab.",
+    "Timing windows: surgery 2026-06-11 and radiation completed 2026-08-28 — check each trial's maximum interval from surgery or radiation to enrolment (often 12–16 weeks from surgery).",
+    "Concurrent adjuvant pembrolizumab (cycle 4 of 9): confirm whether candidate trials allow ongoing anti-PD-1 therapy or require its completion.",
+    "Hepatitis B/C and HIV status are not documented.",
+    "ANC 1.9 with WBC 3.4 (L) on 2026-09-19 — adequate for most trials (≥ 1.5) but borderline; repeat before screening.",
+    "Menses irregular since chemotherapy; confirm how trials that require pregnancy testing and contraception classify her (LNG-IUD in place, serum hCG negative 2026-09-19).",
+    "No brain imaging has been performed (asymptomatic).",
+    "The 2026-09-22 A/P carries a stale copy-forward line ('continue weekly paclitaxel/carbo + pembro'); neoadjuvant chemotherapy finished in May 2026 — verify no chemotherapy is ongoing.",
+    "Archival tissue: the June 2026 surgical specimen is available; check whether a trial requires the pre-treatment core biopsy instead.",
+  ],
+  summary:
+    "39-year-old premenopausal woman with stage IIB (cT2 cN1) right-sided triple-negative breast cancer and a germline BRCA1 pathogenic variant, treated with neoadjuvant KEYNOTE-522 (pembrolizumab + paclitaxel/carboplatin, then pembrolizumab + dose-dense AC) with residual disease at bilateral mastectomy and right axillary dissection on 2026-06-11 (ypT1c ypN1a, RCB class II). Post-mastectomy radiation finished 2026-08-28, adjuvant pembrolizumab is ongoing (cycle 4 of 9), the July 2026 CT showed no metastatic disease, and she is ECOG 0 with grade 1 residual neuropathy and treated immune-related hypothyroidism. Adjuvant olaparib vs capecitabine is under discussion and a Signatera ctDNA result is pending; archival surgical tissue is available.",
+  extractedAt: EXTRACTED_AT,
+  source: "demo",
+};
+
+// ---------------------------------------------------------------------------
+// Rosa V. — HER2+ metastatic, treated brain metastases, progressed on T-DXd
+// ---------------------------------------------------------------------------
+
+const R_NOTE = "Oncology follow-up note 2026-09-24";
+const R_PATH = "Pathology report, core biopsies 2024-01-16";
+const R_MRI = "MRI brain 2026-09-12";
+const R_CT = "CT chest/abdomen/pelvis 2026-07-20";
+const R_ECHO = "Echocardiogram 2026-09-10";
+const R_LABS = "Labs 2026-09-22";
+const R_MEDS = "Medication list";
+const R_ALLERGY = "Allergies";
+
+const rosa: PatientProfile = {
+  id: "rosa-v",
+  label: "Rosa V.",
+  demographics: {
+    age: x(66, "high", [ev("66 yo postmenopausal F", R_NOTE)]),
+    sex: x("female" as const, "high", [ev("66 yo postmenopausal F", R_NOTE)]),
+    menopausalStatus: x("postmenopausal" as const, "high", [ev("66 yo postmenopausal F", R_NOTE)]),
+  },
+  diagnosis: {
+    primary: x(
+      "Invasive ductal carcinoma, right breast, HER2-positive, de novo metastatic (primary never resected)",
+      "high",
+      [ev("de novo metastatic R breast IDC, grade 3, ER-/PR-/HER2 3+, dx Jan 2024", R_NOTE), ev("PSH: port 2/2024. No breast surgery.", R_NOTE)],
+    ),
+    histology: x("Invasive ductal carcinoma", "high", [ev("Right breast core: Invasive ductal carcinoma, grade 3 (Nottingham 9/9).", R_PATH)]),
+    grade: x("Grade 3 (Nottingham 9/9)", "high", [ev("Right breast core: Invasive ductal carcinoma, grade 3 (Nottingham 9/9).", R_PATH)]),
+    laterality: x("right" as const, "high", [ev("de novo metastatic R breast IDC", R_NOTE)]),
+    diagnosisDate: x("2024-01", "high", [ev("dx Jan 2024", R_NOTE), ev("Collected: 01/16/2024 | Reported: 01/19/2024", R_PATH)]),
+    stageAtDiagnosis: x("IV (de novo)", "high", [ev("de novo stage IV", R_NOTE)]),
+    tnm: x("cT3 cN2 M1", "high", [ev("cT3 cN2 M1: bilat lung nodules, mediastinal LN, solitary liver lesion", R_NOTE)]),
+    currentStage: x("IV", "high", [ev("de novo stage IV", R_NOTE)]),
+    setting: x(
+      "metastatic" as const,
+      "high",
+      [ev("Metastatic HER2+ (IHC 3+) HR-negative breast ca, de novo stage IV, PD on 1L THP/HP and 2L T-DXd.", R_NOTE)],
+      "De novo metastatic disease; two prior lines of HER2-directed therapy in the metastatic setting.",
+    ),
+    subtype: x("HER2+ (HR-negative)", "high", [ev("ER-/PR-/HER2 3+", R_NOTE), ev("HER2 IHC: 3+ (positive)", R_PATH)]),
+    metastaticSites: x(
+      [
+        "lung (bilateral nodules)",
+        "mediastinal lymph nodes",
+        "liver (segments V and VII plus subcentimetre lesions)",
+        "brain (three lesions, treated with SRS 2026-08-07)",
+      ],
+      "high",
+      [
+        ev("cT3 cN2 M1: bilat lung nodules, mediastinal LN, solitary liver lesion", R_NOTE),
+        ev("3 new brain mets (largest 1.4 cm R frontal)", R_NOTE),
+        ev("segment VII lesion 2.8 cm (previously 1.6 cm), segment V lesion 2.2 cm (previously 1.1 cm)", R_CT),
+      ],
+    ),
+    measurableDisease: x(true, "high", [ev("Measurable liver dz: seg VII 2.8 cm, seg V 2.2 cm.", R_NOTE)]),
+    cnsStatus: x(
+      "treated-stable" as const,
+      "high",
+      [
+        ev("Treated brain mets (GK SRS 8/7/26) stable on 9/12 MRI, off steroids.", R_NOTE),
+        ev("No new enhancing lesions. No vasogenic edema, no mass effect, no hemorrhage.", R_MRI),
+      ],
+      "Three brain metastases treated with Gamma Knife SRS on 2026-08-07; dexamethasone off since 2026-08-30; no seizures; headaches resolved.",
+    ),
+  },
+  biomarkers: [
+    {
+      name: "ER",
+      status: "negative",
+      detail: "0%",
+      method: "IHC",
+      date: "2024-01-16",
+      specimen: "primary core biopsy 2024-01",
+      evidence: [ev("ER: negative (0%)", R_PATH)],
+      confidence: "high",
+    },
+    {
+      name: "PR",
+      status: "negative",
+      detail: "0%",
+      method: "IHC",
+      date: "2024-01-16",
+      specimen: "primary core biopsy 2024-01",
+      evidence: [ev("PR: negative (0%)", R_PATH)],
+      confidence: "high",
+    },
+    {
+      name: "HER2",
+      status: "positive",
+      detail: "IHC 3+ on the primary core (2024-01) and liver metastasis (2024-01-23); no repeat biopsy at progression on T-DXd",
+      method: "IHC",
+      date: "2024-01-16",
+      specimen: "primary core biopsy 2024-01 and liver biopsy 2024-01-23",
+      evidence: [
+        ev("HER2 IHC: 3+ (positive), complete intense circumferential staining in >10% of cells", R_PATH),
+        ev("Liver bx 2024-01-23: metastatic carcinoma c/w breast primary, HER2 IHC 3+.", R_PATH),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Ki-67",
+      status: "high",
+      detail: "60%",
+      method: "IHC",
+      date: "2024-01-16",
+      specimen: "primary core biopsy 2024-01",
+      evidence: [ev("Ki-67: 60%", R_PATH)],
+      confidence: "high",
+    },
+    {
+      name: "PIK3CA",
+      status: "unknown",
+      detail: "Not tested — no tissue or ctDNA NGS on file",
+      evidence: [ev("No NGS on file.", R_PATH)],
+      confidence: "high",
+    },
+  ],
+  treatments: [
+    {
+      name: "Docetaxel + trastuzumab + pertuzumab (THP) ×6",
+      agents: ["docetaxel", "trastuzumab", "pertuzumab"],
+      category: "chemotherapy",
+      intent: "metastatic",
+      line: 1,
+      startDate: "2024-02",
+      endDate: "2024-06",
+      status: "completed",
+      bestResponse: "PR",
+      reasonStopped: "completed planned induction; continued to trastuzumab/pertuzumab maintenance",
+      evidence: [ev("1L THP (docetaxel x6, 2/2024-6/2024) then HP maint (Phesgo), best response PR", R_NOTE)],
+      confidence: "high",
+    },
+    {
+      name: "Trastuzumab + pertuzumab maintenance (Phesgo)",
+      agents: ["trastuzumab", "pertuzumab"],
+      category: "targeted",
+      intent: "metastatic",
+      line: 1,
+      startDate: "2024-07",
+      endDate: "2025-03",
+      status: "discontinued",
+      bestResponse: "PR",
+      reasonStopped: "progression (new liver lesions, March 2025)",
+      evidence: [ev("then HP maint (Phesgo), best response PR; PD 3/2025 w/ new liver lesions.", R_NOTE)],
+      confidence: "high",
+    },
+    {
+      name: "Trastuzumab deruxtecan (T-DXd) 5.4 mg/kg",
+      agents: ["trastuzumab deruxtecan"],
+      category: "antibody-drug-conjugate",
+      intent: "metastatic",
+      line: 2,
+      startDate: "2025-04",
+      endDate: "2026-07-06",
+      status: "discontinued",
+      bestResponse: "PR",
+      reasonStopped: "progression (liver and three new brain metastases, July 2026); no ILD/pneumonitis at any point",
+      evidence: [
+        ev("2L T-DXd 5.4 mg/kg 4/2025-7/2026 (last dose 07/06/2026), PR, no ILD/pneumonitis at any point", R_NOTE),
+        ev("trastuzumab deruxtecan - DISCONTINUED 07/2026 (PD)", R_MEDS),
+      ],
+      confidence: "high",
+    },
+    {
+      name: "Dexamethasone (peri-SRS, tapered off)",
+      agents: ["dexamethasone"],
+      category: "other",
+      intent: "metastatic",
+      startDate: "2026-07",
+      endDate: "2026-08-30",
+      status: "completed",
+      reasonStopped: "taper completed",
+      evidence: [ev("Dex tapered off, last dose 8/30/26.", R_NOTE), ev("dexamethasone - taper COMPLETED, last dose 08/30/2026", R_MEDS)],
+      confidence: "high",
+    },
+    {
+      name: "Gamma Knife stereotactic radiosurgery to three brain metastases (20 Gy)",
+      category: "radiation",
+      intent: "metastatic",
+      startDate: "2026-08-07",
+      endDate: "2026-08-07",
+      status: "completed",
+      bestResponse: "all three treated lesions smaller on MRI 2026-09-12, no new lesions",
+      evidence: [ev("GK SRS to all 3 lesions 8/7/26 (20 Gy).", R_NOTE), ev("all decreased, consistent with treatment response", R_MRI)],
+      confidence: "high",
+    },
+  ],
+  performance: {
+    ecog: x(1, "high", [ev("EXAM: ECOG 1.", R_NOTE)], "Mild fatigue; 2 kg weight loss over 2 months."),
+  },
+  labs: [
+    { name: "WBC", value: "5.8", unit: "x10^9/L", date: "2026-09-22", flag: "normal", evidence: [ev("WBC 5.8", R_LABS)] },
+    { name: "ANC", value: "3.1", unit: "x10^9/L", date: "2026-09-22", flag: "normal", evidence: [ev("ANC 3.1", R_LABS)] },
+    { name: "Hemoglobin", value: "10.9", unit: "g/dL", date: "2026-09-22", flag: "abnormal", evidence: [ev("Hgb 10.9 (L)", R_LABS)] },
+    { name: "Platelets", value: "165", unit: "x10^9/L", date: "2026-09-22", flag: "normal", evidence: [ev("Plt 165", R_LABS)] },
+    { name: "Creatinine", value: "0.9", unit: "mg/dL", date: "2026-09-22", flag: "normal", evidence: [ev("Cr 0.9", R_LABS)] },
+    {
+      name: "Creatinine clearance (estimated, Cockcroft-Gault)",
+      value: "~62",
+      unit: "mL/min",
+      date: "2026-09-22",
+      flag: "normal",
+      evidence: [ev("est CrCl ~62 mL/min (CG)", R_LABS)],
+    },
+    { name: "AST", value: "52", unit: "U/L", date: "2026-09-22", flag: "abnormal", evidence: [ev("AST 52 (H, 1.3x ULN)", R_LABS)] },
+    { name: "ALT", value: "48", unit: "U/L", date: "2026-09-22", flag: "abnormal", evidence: [ev("ALT 48 (H)", R_LABS)] },
+    { name: "Total bilirubin", value: "0.8", unit: "mg/dL", date: "2026-09-22", flag: "normal", evidence: [ev("T bili 0.8", R_LABS)] },
+    {
+      name: "Alkaline phosphatase",
+      value: "130",
+      unit: "U/L",
+      date: "2026-09-22",
+      flag: "abnormal",
+      evidence: [ev("Alk phos 130 (H)", R_LABS)],
+    },
+    { name: "Albumin", value: "3.6", unit: "g/dL", date: "2026-09-22", flag: "normal", evidence: [ev("Albumin 3.6", R_LABS)] },
+    { name: "HbA1c", value: "6.9", unit: "%", date: "2026-07", flag: "abnormal", evidence: [ev("HbA1c 6.9% (07/2026)", R_LABS)] },
+    { name: "TSH", value: "2.4", unit: "mIU/L", date: "2026-07", flag: "normal", evidence: [ev("TSH 2.4 (7/2026)", R_NOTE)] },
+    {
+      name: "LVEF",
+      value: "55",
+      unit: "%",
+      date: "2026-09-10",
+      flag: "normal",
+      evidence: [ev("ECHO 2026-09-10: LVEF 55% (biplane Simpson's).", R_ECHO)],
+    },
+  ],
+  comorbidities: [
+    x("Type 2 diabetes mellitus (metformin; HbA1c 6.9% July 2026)", "high", [ev("T2DM (metformin, A1c 6.9% 7/2026)", R_NOTE)]),
+    x("Hypertension (lisinopril)", "high", [ev("HTN (lisinopril)", R_NOTE)], "No coronary artery disease documented; never smoker."),
+    x("Hypothyroidism (levothyroxine; TSH 2.4 July 2026)", "high", [ev("hypothyroidism (levothyroxine)", R_NOTE)]),
+    x(
+      "Residual grade 2 peripheral neuropathy (docetaxel), on gabapentin",
+      "high",
+      [ev("Residual G2 PN hands/feet from docetaxel", R_NOTE)],
+      "Numbness of hands and feet, drops small objects; no falls.",
+    ),
+    x("Chronic mild anaemia (Hgb 10.9 g/dL)", "high", [ev("7. Mild anemia Hgb 10.9, chronic, no bleeding.", R_NOTE)]),
+  ],
+  medications: [
+    x(
+      "Metformin 1000 mg BID",
+      "high",
+      [ev("metformin 1000 mg PO BID", R_MEDS)],
+      "No anticoagulants or strong CYP3A4 inhibitors/inducers listed.",
+    ),
+    x("Lisinopril 20 mg daily", "high", [ev("lisinopril 20 mg PO daily", R_MEDS)]),
+    x("Levothyroxine 100 mcg daily", "high", [ev("levothyroxine 100 mcg PO daily", R_MEDS)]),
+    x("Gabapentin 300 mg nightly (neuropathy)", "high", [ev("gabapentin 300 mg PO qhs", R_MEDS)]),
+    x(
+      "Dexamethasone — taper completed, last dose 2026-08-30",
+      "high",
+      [ev("dexamethasone - taper COMPLETED, last dose 08/30/2026", R_MEDS)],
+      "No current systemic corticosteroids.",
+    ),
+    x(
+      "Trastuzumab deruxtecan — discontinued July 2026 (last dose 2026-07-06)",
+      "high",
+      [ev("trastuzumab deruxtecan - DISCONTINUED 07/2026 (PD)", R_MEDS)],
+      "Listed for washout purposes; not a current medication.",
+    ),
+  ],
+  allergies: [x("No known drug allergies", "high", [ev("ALLERGIES: NKDA", R_ALLERGY)])],
+  keyDates: [
+    { label: "Initial (de novo metastatic) diagnosis", date: "2024-01-16", evidence: [ev("Collected: 01/16/2024 | Reported: 01/19/2024", R_PATH)] },
+    { label: "Start of first-line therapy (THP)", date: "2024-02", evidence: [ev("1L THP (docetaxel x6, 2/2024-6/2024)", R_NOTE)] },
+    { label: "Progression on first-line therapy", date: "2025-03", evidence: [ev("PD 3/2025 w/ new liver lesions.", R_NOTE)] },
+    { label: "Start of trastuzumab deruxtecan", date: "2025-04", evidence: [ev("2L T-DXd 5.4 mg/kg 4/2025-7/2026", R_NOTE)] },
+    { label: "Last dose of trastuzumab deruxtecan", date: "2026-07-06", evidence: [ev("(last dose 07/06/2026)", R_NOTE)] },
+    { label: "Progression on T-DXd (CT)", date: "2026-07-20", evidence: [ev("CT CHEST/ABDOMEN/PELVIS W/ CONTRAST - 07/20/2026", R_CT)] },
+    { label: "Brain metastases diagnosed (MRI)", date: "2026-07-22", evidence: [ev("MRI brain 7/22/26 w/ 3 new brain mets", R_NOTE)] },
+    { label: "Gamma Knife SRS", date: "2026-08-07", evidence: [ev("GK SRS to all 3 lesions 8/7/26 (20 Gy).", R_NOTE)] },
+    { label: "Last dose of dexamethasone", date: "2026-08-30", evidence: [ev("Dex tapered off, last dose 8/30/26.", R_NOTE)] },
+    { label: "Echocardiogram", date: "2026-09-10", evidence: [ev("ECHO 2026-09-10: LVEF 55%", R_ECHO)] },
+    { label: "Last brain MRI (post-SRS, stable)", date: "2026-09-12", evidence: [ev("MRI BRAIN W/ AND W/O CONTRAST - 2026-09-12", R_MRI)] },
+    { label: "Most recent labs", date: "2026-09-22", evidence: [ev("LABS 2026-09-22", R_LABS)] },
+    { label: "Most recent clinic visit", date: "2026-09-24", evidence: [ev("Date of service: Sept 24, 2026", R_NOTE)] },
+  ],
+  openQuestions: [
+    "Hepatitis B/C and HIV status are not documented.",
+    "No tumour NGS or ctDNA on file and no repeat biopsy at progression on T-DXd; HER2 status rests on January 2024 tissue, so trials requiring a fresh biopsy or central HER2 confirmation will need one.",
+    "PD-L1 has not been tested.",
+    "CNS timing: SRS 2026-08-07, last dexamethasone 2026-08-30, stable MRI 2026-09-12 — check each trial's required interval since SRS, steroid-free period (often ≥ 2–4 weeks) and MRI window.",
+    "LVEF 55% (down from 62% in 2024): meets a ≥ 50% threshold but is borderline for trials requiring ≥ 55%.",
+    "AST 52 U/L (1.3× ULN) with liver metastases: within the usual ≤ 3–5× ULN allowance for hepatic involvement; confirm the trial's limit.",
+    "Residual grade 2 peripheral neuropathy: many taxane- or capecitabine-containing arms exclude neuropathy ≥ grade 2.",
+    "Estimated CrCl ~62 mL/min (Cockcroft-Gault): adequate for most trials; confirm the calculation method if the protocol specifies one.",
+    "ECG/QTc not documented.",
+    "The 2026-09-24 note carries a stale copy-forward line ('T-DXd C14 D1 today ... continue q3w'); the HPI and medication list confirm T-DXd was discontinued in July 2026 (last dose 2026-07-06).",
+    "2 kg weight loss over 2 months and Hgb 10.9 g/dL: confirm no transfusion or growth-factor support within the trial's window.",
+  ],
+  summary:
+    "66-year-old postmenopausal woman with de novo metastatic HER2-positive (IHC 3+), HR-negative right breast cancer (January 2024; lung, mediastinal nodal and liver metastases) who progressed on first-line THP followed by trastuzumab/pertuzumab maintenance and then on second-line trastuzumab deruxtecan (PR, no ILD) in July 2026 with liver progression and three new brain metastases. All three brain lesions were treated with Gamma Knife SRS on 2026-08-07, dexamethasone was tapered off by 2026-08-30, and the 2026-09-12 MRI shows smaller treated lesions with no new disease or oedema. ECOG 1 with measurable liver disease (2.8 and 2.2 cm), LVEF 55%, AST 1.3× ULN, residual grade 2 neuropathy and well-controlled type 2 diabetes; tucatinib-, T-DM1-, lapatinib- and neratinib-naive, and weighing tucatinib + trastuzumab + capecitabine against a trial.",
+  extractedAt: EXTRACTED_AT,
+  source: "demo",
+};
+
+export const DEMO_PROFILES: Record<string, PatientProfile> = {
+  [margaret.id]: margaret,
+  [danielle.id]: danielle,
+  [rosa.id]: rosa,
+};
