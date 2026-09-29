@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_MATCHES } from "./matches";
+import { DEMO_MATCH_PROBLEMS } from "./match-helpers";
 import { DEMO_PATIENTS } from "./patients";
 import { DEMO_PROFILES } from "./profiles";
 import { DEMO_TRIALS } from "./trials";
@@ -11,6 +12,10 @@ import { DEMO_TRIALS } from "./trials";
  */
 describe("demo matches", () => {
   const patientIds = Object.keys(DEMO_MATCHES);
+
+  it("was authored without structural problems", () => {
+    expect(DEMO_MATCH_PROBLEMS).toEqual([]);
+  });
 
   it("only references demo patients that exist", () => {
     for (const id of patientIds) {
