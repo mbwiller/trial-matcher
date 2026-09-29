@@ -9,49 +9,184 @@ import type { Criterion, CriterionCategory, CriterionType } from "@/lib/types";
  * "Exclusion Criteria:" header. Escaped characters (`\<`, `\>`) appear
  * because the registry markdown-escapes comparison operators.
  *
- * Strategy: normalise → split into inclusion/exclusion sections → split each
- * section into top-level items, folding sub-bullets and continuation lines
- * into their parent → clean → categorise.
+ * Strategy: normalise → split into inclusion/exclusion sections (recognising
+ * cohort-prefixed and sentence-style headers) → build an item tree per
+ * section (bullets, numbering, sub-bullets, colon-terminated stems followed
+ * by a list, continuation paragraphs) → render: sub-items fold into their
+ * parent unless the result would be unreasonably long, in which case the
+ * list is flattened into one criterion per item → clean → categorise.
+ *
+ * Fidelity notes:
+ *   - A registry entry with no exclusion section (e.g. SWOG S1501, the
+ *     ComboMATCH screening trial) yields zero exclusion criteria. "Must not…"
+ *     statements listed under the inclusion header stay inclusion criteria:
+ *     verdicts are relative to eligibility, so nothing is lost.
+ *   - Criterion text is the text as written; the only addition is a
+ *     "Cohort A: " style prefix when the source scopes criteria to a cohort.
  */
 
 const ITEM_RE =
-  /^(\s*)(?:[*•\-–·]|\(?\d{1,3}[.)]|\(?[a-zA-Z][.)]|\(?[ivxIVX]{1,5}[.)])\s+(\S.*)$/;
+  /^(\s*)(?:[*•\-–·]|o(?=\s)|\(?\d{1,3}[.)]|\(?[a-zA-Z][.)]|\(?[ivxIVX]{1,5}[.)])\s+(\S.*)$/;
+
+/** Folded parent + sub-items longer than this are flattened into separate criteria. */
+const FOLD_MAX = 1000;
+/** Absolute cap per criterion; longer text is split at sentence boundaries. */
+const HARD_MAX = 1200;
+/** Preferred chunk size when splitting over-long text. */
+const CHUNK_TARGET = 800;
 
 function unescapeMarkdown(text: string): string {
   return text
     .replace(/\r\n?/g, "\n")
-    .replace(/\\([<>*_\[\]()#`~])/g, "$1")
-    .replace(/ /g, " ")
+    .replace(/\\([\\`*_{}[\]()#+\-.!|<>~])/g, "$1")
+    .replace(/\u00a0/g, " ")
     .replace(/[ \t]+$/gm, "");
 }
 
-function isInclusionHeader(line: string): boolean {
-  const t = line.trim();
-  if (t.length > 140) return false;
-  if (/\binclusion\s+criteria\b/i.test(t) && !/\b(not|no|meet|meets|meeting|fail)\b[^.]*\binclusion/i.test(t)) {
-    return true;
-  }
-  return /\b(eligible (to be included|for inclusion|to participate)|must meet all of the following|all of the following criteria (must )?apply|inclusion:)\b/i.test(t);
+// ---------------------------------------------------------------------------
+// Section headers
+// ---------------------------------------------------------------------------
+
+const EXPLICIT_HEADER_RE =
+  /^(.*?)\s*[-–—:]?\s*(?:(?:key|main|general|specific|additional|major|principal|core|study|subject|patient|participant)\s+)*(inclusion|exclusion)\s+criteri(?:a|on)\b\s*(?:for|of|\(|[-–—:])?\s*(.*?)\s*[):]*\s*$/i;
+
+const LABEL_WORD_RE =
+  /\b(cohort|part|arm|group|phase|module|expansion|escalation|sub-?study|population|dose level|schedule|regimen)\b/i;
+
+/** Words that make a would-be label generic ("all patients", "the study", "include but are not limited to the following"). */
+const GENERIC_LABEL_RE =
+  /^(?:(?:the|all|for|of|and|study|trial|key|main|general|specific|additional|overall|protocol|screening|eligibility|major|primary|core|subjects?|patients?|participants?|criteria|following|include|includes|but|are|not|limited|to|only|common|both|each|every)\s*)+$|^(?:all|both|each|every)\s+(?:cohorts?|parts?|arms?|groups?|phases?)$/i;
+
+/** Standalone label lines that scope the criteria that follow: "Cohort A:", "Part 2 (dose expansion)". */
+const LABEL_LINE_RE =
+  /^(?:cohort|part|arm|group|phase|population|module|expansion|escalation)\s+[\w+-]+(?:\s*\([^)]{0,40}\))?\s*(?:cohort|only|patients|participants)?\s*:?$/i;
+
+const SUBJECT_RE =
+  /^(?:a |an |the |all |any |each |every )?(?:patients?|participants?|subjects?|individuals?|persons?|people|women|men|volunteers?|candidates?)\s+(?:are|were|will|would|must|should|is|may|can|cannot|who|that|meeting|presenting|fulfilling|satisfying|have to|need)\b/i;
+
+interface HeaderMatch {
+  /** Section type; undefined keeps the current section (label-only header). */
+  type?: CriterionType;
+  /** Cohort/part label that scopes the criteria that follow. */
+  label?: string;
+  /** Criterion text found on the header line itself ("Inclusion Criteria: Age ≥ 18 …"). */
+  rest?: string;
 }
 
-function isExclusionHeader(line: string): boolean {
-  const t = line.trim();
-  if (t.length > 140) return false;
-  if (/\bexclusion\s+criteria\b/i.test(t) && !/\b(not|no|meet|meets|meeting)\b[^.]*\bexclusion/i.test(t)) {
-    return true;
-  }
-  return /\b(excluded from (the|this) study if|will be excluded if|not eligible if any|must not meet any|any of the following criteria (will|would) exclude|exclusion:)\b/i.test(t);
+function cleanLabel(raw: string | undefined): string | undefined {
+  const label = (raw ?? "")
+    .replace(/[()]/g, "")
+    .replace(/^[\s:\-–—]+|[\s:\-–—]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!label || label.length > 40) return undefined;
+  if (GENERIC_LABEL_RE.test(label)) return undefined;
+  if (LABEL_WORD_RE.test(label)) return label;
+  // Short code-like labels ("A", "B2", "HER2+") are accepted; prose is not.
+  return label.split(" ").length <= 2 && /[A-Z0-9]/.test(label) ? label : undefined;
 }
 
-interface RawItem {
+function matchHeader(rawLine: string): HeaderMatch | null {
+  const line = rawLine.trim();
+  if (!line || line.length > 200) return null;
+  const indent = rawLine.length - rawLine.trimStart().length;
+  const marker = ITEM_RE.exec(rawLine);
+  const body = marker ? marker[2].trim() : line;
+
+  // "Inclusion Criteria:", "Cohort A Inclusion Criteria:", "Key Exclusion Criteria", "Inclusion criteria for Part 2:"
+  const mentionsInc = /\binclusion\b/i.test(body);
+  const mentionsExc = /\bexclusion\b/i.test(body);
+  if (mentionsInc !== mentionsExc && body.length <= 140 && indent <= 4) {
+    const type: CriterionType = mentionsInc ? "inclusion" : "exclusion";
+    const negated = /\b(not|no|none|without|fail\w*|violat\w*|unless)\b[^.:]*\b(inclusion|exclusion)\b/i.test(body);
+    const listIntro = /:$/.test(body) && /\bfollowing\b/i.test(body);
+    if (!negated || listIntro) {
+      const explicit = EXPLICIT_HEADER_RE.exec(body);
+      if (explicit) {
+        const label = cleanLabel(explicit[1]) ?? cleanLabel(explicit[3]);
+        const trailing = explicit[3].trim();
+        const rest = !label && trailing.split(" ").length >= 3 && !/\bfollowing\b/i.test(trailing) ? trailing : undefined;
+        return { type, label, rest };
+      }
+      if (/^(?:(?:key|main|general|specific|additional)\s+)?(inclusion|exclusion)\s*:?$/i.test(body)) return { type };
+      if (/\bcriteria for (inclusion|exclusion)\b/i.test(body)) return { type };
+    }
+  }
+
+  // Standalone cohort/part label: keeps the section, scopes what follows.
+  if (indent <= 4 && LABEL_LINE_RE.test(body)) {
+    const label = cleanLabel(body.replace(/:$/, ""));
+    if (label) return { label };
+  }
+
+  // Sentence-style gates, only as top-level paragraphs that introduce a list:
+  // "Participants are eligible to be included in the study only if all of the following criteria apply:"
+  // "Participants are excluded from the study if any of the following criteria apply:"
+  if (marker || indent > 0) return null;
+  const introducesList = /:$/.test(body) || /\bfollowing\b/i.test(body);
+  if (!introducesList) return null;
+
+  const exclusionWords =
+    /\b(excluded|exclude[sd]?|ineligible|not (?:be )?eligible|not be (?:included|enrolled|permitted|allowed)|may not (?:participate|be enrolled)|cannot participate|will not be (?:included|enrolled)|prohibited)\b/i;
+  const inclusionWords = /\b(eligible|included|inclusion|enrolled|enrol+ed|enrol+ment|participate|participation)\b/i;
+  const subjectLed = SUBJECT_RE.test(body);
+
+  if (exclusionWords.test(body) && /\b(any|following|if)\b/i.test(body)) {
+    if (subjectLed || /^(?:any of the following|the presence of any|presence of any|exclusion|criteria|to be excluded)/i.test(body)) {
+      return { type: "exclusion" };
+    }
+    return null;
+  }
+  if (inclusionWords.test(body) && /\b(all|each|following)\b/i.test(body) && !/\bunless\b/i.test(body)) {
+    if (subjectLed || /^(?:to be eligible|eligible|eligibility|inclusion|criteria|in order to be eligible)/i.test(body)) {
+      return { type: "inclusion" };
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Noise: template sub-headers and section labels that are not criteria
+// ---------------------------------------------------------------------------
+
+const TEMPLATE_SUBHEADERS =
+  "type of participant and disease characteristics|sex and contraceptive\\/barrier requirements|sex and contraceptive requirements|contraceptive\\/barrier requirements|contraceptive requirements|medical conditions|prior\\/concomitant therapy|prior\\/concurrent clinical study experience|diagnostic assessments?|other exclusions?|other inclusions?|informed consent|demographics?|laboratory values|weight|sex|age|general|other|contraception|prior therapy|concomitant therapy";
+
+const SUBHEADER_RE = new RegExp(`^(?:${TEMPLATE_SUBHEADERS})\\s*:?$`, "i");
+const TRAILING_SUBHEADER_RE = new RegExp(`([.;])\\s+(?:${TEMPLATE_SUBHEADERS})\\s*:?$`, "i");
+
+/** Registration-step labels ("STEP 1 REGISTRATION", "Step 2 (Randomization)") carry no criterion. */
+const SECTION_LABEL_RE =
+  /^(?:step|stage)\s+[\w-]+(?:\s+(?:registration|randomi[sz]ation|enrol+ment|screening|only))*(?:\s*\([^)]*\))?\s*:?$/i;
+
+const NOISE_RE =
+  /^(inclusion|exclusion)\s+criteria\s*:?$|^(criteria|eligibility criteria|note|notes|n\/a|none|not applicable)\s*:?$|^(?:note:?\s*)?other protocol[- ]defined (?:inclusion\/exclusion|inclusion and exclusion|eligibility) criteria (?:may|could|will|might) apply\.?$/i;
+
+function isNoise(text: string): boolean {
+  return NOISE_RE.test(text) || SUBHEADER_RE.test(text) || SECTION_LABEL_RE.test(text);
+}
+
+// ---------------------------------------------------------------------------
+// Item tree
+// ---------------------------------------------------------------------------
+
+interface Node {
   indent: number;
   text: string;
-  children: string[];
+  children: Node[];
+  /** True for a non-bulleted paragraph (can act as a stem for a list at its own indent). */
+  paragraph: boolean;
 }
 
-function splitSectionIntoItems(lines: string[]): string[] {
-  const items: RawItem[] = [];
-  let current: RawItem | null = null;
+/** A complete requirement sentence, e.g. "Patients must not be dialysis dependent". */
+const REQUIREMENT_RE =
+  /^(?:all\s+)?(?:[\w/+-]+\s+){0,3}?(?:patients?|participants?|subjects?|individuals?|women|men|persons?|people)\s+(?:must|should|need|needs|are required|have to|has to|cannot|can not|may not|will not|shall|are not|is not)\b|^must\b/i;
+
+const endsWithColon = (s: string) => /[:：]\s*$/.test(s);
+
+function buildTree(lines: string[]): Node[] {
+  const items: Node[] = [];
+  let stack: Node[] = [];
   let lastBlank = true;
 
   for (const raw of lines) {
@@ -60,49 +195,153 @@ function splitSectionIntoItems(lines: string[]): string[] {
       lastBlank = true;
       continue;
     }
+
     const m = ITEM_RE.exec(line);
     if (m) {
       const indent = m[1].length;
       const text = m[2].trim();
-      if (current && indent > current.indent) {
-        current.children.push(text);
+      const node: Node = { indent, text, children: [], paragraph: false };
+      // Pop to the nearest ancestor that is less indented. A colon-terminated
+      // paragraph stem also accepts a contiguous list at its own indent.
+      while (stack.length) {
+        const top = stack[stack.length - 1];
+        if (top.indent < indent) break;
+        if (top.indent === indent && top.paragraph && endsWithColon(top.text) && (!lastBlank || top.children.length === 0)) break;
+        stack.pop();
+      }
+      const parent = stack[stack.length - 1];
+      // A full requirement sentence only nests under an explicit, less-indented
+      // stem; otherwise the registry's indentation is a formatting accident.
+      const nests = parent !== undefined && (!REQUIREMENT_RE.test(text) || (endsWithColon(parent.text) && parent.indent < indent));
+      if (parent && nests) {
+        parent.children.push(node);
+        stack.push(node);
       } else {
-        current = { indent, text, children: [] };
-        items.push(current);
+        items.push(node);
+        stack = [node];
       }
       lastBlank = false;
       continue;
     }
+
     // Non-marker line.
     const indent = line.length - line.trimStart().length;
     const text = line.trim();
-    if (current && (!lastBlank || indent > current.indent)) {
-      // Continuation of the current item (or of its last child).
-      if (current.children.length && indent > current.indent) {
-        current.children[current.children.length - 1] += " " + text;
-      } else {
-        current.text += " " + text;
-      }
+    if (lastBlank && (SUBHEADER_RE.test(text) || SECTION_LABEL_RE.test(text))) {
+      // Template sub-header ("Medical Conditions", "STEP 2 REGISTRATION"): not a criterion; closes the current item.
+      stack = [];
+      lastBlank = false;
+      continue;
+    }
+    const deepest = stack[stack.length - 1];
+    if (deepest && (!lastBlank || indent > deepest.indent)) {
+      // Wrapped continuation of the current item (or an indented paragraph under it).
+      deepest.text += " " + text;
     } else {
-      // Standalone paragraph criterion.
-      current = { indent, text, children: [] };
-      items.push(current);
+      const node: Node = { indent, text, children: [], paragraph: true };
+      items.push(node);
+      stack = [node];
     }
     lastBlank = false;
   }
-
-  return items.map((it) => {
-    let text = it.text.trim();
-    if (it.children.length) {
-      const kids = it.children.map((c) => c.replace(/\s+/g, " ").trim()).filter(Boolean);
-      text = text.replace(/[:;,]\s*$/, "") + ": " + kids.join("; ");
-    }
-    return text.replace(/\s+/g, " ").trim();
-  });
+  return items;
 }
 
-const NOISE_RE =
-  /^(inclusion|exclusion)\s+criteria\s*:?$|^(criteria|eligibility criteria|note|notes)\s*:?$/i;
+// ---------------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------------
+
+function tidy(text: string): string {
+  return text
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,;.])/g, "$1")
+    .replace(TRAILING_SUBHEADER_RE, "$1")
+    .trim();
+}
+
+function fold(node: Node): string {
+  const own = tidy(node.text);
+  if (!node.children.length) return own;
+  const kids = node.children.map(fold).filter(Boolean);
+  return own.replace(/[:;,]\s*$/, "") + ": " + kids.join("; ");
+}
+
+function render(node: Node): string[] {
+  if (!node.children.length) return [tidy(node.text)];
+  const folded = fold(node);
+  if (folded.length <= FOLD_MAX) return [folded];
+  // Too long to read as one criterion: flatten into the stem plus one criterion per sub-item.
+  const stem = tidy(node.text).replace(/[:;,]\s*$/, "");
+  const out: string[] = [];
+  if (stem.split(" ").length >= 4) out.push(stem);
+  for (const child of node.children) out.push(...render(child));
+  return out;
+}
+
+const ABBREV_RE = /(?:^|\s)(?:e\.g|i\.e|vs|etc|approx|dr|mr|mrs|ms|no|fig|ref|inc|ltd|st|ca|cf|al|resp)\.$/i;
+
+function sentences(text: string): string[] {
+  const out: string[] = [];
+  let start = 0;
+  for (let i = 0; i < text.length - 2; i++) {
+    const ch = text[i];
+    if ((ch === "." || ch === ";") && /\s/.test(text[i + 1]) && /[A-Z0-9(]/.test(text[i + 2])) {
+      const candidate = text.slice(start, i + 1);
+      if (ch === "." && ABBREV_RE.test(candidate)) continue;
+      out.push(candidate.trim());
+      start = i + 1;
+    }
+  }
+  const tail = text.slice(start).trim();
+  if (tail) out.push(tail);
+  return out;
+}
+
+function hardWrap(text: string, max: number): string[] {
+  const out: string[] = [];
+  let rest = text;
+  while (rest.length > max) {
+    const window = rest.slice(0, max);
+    const cut = Math.max(window.lastIndexOf(", "), window.lastIndexOf(" "));
+    const at = cut > max * 0.5 ? cut : max;
+    out.push(rest.slice(0, at).trim());
+    rest = rest.slice(at).trim();
+  }
+  if (rest) out.push(rest);
+  return out;
+}
+
+/** Split text longer than `max` at sentence boundaries into chunks of roughly `target` characters. */
+function splitLong(text: string, max = HARD_MAX, target = CHUNK_TARGET): string[] {
+  if (text.length <= max) return [text];
+  const chunks: string[] = [];
+  let current = "";
+  for (const s of sentences(text)) {
+    const pieces = s.length > max ? hardWrap(s, target) : [s];
+    for (const piece of pieces) {
+      if (current && current.length + piece.length + 1 > target) {
+        chunks.push(current);
+        current = piece;
+      } else {
+        current = current ? `${current} ${piece}` : piece;
+      }
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+function renderSection(lines: string[]): string[] {
+  return buildTree(lines)
+    .flatMap(render)
+    .flatMap((t) => splitLong(t))
+    .map((t) => t.replace(/^[:\-–\s]+/, "").trim())
+    .filter((t) => t.length > 2 && !isNoise(t));
+}
+
+// ---------------------------------------------------------------------------
+// Categorisation (heuristic)
+// ---------------------------------------------------------------------------
 
 export function categorizeCriterion(text: string): CriterionCategory {
   const t = text;
@@ -122,6 +361,10 @@ export function categorizeCriterion(text: string): CriterionCategory {
   return "other";
 }
 
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
 export interface ParsedEligibility {
   inclusion: string[];
   exclusion: string[];
@@ -131,23 +374,26 @@ export function parseEligibilityText(raw: string): ParsedEligibility {
   const text = unescapeMarkdown(raw ?? "");
   const lines = text.split("\n");
 
-  const sections: Array<{ type: CriterionType; lines: string[] }> = [];
+  const sections: Array<{ type: CriterionType; label?: string; lines: string[] }> = [];
   let mode: CriterionType = "inclusion";
+  let label: string | undefined;
   let bucket: string[] = [];
   const flush = () => {
-    if (bucket.some((l) => l.trim())) sections.push({ type: mode, lines: bucket });
+    if (bucket.some((l) => l.trim())) sections.push({ type: mode, label, lines: bucket });
     bucket = [];
   };
 
   for (const line of lines) {
-    if (isExclusionHeader(line)) {
+    const header = matchHeader(line);
+    if (header) {
       flush();
-      mode = "exclusion";
-      continue;
-    }
-    if (isInclusionHeader(line)) {
-      flush();
-      mode = "inclusion";
+      if (header.type) {
+        mode = header.type;
+        label = header.label;
+      } else {
+        label = header.label;
+      }
+      if (header.rest) bucket.push(header.rest);
       continue;
     }
     bucket.push(line);
@@ -156,9 +402,7 @@ export function parseEligibilityText(raw: string): ParsedEligibility {
 
   const out: ParsedEligibility = { inclusion: [], exclusion: [] };
   for (const s of sections) {
-    const items = splitSectionIntoItems(s.lines)
-      .map((t) => t.replace(/^[:\-–\s]+/, "").trim())
-      .filter((t) => t.length > 2 && !NOISE_RE.test(t));
+    const items = renderSection(s.lines).map((t) => (s.label ? `${s.label}: ${t}` : t));
     out[s.type].push(...items);
   }
   return out;

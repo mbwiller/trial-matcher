@@ -159,7 +159,7 @@
       {
         "id": "NCT06982521-inc-6",
         "type": "inclusion",
-        "text": "Must have radiological evidence of progression on or after previous treatment for HR+/HER2- ABC with: At least 1 and no more than 2 lines of endocrine therapy (ET) in the (neo)adjuvant setting with recurrence on or within 12 months of completion or in the ABC setting; Only 1 prior line of CDK4/6 inhibitor therapy in one of the following settings:; CDK4/6 inhibitor + ET in the ABC setting; CDK4/6 inhibitor therapy in the adjuvant setting if progression occurred during or within 12 months of completion of adjuvant CDK4/6 inhibitor with ET; Patients who progressed during or within 12 months of completion of adjuvant CDK4/6 inhibitor and after receiving CDK4/6 inhibitor therapy in the advanced setting are considered to have had >1 prior line of CDK4/6 inhibitor and are not eligible",
+        "text": "Must have radiological evidence of progression on or after previous treatment for HR+/HER2- ABC with: At least 1 and no more than 2 lines of endocrine therapy (ET) in the (neo)adjuvant setting with recurrence on or within 12 months of completion or in the ABC setting; Only 1 prior line of CDK4/6 inhibitor therapy in one of the following settings: CDK4/6 inhibitor + ET in the ABC setting; CDK4/6 inhibitor therapy in the adjuvant setting if progression occurred during or within 12 months of completion of adjuvant CDK4/6 inhibitor with ET; Patients who progressed during or within 12 months of completion of adjuvant CDK4/6 inhibitor and after receiving CDK4/6 inhibitor therapy in the advanced setting are considered to have had >1 prior line of CDK4/6 inhibitor and are not eligible",
         "category": "washout"
       },
       {
@@ -794,35 +794,89 @@
       {
         "id": "NCT07198724-inc-8",
         "type": "inclusion",
-        "text": "Participants must have adequate organ and marrow function as defined below: Absolute neutrophil count ≥ 1,500/µL; Platelets ≥ 100,000/µL; Hemoglobin ≥ 9.0 g/dL; Total bilirubin ≤ 1.5 x institutional upper limit of normal (ULN) (or ≤ 2 x ULN in patients with documented Gilbert's syndrome); AST(SGOT)/ALT(SGPT) ≤ 2.5 x institutional ULN (or < 5 x ULN in patients with liver metastases); Creatinine ≤ 1.5 x institutional ULN OR; Calculated creatinine clearance ≥ 45 mL/min via the Cockcroft-Gault formula for participants with creatinine levels above institutional ULN; Baseline LVEF ≥ 50% prior to registration, as measured by echocardiogram (or multiple-gated acquisition [MUGA] scan if an echocardiogram cannot be performed or is inconclusive).; Participants with a history of central nervous system (CNS) metastases are eligible if: Stable or untreated, asymptomatic brain metastases not needing immediate local therapy. For patients with untreated CNS lesions > 2.0 cm on screening contrast brain MRI, discussion with and approval from the Sponsor Investigator is required prior to enrollment.; Brain metastases previously treated with local therapy may either be stable since treatment or may have progressed since prior local CNS therapy, provided that there is no clinical indication for immediate re-treatment with local therapy in the opinion of the investigator; Patients treated with CNS local therapy for newly identified lesions may be eligible to enroll if all of the following criteria are met: Time since WBRT is ≥ 14 days prior to first dose of treatment, time since SRS is ≥ 7 days prior to first dose of treatment, and time since surgical resection is ≥ 14 days",
-        "category": "cns"
+        "text": "Participants must have adequate organ and marrow function as defined below",
+        "category": "organ-function"
       },
       {
         "id": "NCT07198724-inc-9",
+        "type": "inclusion",
+        "text": "Absolute neutrophil count ≥ 1,500/µL",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-10",
+        "type": "inclusion",
+        "text": "Platelets ≥ 100,000/µL",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-11",
+        "type": "inclusion",
+        "text": "Hemoglobin ≥ 9.0 g/dL",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-12",
+        "type": "inclusion",
+        "text": "Total bilirubin ≤ 1.5 x institutional upper limit of normal (ULN) (or ≤ 2 x ULN in patients with documented Gilbert's syndrome)",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-13",
+        "type": "inclusion",
+        "text": "AST(SGOT)/ALT(SGPT) ≤ 2.5 x institutional ULN (or < 5 x ULN in patients with liver metastases)",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-14",
+        "type": "inclusion",
+        "text": "Creatinine ≤ 1.5 x institutional ULN OR",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-15",
+        "type": "inclusion",
+        "text": "Calculated creatinine clearance ≥ 45 mL/min via the Cockcroft-Gault formula for participants with creatinine levels above institutional ULN",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-16",
+        "type": "inclusion",
+        "text": "Baseline LVEF ≥ 50% prior to registration, as measured by echocardiogram (or multiple-gated acquisition [MUGA] scan if an echocardiogram cannot be performed or is inconclusive).",
+        "category": "organ-function"
+      },
+      {
+        "id": "NCT07198724-inc-17",
+        "type": "inclusion",
+        "text": "Participants with a history of central nervous system (CNS) metastases are eligible if: Stable or untreated, asymptomatic brain metastases not needing immediate local therapy. For patients with untreated CNS lesions > 2.0 cm on screening contrast brain MRI, discussion with and approval from the Sponsor Investigator is required prior to enrollment.: Brain metastases previously treated with local therapy may either be stable since treatment or may have progressed since prior local CNS therapy, provided that there is no clinical indication for immediate re-treatment with local therapy in the opinion of the investigator; Patients treated with CNS local therapy for newly identified lesions may be eligible to enroll if all of the following criteria are met: Time since WBRT is ≥ 14 days prior to first dose of treatment, time since SRS is ≥ 7 days prior to first dose of treatment, and time since surgical resection is ≥ 14 days",
+        "category": "cns"
+      },
+      {
+        "id": "NCT07198724-inc-18",
         "type": "inclusion",
         "text": "Postmenopausal women must be postmenopausal, which is defined as any of the following: Age ≥ 60 years; Age < 60 and amenorrhea for 12 or more months (in the absence of chemotherapy, tamoxifen, toremifene, or ovarian suppression) and FSH, and estradiol in the postmenopausal range per local normal range; Premenopausal women made postmenopausal through the use GnRH agonist prior to study entry are eligible and MUST remain on the GnRH agonist for the duration of protocol treatment.; Status-post bilateral oophorectomy - After adequate healing post-surgery",
         "category": "other"
       },
       {
-        "id": "NCT07198724-inc-10",
+        "id": "NCT07198724-inc-19",
         "type": "inclusion",
         "text": "Premenopausal women must have a negative serum or urine pregnancy test. Pregnancy testing does not need to be pursued in female participants who are postmenopausal according to the definition in 3.1.10.",
         "category": "reproductive"
       },
       {
-        "id": "NCT07198724-inc-11",
+        "id": "NCT07198724-inc-20",
         "type": "inclusion",
         "text": "Women of child-bearing potential and men must agree to use adequate contraception at time of enrollment and for 4 months after the last dose of elacestrant or 7 months after the last dose of trastuzumab deruxtecan, whichever is later.",
         "category": "reproductive"
       },
       {
-        "id": "NCT07198724-inc-12",
+        "id": "NCT07198724-inc-21",
         "type": "inclusion",
         "text": "Participants must be able to swallow and retain oral medication.",
         "category": "other"
       },
       {
-        "id": "NCT07198724-inc-13",
+        "id": "NCT07198724-inc-22",
         "type": "inclusion",
         "text": "Ability to understand and the willingness to sign a written informed consent document.",
         "category": "consent"
@@ -878,11 +932,17 @@
       {
         "id": "NCT07198724-exc-9",
         "type": "exclusion",
-        "text": "Uncontrolled intercurrent illness including, but not limited to: ongoing or active infection requiring systemic therapy, clinically significant cardiovascular disease including: cerebral vascular accident/stroke (< 6 months prior to enrollment), myocardial infarction (< 6 months prior to enrollment), unstable angina, congestive heart failure (≥ New York Heart Association Classification Class II), or serious cardiac arrhythmia requiring medication, uncontrolled diabetes mellitus, gastrointestinal disorders potentially affecting the absorption of elacestrant, inflammatory bowel disease or chronic diarrhea, short bowel syndrome, or total gastric resection, or psychiatric illness/social situations that would limit compliance with study requirements. Moderate or severe hepatic impairment (Child-Pugh B or C). Active hepatitis B or active hepatitis C infection. Ability to comply with study requirements is to be assessed by each investigator at the time of screening for study participation. History of myocardial infarction, acute coronary syndrome or coronary angioplasty/stenting/bypass grafting within the last six months OR congestive heart failure (CHF) New York Heart Association (NYHA) Class II-IV or history of CHF NYHA Class III or IV.",
-        "category": "consent"
+        "text": "Uncontrolled intercurrent illness including, but not limited to: ongoing or active infection requiring systemic therapy, clinically significant cardiovascular disease including: cerebral vascular accident/stroke (< 6 months prior to enrollment), myocardial infarction (< 6 months prior to enrollment), unstable angina, congestive heart failure (≥ New York Heart Association Classification Class II), or serious cardiac arrhythmia requiring medication, uncontrolled diabetes mellitus, gastrointestinal disorders potentially affecting the absorption of elacestrant, inflammatory bowel disease or chronic diarrhea, short bowel syndrome, or total gastric resection, or psychiatric illness/social situations that would limit compliance with study requirements.",
+        "category": "comorbidity"
       },
       {
         "id": "NCT07198724-exc-10",
+        "type": "exclusion",
+        "text": "Moderate or severe hepatic impairment (Child-Pugh B or C). Active hepatitis B or active hepatitis C infection. Ability to comply with study requirements is to be assessed by each investigator at the time of screening for study participation. History of myocardial infarction, acute coronary syndrome or coronary angioplasty/stenting/bypass grafting within the last six months OR congestive heart failure (CHF) New York Heart Association (NYHA) Class II-IV or history of CHF NYHA Class III or IV.",
+        "category": "consent"
+      },
+      {
+        "id": "NCT07198724-exc-11",
         "type": "exclusion",
         "text": "Patients with a history of different malignancy are ineligible, except for those who have been disease-free for at least three years and are deemed by the investigator to be at low risk for recurrence of the prior malignancy. Individuals with the following cancers are eligible if diagnosed and treated within the past 5 years: ductal carcinoma in situ of the breast, cervical cancer in situ, and basal cell or squamous cell carcinoma of the skin.",
         "category": "stage"
@@ -1029,7 +1089,7 @@
       {
         "id": "NCT07647328-inc-2",
         "type": "inclusion",
-        "text": "Female or male, must be ≥ 18 years or as per locally allowed age limit for screening. Type of Participant and Disease Characteristics",
+        "text": "Female or male, must be ≥ 18 years or as per locally allowed age limit for screening.",
         "category": "demographics"
       },
       {
@@ -1059,8 +1119,8 @@
       {
         "id": "NCT07647328-inc-7",
         "type": "inclusion",
-        "text": "Adequate organ and marrow function. Sex and Contraceptive/Barrier Requirements",
-        "category": "reproductive"
+        "text": "Adequate organ and marrow function.",
+        "category": "organ-function"
       },
       {
         "id": "NCT07647328-inc-8",
@@ -1071,35 +1131,29 @@
       {
         "id": "NCT07647328-inc-9",
         "type": "inclusion",
-        "text": "Female patients must be using highly effective contraceptive measures from the time of screening until 4 weeks after discontinuation of study treatment, and must have a negative serum pregnancy test before first dose of any study treatment if they are of childbearing potential; or must have evidence of nonchild-bearing potential by fulfilling one of the following criteria at screening:",
+        "text": "Female patients must be using highly effective contraceptive measures from the time of screening until 4 weeks after discontinuation of study treatment, and must have a negative serum pregnancy test before first dose of any study treatment if they are of childbearing potential; or must have evidence of nonchild-bearing potential by fulfilling one of the following criteria at screening: Post-menopausal, defined as women with cessation of regular menses for at least 12 consecutive months with no alternative pathological or physiological cause: (i) Age ≥ 60 years (ii) Age < 60 years with serum estradiol and FSH level within the laboratory's reference range for post-menopausal females (iii) Previous bilateral surgical oophorectomy (iv) Medically confirmed ovarian failure OR (b) Pre/peri-menopausal, ie, not meeting the criteria for being post-menopausal.",
         "category": "reproductive"
       },
       {
         "id": "NCT07647328-inc-10",
         "type": "inclusion",
-        "text": "Post-menopausal, defined as women with cessation of regular menses for at least 12 consecutive months with no alternative pathological or physiological cause: (i) Age ≥ 60 years (ii) Age < 60 years with serum estradiol and FSH level within the laboratory's reference range for post-menopausal females (iii) Previous bilateral surgical oophorectomy (iv) Medically confirmed ovarian failure OR (b) Pre/peri-menopausal, ie, not meeting the criteria for being post-menopausal.",
-        "category": "diagnosis"
-      },
-      {
-        "id": "NCT07647328-inc-11",
-        "type": "inclusion",
         "text": "Pre-/peri-menopausal women can be enrolled if amenable to be treated with monthly LHRH agonists (goserelin or leuprorelin [also known as leuprolide]). Patients must have concomitant treatment with LHRH agonists (goserelin or leuprorelin [leuprolide]) before or on the same day as the first dose of study treatment - and must be willing to continue on it for the duration of the study.",
         "category": "prior-therapy"
       },
       {
-        "id": "NCT07647328-inc-12",
+        "id": "NCT07647328-inc-11",
         "type": "inclusion",
         "text": "Non sterilised male partners of a patient who is a woman of childbearing potential must use a male condom plus spermicide (condom alone in countries where spermicides are not approved) throughout this period.",
         "category": "reproductive"
       },
       {
-        "id": "NCT07647328-inc-13",
+        "id": "NCT07647328-inc-12",
         "type": "inclusion",
         "text": "Male participants who intend to be sexually active with a female partner of childbearing potential must be surgically sterile or using an acceptable method of contraception from the time of screening throughout the total duration of the programme and the drug washout period to prevent pregnancy in a partner. Male participants must not donate or bank sperm during this same time period.",
         "category": "reproductive"
       },
       {
-        "id": "NCT07647328-inc-14",
+        "id": "NCT07647328-inc-13",
         "type": "inclusion",
         "text": "Male patients can be enrolled if amenable to be treated with monthly LHRH agonists (goserelin or leuprorelin [also known as leuprolide]) unless the patients have clear orchiectomy medical history. Willingness to use 2 non-hormonal based methods of contraception throughout the study.",
         "category": "reproductive"
@@ -1320,7 +1374,7 @@
       {
         "id": "NCT06790693-inc-4",
         "type": "inclusion",
-        "text": "De-novo HR+ , HER2- ABC, or, alternatively, relapsed HR+ , HER2- ABC after at least 2 years of standard neoadjuvant/adjuvant endocrine therapy without disease progression during that treatment and disease-free interval of at least 1 year since the completion of that treatment",
+        "text": "De-novo HR+, HER2- ABC, or, alternatively, relapsed HR+, HER2- ABC after at least 2 years of standard neoadjuvant/adjuvant endocrine therapy without disease progression during that treatment and disease-free interval of at least 1 year since the completion of that treatment",
         "category": "biomarker"
       },
       {
@@ -1695,11 +1749,35 @@
       {
         "id": "NCT05564377-inc-6",
         "type": "inclusion",
-        "text": "Patient must meet one of the following requirements: Patients 18 years and older who have tumor amenable to minimal risk image-guided or direct vision biopsy and must be willing and able to undergo a tumor biopsy to obtain samples for research if the patient is to enroll in a ComboMATCH treatment trial OR; Patients 18 years and older who do not have disease that is biopsiable at minimal risk to the patient must confirm availability of an archival tumor tissue specimen for submission for research if the patient enrolls to a ComboMATCH Treatment Trial. This tumor tissue must meet the following criteria:; Tissue must have been collected within 12 months prior to registration to the EAY191 Registration Trial; Patient must not have had a Response Evaluation Criteria in Solid Tumors (RECIST) response (complete response [CR] or partial response [PR]) to any intervening therapy after collection of the tissue; Formalin-fixed paraffin-embedded tumor tissue block(s) or slides must be available OR; Patients under 18 years old must confirm availability of an archival tumor tissue specimen for submission for research if patient enrolls to a ComboMATCH Treatment Trial. This tumor tissue must meet the following criteria:; Formalin-fixed paraffin-embedded tumor tissue block(s) or slides must be available; NOTE: See specific ComboMATCH Treatment Trial protocol for tissue collection and management instructions. Performance of the mandatory research biopsy or submission of pre-trial formalin-fixed paraffin-embedded (FFPE) and collection and submission of the blood specimens for the integrated studies will be performed under the consent authority of the specific treatment trial protocol to which the patient is registered. No procedures to collect specimens for research only are to be performed for patients registered to the EAY191 Registration Trial only",
-        "category": "measurable-disease"
+        "text": "Patient must meet one of the following requirements",
+        "category": "other"
       },
       {
         "id": "NCT05564377-inc-7",
+        "type": "inclusion",
+        "text": "Patients 18 years and older who have tumor amenable to minimal risk image-guided or direct vision biopsy and must be willing and able to undergo a tumor biopsy to obtain samples for research if the patient is to enroll in a ComboMATCH treatment trial OR",
+        "category": "diagnosis"
+      },
+      {
+        "id": "NCT05564377-inc-8",
+        "type": "inclusion",
+        "text": "Patients 18 years and older who do not have disease that is biopsiable at minimal risk to the patient must confirm availability of an archival tumor tissue specimen for submission for research if the patient enrolls to a ComboMATCH Treatment Trial. This tumor tissue must meet the following criteria: Tissue must have been collected within 12 months prior to registration to the EAY191 Registration Trial; Patient must not have had a Response Evaluation Criteria in Solid Tumors (RECIST) response (complete response [CR] or partial response [PR]) to any intervening therapy after collection of the tissue; Formalin-fixed paraffin-embedded tumor tissue block(s) or slides must be available OR",
+        "category": "measurable-disease"
+      },
+      {
+        "id": "NCT05564377-inc-9",
+        "type": "inclusion",
+        "text": "Patients under 18 years old must confirm availability of an archival tumor tissue specimen for submission for research if patient enrolls to a ComboMATCH Treatment Trial. This tumor tissue must meet the following criteria: Formalin-fixed paraffin-embedded tumor tissue block(s) or slides must be available",
+        "category": "diagnosis"
+      },
+      {
+        "id": "NCT05564377-inc-10",
+        "type": "inclusion",
+        "text": "NOTE: See specific ComboMATCH Treatment Trial protocol for tissue collection and management instructions. Performance of the mandatory research biopsy or submission of pre-trial formalin-fixed paraffin-embedded (FFPE) and collection and submission of the blood specimens for the integrated studies will be performed under the consent authority of the specific treatment trial protocol to which the patient is registered. No procedures to collect specimens for research only are to be performed for patients registered to the EAY191 Registration Trial only",
+        "category": "other"
+      },
+      {
+        "id": "NCT05564377-inc-11",
         "type": "inclusion",
         "text": "NOTE: Each ComboMATCH Treatment Trial contains specific eligibility criteria. If patient is found to not be eligible for the assigned ComboMATCH Treatment Trial, indication of ineligibility will trigger re-evaluation and potential assignment to another Treatment Trial",
         "category": "other"
@@ -3553,101 +3631,89 @@
       {
         "id": "NCT06435429-inc-4",
         "type": "inclusion",
-        "text": "Must have received at least 2 lines of HER2-directed therapy for their metastatic disease.: Prior HER2-targeted neo-adjuvant or adjuvant therapy that resulted in relapse within 6 months of the completion of therapy will be considered a line of treatment for metastatic disease.; Based on the physician's choice, participants' eligibility, and institutional and local guidelines, participants may also have received post-T-DXd therapy, for example, a tucatinib-based regimen and/or T-DM1.; Participants must not have received more than 4 lines of HER2-directed therapy in the metastatic setting.",
+        "text": "Must have received at least 2 lines of HER2-directed therapy for their metastatic disease.: Prior HER2-targeted neo-adjuvant or adjuvant therapy that resulted in relapse within 6 months of the completion of therapy will be considered a line of treatment for metastatic disease.; Based on the physician's choice, participants' eligibility, and institutional and local guidelines, participants may also have received post-T-DXd therapy, for example, a tucatinib-based regimen and/or T-DM1.",
         "category": "washout"
       },
       {
         "id": "NCT06435429-inc-5",
         "type": "inclusion",
+        "text": "Participants must not have received more than 4 lines of HER2-directed therapy in the metastatic setting.",
+        "category": "biomarker"
+      },
+      {
+        "id": "NCT06435429-inc-6",
+        "type": "inclusion",
         "text": "Has measurable disease per RECIST version 1.1.",
         "category": "measurable-disease"
       },
       {
-        "id": "NCT06435429-inc-6",
+        "id": "NCT06435429-inc-7",
         "type": "inclusion",
         "text": "Is eligible to receive one of the chemotherapy options listed in the physician's choice of chemotherapy (eribulin, gemcitabine, vinorelbine, or capecitabine).",
         "category": "other"
       },
       {
-        "id": "NCT06435429-inc-7",
+        "id": "NCT06435429-inc-8",
         "type": "inclusion",
         "text": "Participants with history of treated or clinically inactive CNS metastases are eligible as specified in the protocol.",
         "category": "cns"
       },
       {
-        "id": "NCT06435429-inc-8",
+        "id": "NCT06435429-inc-9",
         "type": "inclusion",
         "text": "Has a life expectancy of at least 6 months, in the opinion of the investigator.",
         "category": "performance"
       },
       {
-        "id": "NCT06435429-inc-9",
+        "id": "NCT06435429-inc-10",
         "type": "inclusion",
         "text": "Has adequate hematologic parameters as defined in the protocol.",
         "category": "organ-function"
       },
       {
-        "id": "NCT06435429-inc-10",
+        "id": "NCT06435429-inc-11",
         "type": "inclusion",
         "text": "Has adequate hepatic function as specified in the protocol.",
         "category": "organ-function"
       },
       {
-        "id": "NCT06435429-inc-11",
+        "id": "NCT06435429-inc-12",
         "type": "inclusion",
         "text": "Has creatinine clearance ≥ 50 mL/minute as calculated per local institutional guidelines.",
         "category": "organ-function"
       },
       {
-        "id": "NCT06435429-inc-12",
+        "id": "NCT06435429-inc-13",
         "type": "inclusion",
         "text": "Has LVEF ≥ 50% as determined by either echocardiogram or MUGA obtained within 4 weeks before the first dose of study intervention.",
         "category": "washout"
       },
       {
-        "id": "NCT06435429-inc-13",
+        "id": "NCT06435429-inc-14",
         "type": "inclusion",
         "text": "Has ECOG performance status of 0 or 1.",
         "category": "performance"
       },
       {
-        "id": "NCT06435429-inc-14",
-        "type": "inclusion",
-        "text": "Participant agrees to the following based on sex assigned at birth.: Male participants: Male participants are eligible to participate if they agree to the following during the study intervention period and for at least 7 months after the last dose of study intervention or the contraception period for the combination chemotherapy of choice per local guidance/standard practice:; Refrain from donating fresh unwashed semen.; Use contraception as follows as specified in the protocol; Female participants:",
-        "category": "reproductive"
-      },
-      {
         "id": "NCT06435429-inc-15",
         "type": "inclusion",
-        "text": "Is a women of nonchildbearing potential OR",
-        "category": "reproductive"
+        "text": "Participant agrees to the following based on sex assigned at birth.",
+        "category": "other"
       },
       {
         "id": "NCT06435429-inc-16",
         "type": "inclusion",
-        "text": "Is a woman of childbearing potential (WOCBP) and using a contraceptive method that is highly effective (with a failure rate of < 1% per year), with low user dependency during the study intervention period and for at least 7 months after the last dose of study intervention.",
+        "text": "Male participants: Male participants are eligible to participate if they agree to the following during the study intervention period and for at least 7 months after the last dose of study intervention or the contraception period for the combination chemotherapy of choice per local guidance/standard practice: Refrain from donating fresh unwashed semen.; Use contraception as follows as specified in the protocol",
         "category": "reproductive"
       },
       {
         "id": "NCT06435429-inc-17",
         "type": "inclusion",
-        "text": "A WOCBP must have a negative highly sensitive pregnancy test (urine or serum as required by local regulations) within 3 days before the first dose of study intervention.",
+        "text": "Female participants: A female participant is eligible to participate if she is not pregnant or breastfeeding, and one of the following conditions applies: Is a women of nonchildbearing potential OR; Is a woman of childbearing potential (WOCBP) and using a contraceptive method that is highly effective (with a failure rate of < 1% per year), with low user dependency during the study intervention period and for at least 7 months after the last dose of study intervention.; A WOCBP must have a negative highly sensitive pregnancy test (urine or serum as required by local regulations) within 3 days before the first dose of study intervention.; Additional requirements for pregnancy testing during and after study intervention are provided in the protocol.; The investigator is responsible for review of medical history, menstrual history, and recent sexual activity to decrease the risk for inclusion of a woman with an early undetected pregnancy.",
         "category": "reproductive"
       },
       {
         "id": "NCT06435429-inc-18",
-        "type": "inclusion",
-        "text": "Additional requirements for pregnancy testing during and after study intervention are provided in the protocol.",
-        "category": "reproductive"
-      },
-      {
-        "id": "NCT06435429-inc-19",
-        "type": "inclusion",
-        "text": "The investigator is responsible for review of medical history, menstrual history, and recent sexual activity to decrease the risk for inclusion of a woman with an early undetected pregnancy.",
-        "category": "reproductive"
-      },
-      {
-        "id": "NCT06435429-inc-20",
         "type": "inclusion",
         "text": "Is capable of giving signed informed consent, which includes compliance with the requirements and restrictions listed in the informed consent form and in the protocol.",
         "category": "consent"
@@ -3655,107 +3721,101 @@
       {
         "id": "NCT06435429-exc-1",
         "type": "exclusion",
-        "text": "Medical Conditions",
-        "category": "comorbidity"
-      },
-      {
-        "id": "NCT06435429-exc-2",
-        "type": "exclusion",
         "text": "Has clinically confirmed leptomeningeal disease, in the opinion of the investigator.",
         "category": "cns"
       },
       {
-        "id": "NCT06435429-exc-3",
+        "id": "NCT06435429-exc-2",
         "type": "exclusion",
         "text": "Has uncontrolled or significant cardiovascular disease.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-4",
+        "id": "NCT06435429-exc-3",
         "type": "exclusion",
         "text": "Has toxicity related to prior cancer therapy that has not resolved to ≤ Grade 1, with exceptions as stated in the protocol.",
         "category": "other"
       },
       {
-        "id": "NCT06435429-exc-5",
+        "id": "NCT06435429-exc-4",
         "type": "exclusion",
         "text": "Has uncontrolled infection requiring IV antibiotics, antivirals, or antifungals.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-6",
+        "id": "NCT06435429-exc-5",
         "type": "exclusion",
         "text": "Has an infection with HIV-1 or HIV-2, with the exception of participants with well-controlled HIV.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-7",
+        "id": "NCT06435429-exc-6",
         "type": "exclusion",
         "text": "Has active hepatitis B or C infection.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-8",
+        "id": "NCT06435429-exc-7",
         "type": "exclusion",
         "text": "Has an active SARS-CoV-2 infection. Participants with prior infection that has resolved per local institutions' requirements and screening guidance are eligible.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-9",
+        "id": "NCT06435429-exc-8",
         "type": "exclusion",
         "text": "Has a history of life-threatening hypersensitivity to monoclonal antibodies or to recombinant proteins or excipients in the drug formulation of zanidatamab.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-10",
+        "id": "NCT06435429-exc-9",
         "type": "exclusion",
         "text": "Is unable to receive trastuzumab treatment due to medical contraindications.",
         "category": "other"
       },
       {
-        "id": "NCT06435429-exc-11",
+        "id": "NCT06435429-exc-10",
         "type": "exclusion",
         "text": "Has any serious underlying medical or psychiatric condition that would impair the ability of the participant to receive or tolerate the planned treatment at the investigational site.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-12",
+        "id": "NCT06435429-exc-11",
         "type": "exclusion",
         "text": "Has any condition that would prevent treatment with the physician's choice of chemotherapy.",
         "category": "other"
       },
       {
-        "id": "NCT06435429-exc-13",
+        "id": "NCT06435429-exc-12",
         "type": "exclusion",
-        "text": "Has any issue or condition that in the opinion of the investigator would contraindicate the participant's participation in the study or confound the results of the study. Prior/Concomitant Therapy",
+        "text": "Has any issue or condition that in the opinion of the investigator would contraindicate the participant's participation in the study or confound the results of the study.",
         "category": "other"
       },
       {
-        "id": "NCT06435429-exc-14",
+        "id": "NCT06435429-exc-13",
         "type": "exclusion",
         "text": "Has a history of prior allogeneic bone marrow, stem cell, or solid organ transplantation.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-15",
+        "id": "NCT06435429-exc-14",
         "type": "exclusion",
         "text": "The washout periods for prior anticancer therapies before randomization as specified in the protocol.",
         "category": "washout"
       },
       {
-        "id": "NCT06435429-exc-16",
+        "id": "NCT06435429-exc-15",
         "type": "exclusion",
-        "text": "Has a history of trauma or major surgery within 4 weeks prior to randomization. Other Exclusions",
+        "text": "Has a history of trauma or major surgery within 4 weeks prior to randomization.",
         "category": "washout"
       },
       {
-        "id": "NCT06435429-exc-17",
+        "id": "NCT06435429-exc-16",
         "type": "exclusion",
         "text": "Has a known hypersensitivity to any components of the study drugs, including chemotherapy.",
         "category": "comorbidity"
       },
       {
-        "id": "NCT06435429-exc-18",
+        "id": "NCT06435429-exc-17",
         "type": "exclusion",
         "text": "Female participants who are breastfeeding or pregnant, and female and male participants planning a pregnancy.",
         "category": "reproductive"
@@ -3939,17 +3999,29 @@
       {
         "id": "NCT06324357-inc-5",
         "type": "inclusion",
-        "text": "History of prior treatment lines in palliative setting: For cohorts A, B, C, D, E, F, G, H, I, I-ext, J, J-ext, K and O documented investigator assessed progression after HER2-directed treatment for unresectable locally advanced or metastatic disease (For Cohorts D, H, I (I-ext), J (J-ext) - patients must have been pretreated with trastuzumab deruxtecan (T-DXd) and have progressed or have been intolerant to previous T-DXd).; For cohorts L, L-ext, M and N documented progression or recurrence of disease during or following their latest line of therapy. Patients must have had at least one prior line of therapy for locally advanced unresectable disease or metastatic disease (adjuvant and neoadjuvant therapy excluded) and documented disease progression or recurrence of disease during or following their latest line of therapy. In the opinion of the Investigator, patients must be unlikely to tolerate or derive clinically meaningful benefit from further standard of care therapy known to prolong survival.",
-        "category": "biomarker"
+        "text": "History of prior treatment lines in palliative setting",
+        "category": "prior-therapy"
       },
       {
         "id": "NCT06324357-inc-6",
+        "type": "inclusion",
+        "text": "For cohorts A, B, C, D, E, F, G, H, I, I-ext, J, J-ext, K and O documented investigator assessed progression after HER2-directed treatment for unresectable locally advanced or metastatic disease (For Cohorts D, H, I (I-ext), J (J-ext) - patients must have been pretreated with trastuzumab deruxtecan (T-DXd) and have progressed or have been intolerant to previous T-DXd).",
+        "category": "biomarker"
+      },
+      {
+        "id": "NCT06324357-inc-7",
+        "type": "inclusion",
+        "text": "For cohorts L, L-ext, M and N documented progression or recurrence of disease during or following their latest line of therapy. Patients must have had at least one prior line of therapy for locally advanced unresectable disease or metastatic disease (adjuvant and neoadjuvant therapy excluded) and documented disease progression or recurrence of disease during or following their latest line of therapy. In the opinion of the Investigator, patients must be unlikely to tolerate or derive clinically meaningful benefit from further standard of care therapy known to prolong survival.",
+        "category": "stage"
+      },
+      {
+        "id": "NCT06324357-inc-8",
         "type": "inclusion",
         "text": "Presence of at least one measurable lesion according to RECIST 1.1",
         "category": "measurable-disease"
       },
       {
-        "id": "NCT06324357-inc-7",
+        "id": "NCT06324357-inc-9",
         "type": "inclusion",
         "text": "Eastern Cooperative Oncology Group (ECOG) score of 0 or 1",
         "category": "performance"
@@ -4155,47 +4227,77 @@
       {
         "id": "NCT07136428-exc-7",
         "type": "exclusion",
-        "text": "Clinically significant acute infection requiring systemic antibacterial, antifungal, or antiviral therapy including: tuberculosis (clinical evaluation that includes clinical history, physical examination, and radiographic findings, and TB testing in line with local practice),; hepatitis B (known positive HBV surface antigen (HBsAg) result) ,; hepatitis C (note: hepatitis C testing at screening will only be performed on those at high risk or with known history), or; human immunodeficiency virus (positive HIV 1/2 antibodies) (note: HIV testing at screening will only be performed on those at high risk or with known history); NOTE: Patients with a past or resolved HBV infection (defined as the presence of hepatitis B core antibody [anti-HBc] and absence of HBsAg) are eligible. Patients positive for hepatitis C (HCV) antibody are eligible only if polymerase chain reaction is negative for HCV RNA. Subjects with HIV/AIDS with adequate antiviral therapy to control viral load would be allowed if they are stable and have been on treatment for ≥ 4 weeks prior to first dose of study drug(s). Subjects with viral hepatitis with controlled viral load would be allowed while on suppressive antiviral therapy. Testing not required.",
+        "text": "Clinically significant acute infection requiring systemic antibacterial, antifungal, or antiviral therapy including",
         "category": "comorbidity"
       },
       {
         "id": "NCT07136428-exc-8",
         "type": "exclusion",
-        "text": "Unable for any reason to undergo MRI of the brain.",
-        "category": "cns"
+        "text": "tuberculosis (clinical evaluation that includes clinical history, physical examination, and radiographic findings, and TB testing in line with local practice),",
+        "category": "other"
       },
       {
         "id": "NCT07136428-exc-9",
         "type": "exclusion",
-        "text": "Use of a strong cytochrome P450 (CYP)3A4 inhibitor within 5 half-lives of study treatment. .. Unable to avoid certain CYP3A4 or CYP2C9 substrates which cannot be co-administered with study treatment given altered substrate concentrations.",
-        "category": "washout"
+        "text": "hepatitis B (known positive HBV surface antigen (HBsAg) result),",
+        "category": "comorbidity"
       },
       {
         "id": "NCT07136428-exc-10",
         "type": "exclusion",
-        "text": "Central nervous system exclusion - Based on screening brain MRI, patients must not have any of the following: Ongoing use of systemic corticosteroids for control of symptoms of brain metastases at a total daily dose of > 2 mg of dexamethasone (or equivalent); Diffuse leptomeningeal disease or positive CSF cytology; however, discreet dural-based metastases are allowed; Poorly controlled seizures. Defined as seizures that continue to occur despite optimal anticonvulsant medications based on investigator discretion.",
-        "category": "cns"
+        "text": "hepatitis C (note: hepatitis C testing at screening will only be performed on those at high risk or with known history), or",
+        "category": "comorbidity"
       },
       {
         "id": "NCT07136428-exc-11",
         "type": "exclusion",
-        "text": "Active infection requiring intravenous systemic therapy.",
+        "text": "human immunodeficiency virus (positive HIV 1/2 antibodies) (note: HIV testing at screening will only be performed on those at high risk or with known history)",
         "category": "comorbidity"
       },
       {
         "id": "NCT07136428-exc-12",
         "type": "exclusion",
+        "text": "NOTE: Patients with a past or resolved HBV infection (defined as the presence of hepatitis B core antibody [anti-HBc] and absence of HBsAg) are eligible. Patients positive for hepatitis C (HCV) antibody are eligible only if polymerase chain reaction is negative for HCV RNA. Subjects with HIV/AIDS with adequate antiviral therapy to control viral load would be allowed if they are stable and have been on treatment for ≥ 4 weeks prior to first dose of study drug(s). Subjects with viral hepatitis with controlled viral load would be allowed while on suppressive antiviral therapy. Testing not required.",
+        "category": "comorbidity"
+      },
+      {
+        "id": "NCT07136428-exc-13",
+        "type": "exclusion",
+        "text": "Unable for any reason to undergo MRI of the brain.",
+        "category": "cns"
+      },
+      {
+        "id": "NCT07136428-exc-14",
+        "type": "exclusion",
+        "text": "Use of a strong cytochrome P450 (CYP)3A4 inhibitor within 5 half-lives of study treatment... Unable to avoid certain CYP3A4 or CYP2C9 substrates which cannot be co-administered with study treatment given altered substrate concentrations.",
+        "category": "washout"
+      },
+      {
+        "id": "NCT07136428-exc-15",
+        "type": "exclusion",
+        "text": "Central nervous system exclusion - Based on screening brain MRI, patients must not have any of the following: Ongoing use of systemic corticosteroids for control of symptoms of brain metastases at a total daily dose of > 2 mg of dexamethasone (or equivalent); Diffuse leptomeningeal disease or positive CSF cytology; however, discreet dural-based metastases are allowed; Poorly controlled seizures. Defined as seizures that continue to occur despite optimal anticonvulsant medications based on investigator discretion.",
+        "category": "cns"
+      },
+      {
+        "id": "NCT07136428-exc-16",
+        "type": "exclusion",
+        "text": "Active infection requiring intravenous systemic therapy.",
+        "category": "comorbidity"
+      },
+      {
+        "id": "NCT07136428-exc-17",
+        "type": "exclusion",
         "text": "Pregnant or breastfeeding (NOTE: breast milk cannot be stored for future use while the mother is being treated on study).",
         "category": "reproductive"
       },
       {
-        "id": "NCT07136428-exc-13",
+        "id": "NCT07136428-exc-18",
         "type": "exclusion",
         "text": "Patients with a prior or concurrent malignancy within last 5 years whose natural history or treatment has the potential to interfere with the safety or efficacy assessment of the investigational regimen, per treating physician discretion, are not eligible for this trial.",
         "category": "diagnosis"
       },
       {
-        "id": "NCT07136428-exc-14",
+        "id": "NCT07136428-exc-19",
         "type": "exclusion",
         "text": "Treatment with any investigational drug within 30 days prior to enrollment (Day 1 of study drug).",
         "category": "washout"
@@ -4924,173 +5026,125 @@
       {
         "id": "NCT03418961-inc-1",
         "type": "inclusion",
-        "text": "STEP 1 REGISTRATION",
-        "category": "other"
+        "text": "Patients must: Have metastatic breast cancer, AND; Be initiating within 11 calendar days of Step 1 Registration OR be continuing trastuzumab-based HER-2 targeted therapy without concurrent anthracyclines, AND; Be receiving the trastuzumab-based HER-2 targeted therapy for metastatic disease in first, second, third-, or fourth-line setting. Patients may have brain metastasis. There is no limit for number of doses of HER-2 targeted therapy prior to registration.",
+        "category": "cns"
       },
       {
         "id": "NCT03418961-inc-2",
         "type": "inclusion",
-        "text": "Patients must:",
-        "category": "other"
+        "text": "Examples of eligible HER-2 targeted therapy: Trastuzumab or a trastuzumab biosimilar; Trastuzumab + chemotherapy or hormonal therapy; Trastuzumab + other HER-2 targeted agent with or without chemotherapy (such as pertuzumab, lapatinib, and tucatinib); Ado-trastuzumab (Kadcyla®); Fam-trastuzumab deruxtecan (Enhertu) NOTE: Patients on lapatinib without trastuzumab are not eligible. Planned treatment with concurrent HER-2 targeted therapy and anthracyclines is not permitted.",
+        "category": "biomarker"
       },
       {
         "id": "NCT03418961-inc-3",
         "type": "inclusion",
-        "text": "Have metastatic breast cancer, AND",
-        "category": "stage"
+        "text": "Patients must be at increased risk for cardiotoxicity defined by at least one of the following: Previous anthracycline exposure OR; 1 or more of the following risk factors for heart disease: LVEF 50-54% by local ECHO read*; Age ≥ 65; BMI ≥ 30 kg/m2; Current or prior anti-hypertensive therapy; Diagnosis of coronary artery disease (CAD); Diagnosis of diabetes mellitus; Diagnosis of atrial fibrillation/flutter Note: ECHO can be performed at any time prior to registration with the most recent being sent.",
+        "category": "organ-function"
       },
       {
         "id": "NCT03418961-inc-4",
         "type": "inclusion",
-        "text": "Be initiating within 11 calendar days of Step 1 Registration OR be continuing trastuzumab-based HER-2 targeted therapy without concurrent anthracyclines, AND",
-        "category": "biomarker"
-      },
-      {
-        "id": "NCT03418961-inc-5",
-        "type": "inclusion",
-        "text": "Be receiving the trastuzumab-based HER-2 targeted therapy for metastatic disease in first, second, third-, or fourth-line setting. Patients may have brain metastasis. There is no limit for number of doses of HER-2 targeted therapy prior to registration.",
-        "category": "cns"
-      },
-      {
-        "id": "NCT03418961-inc-6",
-        "type": "inclusion",
-        "text": "Examples of eligible HER-2 targeted therapy:",
-        "category": "biomarker"
-      },
-      {
-        "id": "NCT03418961-inc-7",
-        "type": "inclusion",
-        "text": "Trastuzumab or a trastuzumab biosimilar",
-        "category": "other"
-      },
-      {
-        "id": "NCT03418961-inc-8",
-        "type": "inclusion",
-        "text": "Trastuzumab + chemotherapy or hormonal therapy",
-        "category": "other"
-      },
-      {
-        "id": "NCT03418961-inc-9",
-        "type": "inclusion",
-        "text": "Trastuzumab + other HER-2 targeted agent with or without chemotherapy (such as pertuzumab, lapatinib, and tucatinib)",
-        "category": "biomarker"
-      },
-      {
-        "id": "NCT03418961-inc-10",
-        "type": "inclusion",
-        "text": "Ado-trastuzumab (Kadcyla®)",
-        "category": "other"
-      },
-      {
-        "id": "NCT03418961-inc-11",
-        "type": "inclusion",
-        "text": "Fam-trastuzumab deruxtecan (Enhertu) NOTE: Patients on lapatinib without trastuzumab are not eligible. Planned treatment with concurrent HER-2 targeted therapy and anthracyclines is not permitted.: Patients must be at increased risk for cardiotoxicity defined by at least one of the following:; Previous anthracycline exposure OR; 1 or more of the following risk factors for heart disease:; LVEF 50-54% by local ECHO read*; Age ≥ 65; BMI ≥ 30 kg/m2; Current or prior anti-hypertensive therapy; Diagnosis of coronary artery disease (CAD); Diagnosis of diabetes mellitus; Diagnosis of atrial fibrillation/flutter Note: ECHO can be performed at any time prior to registration with the most recent being sent.; Patients must not have taken within 21 days prior to Step 1 Registration, be currently taking at the time of Step 1 Registration or planning to take once registered to Step 1 a beta blocker, ARB, or ACE inhibitor, in order to be randomized (Arms 1 and 2).",
+        "text": "Patients must not have taken within 21 days prior to Step 1 Registration, be currently taking at the time of Step 1 Registration or planning to take once registered to Step 1 a beta blocker, ARB, or ACE inhibitor, in order to be randomized (Arms 1 and 2).",
         "category": "washout"
       },
       {
-        "id": "NCT03418961-inc-12",
+        "id": "NCT03418961-inc-5",
         "type": "inclusion",
         "text": "Patients enrolling in the observational cohort (Arm 3) must be currently taking a beta blocker, ARB, or ACE inhibitor at the time of Step 1 Registration.",
         "category": "other"
       },
       {
-        "id": "NCT03418961-inc-13",
+        "id": "NCT03418961-inc-6",
         "type": "inclusion",
         "text": "Patients must have a Zubrod Performance status of 0-2",
         "category": "performance"
       },
       {
-        "id": "NCT03418961-inc-14",
+        "id": "NCT03418961-inc-7",
         "type": "inclusion",
         "text": "Patients must have a complete physical examination and medical history within 28 days prior to registration",
         "category": "washout"
       },
       {
-        "id": "NCT03418961-inc-15",
+        "id": "NCT03418961-inc-8",
         "type": "inclusion",
         "text": "Patients must have LVEF >= 50% echocardiogram (2D or 3D) within 28 days prior to registration. The echocardiogram must be obtained from a S1501 validated ECHO laboratory (lab) and submitted for central review by the S1501 ECHO core lab.",
         "category": "washout"
       },
       {
-        "id": "NCT03418961-inc-16",
+        "id": "NCT03418961-inc-9",
         "type": "inclusion",
         "text": "If a 3D echocardiogram is performed at baseline, sites must ensure that standard 2D images, including 40chamber and 2-chamber views, are also obtained and submitted at subsequent timepoints.",
         "category": "other"
       },
       {
-        "id": "NCT03418961-inc-17",
+        "id": "NCT03418961-inc-10",
         "type": "inclusion",
         "text": "All follow-up echocardiograms (every 12 weeks) must be performed using 2D imaging to allow for standardized assessments. Follow-up scans must be completed at a site that can provide 2D images per protocol requirements. The echocardiograms cannot be submitted for central read until after Step 1 registration is complete.",
         "category": "other"
       },
       {
-        "id": "NCT03418961-inc-18",
+        "id": "NCT03418961-inc-11",
         "type": "inclusion",
         "text": "Patients must have adequate hepatic function as evidenced by all of the following within 28 days prior to registration: Serum bilirubin < 3.0 x institutional upper limit of normal (IULN); Serum glutamic oxaloacetic transaminase (SGOT)/aspartate aminotransferase (AST) and serum glutamic pyruvic transaminase (SGPT)/alanine aminotransferase (ALT) < 5.0 x IULN",
         "category": "washout"
       },
       {
-        "id": "NCT03418961-inc-19",
+        "id": "NCT03418961-inc-12",
         "type": "inclusion",
         "text": "Patients must not be dialysis dependent",
         "category": "other"
       },
       {
-        "id": "NCT03418961-inc-20",
+        "id": "NCT03418961-inc-13",
         "type": "inclusion",
         "text": "No other prior malignancy is allowed except for the following: adequately treated basal cell or squamous cell skin cancer, in situ cervical cancer, prostate cancer on active surveillance, adequately treated stage I or II cancer from which the patient is currently in complete remission, or any other cancer from which the patient has been disease free for five years",
         "category": "stage"
       },
       {
-        "id": "NCT03418961-inc-21",
+        "id": "NCT03418961-inc-14",
         "type": "inclusion",
         "text": "Patients must not be pregnant or nursing due to potential fetal or nursing infant harm; women/men of reproductive potential must have agreed to use an effective contraceptive method, a woman is considered to be of \"reproductive potential\" if she has had menses at any time in the preceding 12 consecutive months; in addition to routine contraceptive methods, \"effective contraception\" also includes heterosexual celibacy and surgery intended to prevent pregnancy (or with a side-effect of pregnancy prevention) defined as a hysterectomy, bilateral oophorectomy or bilateral tubal ligation; however, if at any point a previously celibate patient chooses to become heterosexually active during the time period for use of contraceptive measures outlined in the protocol, he/she is responsible for beginning contraceptive measures",
         "category": "reproductive"
       },
       {
-        "id": "NCT03418961-inc-22",
+        "id": "NCT03418961-inc-15",
         "type": "inclusion",
         "text": "Patients must be willing to submit blood specimens",
         "category": "other"
       },
       {
-        "id": "NCT03418961-inc-23",
+        "id": "NCT03418961-inc-16",
         "type": "inclusion",
         "text": "Sites must seek additional patient consent for the future use of specimens",
         "category": "other"
       },
       {
-        "id": "NCT03418961-inc-24",
+        "id": "NCT03418961-inc-17",
         "type": "inclusion",
         "text": "Patients must be informed of the investigational nature of this study and must sign and give written informed consent in accordance with institutional and federal guidelines",
         "category": "consent"
       },
       {
-        "id": "NCT03418961-inc-25",
+        "id": "NCT03418961-inc-18",
         "type": "inclusion",
         "text": "For participants with impaired decision-making capabilities, legally authorized representatives may sign and give informed consent on behalf of study participants in accordance with applicable federal, local, and CIRB regulations.",
         "category": "consent"
       },
       {
-        "id": "NCT03418961-inc-26",
+        "id": "NCT03418961-inc-19",
         "type": "inclusion",
         "text": "As a part of the OPEN registration process the treating institution's identity is provided in order to ensure that the current (within 365 days) date of institutional review board approval for this study has been entered in the system",
         "category": "other"
       },
       {
-        "id": "NCT03418961-inc-27",
-        "type": "inclusion",
-        "text": "STEP 2 REGISTRATION (Randomization)",
-        "category": "other"
-      },
-      {
-        "id": "NCT03418961-inc-28",
+        "id": "NCT03418961-inc-20",
         "type": "inclusion",
         "text": "Patients must not be registered to step 2 until confirming via RAVE EDC that the patient's LVEF by echocardiogram was >= 50% by central review. Patients must be registered within 21 calendar days of submission of the ECHO study/",
         "category": "organ-function"
       },
       {
-        "id": "NCT03418961-inc-29",
+        "id": "NCT03418961-inc-21",
         "type": "inclusion",
         "text": "Site must verify that there is no known change in the step 1 eligibility since initial registration",
         "category": "other"
