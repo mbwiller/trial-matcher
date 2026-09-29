@@ -275,10 +275,12 @@ body {
 
 @utility glass-sheen {
   position: relative;
+  isolation: isolate;
   &::before {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: -1;
     border-radius: inherit;
     pointer-events: none;
     background: linear-gradient(
