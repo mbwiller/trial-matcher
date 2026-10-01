@@ -111,6 +111,42 @@ export function scoreVerdicts(trial: Trial, verdicts: CriterionVerdict[]): Score
   return { score, tier, blockers, confirmations, counts };
 }
 
+/**
+ * The arithmetic behind a score, for display next to it. Mirrors scoreVerdicts()
+ * exactly (asserted in scoring.test.ts) so the explanation can never drift from
+ * the number.
+ */
+export type ScoreBreakdown =
+  | { rule: "no-criteria"; score: number }
+  /** At least one high-confidence blocker: 15, minus 4 per additional one. */
+  | { rule: "blocked"; score: number; blockers: number }
+  /** Blockers, none of them high-confidence: 38 − 6 per blocker − 2 per open item (floor 16). */
+  | { rule: "doubtful"; score: number; blockers: number; unknowns: number }
+  /** No blockers: 40 + 60 × met ÷ (met + open) − 4 per open key item (max 20). */
+  | { rule: "scored"; score: number; pass: number; applicable: number; base: number; keyUnknowns: number; penalty: number };
+
+export function explainScore(trial: Trial, verdicts: CriterionVerdict[]): ScoreBreakdown {
+  const pairs = pairVerdicts(trial, verdicts);
+  const { score, counts } = scoreVerdicts(trial, verdicts);
+  if (pairs.length === 0) return { rule: "no-criteria", score };
+  const highConfidenceFails = pairs.filter((p) => p.verdict.status === "fail" && p.verdict.confidence === "high").length;
+  if (highConfidenceFails > 0) return { rule: "blocked", score, blockers: highConfidenceFails };
+  if (counts.fail > 0) return { rule: "doubtful", score, blockers: counts.fail, unknowns: counts.unknown };
+  const applicable = counts.pass + counts.unknown;
+  const keyUnknowns = pairs.filter(
+    (p) => p.verdict.status === "unknown" && p.criterion.category !== undefined && KEY_CATEGORIES.has(p.criterion.category),
+  ).length;
+  return {
+    rule: "scored",
+    score,
+    pass: counts.pass,
+    applicable,
+    base: Math.round(40 + 60 * (applicable > 0 ? counts.pass / applicable : 1)),
+    keyUnknowns,
+    penalty: Math.min(20, 4 * keyUnknowns),
+  };
+}
+
 export function finalizeMatch(
   trial: Trial,
   verdicts: CriterionVerdict[],

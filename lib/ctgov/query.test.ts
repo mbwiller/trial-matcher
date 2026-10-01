@@ -112,7 +112,7 @@ describe("buildTrialQuery", () => {
     expect(params.term).toBe('(HER2-positive OR "HER2 positive") AND (metastatic OR advanced OR "stage IV")');
     expect(params.overallStatus).toEqual(["RECRUITING"]);
     expect(params.advanced).toBe("AREA[StudyType]INTERVENTIONAL AND AREA[Sex](ALL OR FEMALE)");
-    expect(params.pageSize).toBe(72);
+    expect(params.pageSize).toBe(48);
     expect(params.countTotal).toBe(true);
     expect(biomarkerParams).toBeUndefined();
     expect(description).toBe("Recruiting · Interventional · breast cancer · HER2-positive · metastatic");
@@ -211,7 +211,7 @@ describe("age filtering", () => {
       makeTrial("NCT00000002", "Older adults", { minimumAge: "65 Years" }),
       makeTrial("NCT00000003", "Young adults", { minimumAge: "18 Years", maximumAge: "45 Years" }),
       makeTrial("NCT00000004", "Any age", { minimumAge: undefined }),
-      makeTrial("NCT00000005", "Paediatric", { minimumAge: "6 Months", maximumAge: "17 Years" }),
+      makeTrial("NCT00000005", "Pediatric", { minimumAge: "6 Months", maximumAge: "17 Years" }),
     ];
     expect(filterByAge(trials, 54).map((t) => t.nctId)).toEqual(["NCT00000001", "NCT00000004"]);
     expect(filterByAge(trials, 70).map((t) => t.nctId)).toEqual(["NCT00000001", "NCT00000002", "NCT00000004"]);
@@ -250,7 +250,7 @@ describe("prioritizeTrials", () => {
     expect(ranked.map((t) => t.nctId)).toEqual(["NCT00000020", "NCT00000021", "NCT00000022"]);
     const { score, reasons } = scoreTrialRelevance(profile, pik3ca);
     expect(score).toBeGreaterThan(scoreTrialRelevance(profile, plain).score);
-    expect(reasons).toEqual(expect.arrayContaining(["PIK3CA mentioned", "prior CDK4/6 inhibitor relevant"]));
+    expect(reasons).toEqual(expect.arrayContaining(["PIK3CA in title/conditions", "prior CDK4/6 inhibitor relevant"]));
   });
 
   it("prefers post-neoadjuvant residual-disease trials over pre-operative ones for a patient without pCR", () => {

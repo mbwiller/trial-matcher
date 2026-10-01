@@ -1,0 +1,290 @@
+import { demoMatch } from "../../match-helpers";
+
+const NOTE = "Clinic note 2026-09-18";
+const NGS = "Tissue NGS 2025-03-10";
+const CT = "CT CAP 2026-08-14";
+const LABS = "Labs 2026-09-15";
+const MEDS = "Medication list";
+
+export default demoMatch(
+  "NCT05455619",
+  "Fits the triplet with alpelisib or capivasertib · HbA1c, amylase/lipase and anemia attribution pending",
+  "A good fit: postmenopausal, HR+/HER2-low with PIK3CA H1047R, recurrence on adjuvant anastrozole and progression on letrozole + palbociclib, measurable liver disease, ECOG 1, and no prior fulvestrant, PI3K/AKT inhibitor or metastatic chemotherapy. Evexomostat would be added to the capivasertib or alpelisib + fulvestrant already discussed in clinic. Open items: HbA1c (≤ 6.4% for alpelisib, < 8% for capivasertib; fasting glucose 104 mg/dL), fasting amylase and lipase, and whether her grade 1 anemia (Hgb 11.2) is attributed to palbociclib, since marrow toxicity from prior therapy must be back to grade 0.",
+  [
+    {
+      id: "NCT05455619-inc-1",
+      status: "pass",
+      confidence: "medium",
+      rationale: "58-year-old postmenopausal woman (natural menopause at about 51); written informed consent is obtained at screening.",
+      evidence: [{ quote: "58 yo postmenopausal F (natural menopause ~51)", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-inc-2",
+      status: "pass",
+      rationale: "ER 90%, PR 10%, HER2 IHC 1+ with ISH not amplified on the 2025 liver biopsy: HR-positive and HER2-negative (HER2-low) by local testing.",
+      evidence: [{ quote: "Liver bx 2/19/25 c/w met breast ca, ER 90% PR 10% HER2 1+/ISH neg (HER2-low)", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-inc-3",
+      status: "pass",
+      confidence: "medium",
+      rationale: "PIK3CA H1047R is documented in writing on tissue NGS of the liver biopsy (reported 2025-03-10); the report does not name the assay, so FDA-approved status needs confirming.",
+      evidence: [{ quote: "PIK3CA p.H1047R (c.3140A>G), VAF 31% - pathogenic", source: NGS }],
+      actionNeeded: "Confirm the 2025 NGS was an FDA-approved test (e.g. FoundationOne CDx, therascreen PIK3CA); otherwise retest at screening.",
+    },
+    {
+      id: "NCT05455619-inc-4",
+      status: "pass",
+      rationale: "Relapsed in February 2025 during adjuvant anastrozole, then progressed on letrozole + palbociclib in the metastatic setting (CT 2026-08-14): progression after both adjuvant endocrine therapy and a CDK4/6 inhibitor.",
+      evidence: [
+        { quote: "then adj anastrozole 12/2019 until recurrence", source: NOTE },
+        { quote: "PD on 1L AI + CDK4/6i after ~17 mo.", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05455619-inc-5",
+      status: "pass",
+      rationale: "Measurable liver lesions on CT 2026-08-14 (segment VI 3.2 cm, segment IV 1.8 cm). Her sclerotic bone metastases are non-measurable but are not needed for eligibility.",
+      evidence: [
+        { quote: "segment VI lesion increased from 2.4 cm to 3.2 cm", source: CT },
+        { quote: "Sclerotic osseous metastases at T8, L3 and right iliac wing, unchanged.", source: CT },
+      ],
+    },
+    {
+      id: "NCT05455619-inc-6",
+      status: "pass",
+      rationale: "ECOG 1 at the 2026-09-18 visit.",
+      evidence: [{ quote: "EXAM: ECOG 1.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-inc-7",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Fasting glucose 104 mg/dL on 2026-09-15 meets the ≤ 140 limit, but HbA1c has never been measured; her oncologist plans to add it to the next draw.",
+      evidence: [
+        { quote: "Glucose (fasting) 104 (H)", source: LABS },
+        { quote: "fasting glucose 104 on 9/15 labs, A1c not on file, will add to next draw.", source: NOTE },
+      ],
+      actionNeeded: "Obtain HbA1c: ≤ 6.4% required for the alpelisib arm, < 8% for capivasertib; repeat screening fasting glucose (≤ 140 mg/dL).",
+    },
+    {
+      id: "NCT05455619-inc-8",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Weight 71.2 kg; height is not recorded, but her BMI would fall below 20 only at a height above about 189 cm.",
+      evidence: [{ quote: "Wt 71.2 kg.", source: NOTE }],
+      actionNeeded: "Record height at screening to document BMI ≥ 20 kg/m².",
+    },
+    {
+      id: "NCT05455619-inc-9",
+      status: "pass",
+      rationale: "Aged 58 with natural menopause at about 51, so amenorrhoeic for roughly 7 years: meets the ≥ 45 years and > 2 years without menses definition.",
+      evidence: [{ quote: "58 yo postmenopausal F (natural menopause ~51)", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-inc-10",
+      status: "pass",
+      rationale: "No prior fulvestrant: endocrine therapy to date has been adjuvant anastrozole and first-line letrozole, so she remains eligible for fulvestrant.",
+      evidence: [{ quote: "Started 1L letrozole + palbociclib + denosumab 3/2025, best response PR.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-inc-11",
+      status: "pass",
+      rationale: "Permissive item. She has had no PI3K, AKT or mTOR inhibitor, so either companion drug (alpelisib or capivasertib) remains open.",
+      evidence: [{ quote: "Discussed 2L options: capivasertib + fulvestrant vs alpelisib + fulvestrant vs clinical trial.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-inc-12",
+      status: "pass",
+      rationale: "No chemotherapy for metastatic disease; her only chemotherapy was adjuvant ddAC-T in 2019.",
+      evidence: [{ quote: "adj ddAC-T 5/2019-9/2019", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-inc-13",
+      status: "pass",
+      confidence: "low",
+      rationale: "Willingness to attend fasted (> 8 hours) on designated days is confirmed at screening; nothing in the record argues against it.",
+    },
+    {
+      id: "NCT05455619-inc-14",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Every listed value that has been measured meets its limit on 2026-09-15: platelets 210, AST 34/ALT 41 (≤ 5 × ULN allowed with liver metastases), bilirubin 0.6, Hgb 11.2, ANC 2.8, CrCl ≈ 86 mL/min, albumin 3.9. Fasting amylase and lipase have not been drawn.",
+      evidence: [
+        { quote: "ANC 2.8 | Hgb 11.2 (L) | Plt 210", source: LABS },
+        { quote: "AST 34 | ALT 41 | T bili 0.6 | Alk phos 148 (H) | Albumin 3.9", source: LABS },
+      ],
+      actionNeeded: "Obtain fasting amylase (≤ 2 × ULN) and lipase (≤ 1.5 × ULN) with screening labs.",
+    },
+    {
+      id: "NCT05455619-inc-15",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Takes oral medications daily and completed about 17 months of oral letrozole + palbociclib.",
+      evidence: [{ quote: "amlodipine 10 mg PO daily", source: MEDS }],
+    },
+    {
+      id: "NCT05455619-exc-1",
+      status: "pass",
+      rationale: "Presented as stage IIB (pT2 pN1a) IDC treated with lumpectomy; no inflammatory features, and the breast shows only post-treatment changes without local recurrence.",
+      evidence: [
+        { quote: "stage IIB (pT2 pN1a)", source: NOTE },
+        { quote: "L breast post-surgical/RT changes, no local recurrence, no palpable nodes.", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05455619-exc-2",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No known brain metastases or other CNS pathology, neurologically nonfocal and on no corticosteroids. She has never had brain imaging, so the stable-imaging clause has nothing to apply to.",
+      evidence: [
+        { quote: "Denies neuro sx. Has never had brain imaging.", source: NOTE },
+        { quote: "Neuro grossly nonfocal.", source: NOTE },
+      ],
+      actionNeeded: "Obtain brain MRI only if the protocol requires baseline CNS imaging.",
+    },
+    {
+      id: "NCT05455619-exc-3",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Her only recorded allergy is sulfa (rash). She has not received evexomostat, fulvestrant, alpelisib or capivasertib, none of which is a sulfonamide.",
+      evidence: [{ quote: "ALLERGIES: sulfa (rash)", source: "Allergies" }],
+      actionNeeded: "Confirm no hypersensitivity to study-drug excipients at screening.",
+    },
+    {
+      id: "NCT05455619-exc-4",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No diabetes diagnosis, no insulin or other glucose-lowering drug, and fasting glucose 104 mg/dL (below 140). HbA1c is still pending and is tracked under the glycaemic inclusion criterion.",
+      evidence: [
+        { quote: "No DM.", source: NOTE },
+        { quote: "Glucose (fasting) 104 (H)", source: LABS },
+      ],
+    },
+    {
+      id: "NCT05455619-exc-5",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No surgery since 2019–2020 (lumpectomy, port placement and removal); the last procedure was the liver core biopsy in February 2025.",
+      evidence: [{ quote: "PSH: as above. Port 2019, removed 2020.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-6",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Hgb 11.2 g/dL (flagged low) is grade 1 anemia, and this criterion requires marrow toxicity from prior therapy to be grade 0. It may reflect palbociclib (stopped 2026-08-20) or the cancer itself; ANC 2.8 and platelets 210 have recovered, and her fatigue began after palbociclib stopped.",
+      evidence: [{ quote: "ANC 2.8 | Hgb 11.2 (L) | Plt 210", source: LABS }],
+      actionNeeded: "Repeat CBC at screening and document whether the anemia is attributed to palbociclib; if it is, Hgb must be back within normal range (grade 0).",
+    },
+    {
+      id: "NCT05455619-exc-7",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Child-Pugh A on available data: bilirubin 0.6, albumin 3.9, no ascites or encephalopathy described. INR is not on file, but she takes no anticoagulant and synthetic function is preserved.",
+      evidence: [
+        { quote: "AST 34 | ALT 41 | T bili 0.6 | Alk phos 148 (H) | Albumin 3.9", source: LABS },
+        { quote: "Abd soft, mild RUQ fullness, nontender.", source: NOTE },
+      ],
+      actionNeeded: "Add PT/INR to screening labs to complete Child-Pugh scoring.",
+    },
+    {
+      id: "NCT05455619-exc-8",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No HIV infection on the problem list; serostatus has not been documented.",
+      actionNeeded: "Confirm HIV status at screening if the protocol requires testing.",
+    },
+    {
+      id: "NCT05455619-exc-9",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Her only radiotherapy was whole-breast RT in October–November 2019; no palliative radiation to the bone metastases is recorded.",
+      evidence: [{ quote: "whole breast RT 10-11/2019", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-10",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No malignancy other than breast cancer is recorded in her history.",
+      evidence: [{ quote: "PMH: HTN, HLD, osteopenia (DEXA 2023 T-score -1.8). No DM.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-11",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No GI disease, bowel surgery or symptoms affecting absorption: no nausea or vomiting, appetite and weight stable.",
+      evidence: [
+        { quote: "No HA, no visual changes, no focal weakness, no N/V.", source: NOTE },
+        { quote: "Appetite ok, wt stable.", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05455619-exc-12",
+      status: "pass",
+      confidence: "medium",
+      rationale: "CT chest 2026-08-14 reports no new pulmonary nodules and no pneumonitis or interstitial change, and lungs are clear on exam; the screening CT should be reviewed as the criterion specifies.",
+      evidence: [
+        { quote: "No new pulmonary nodules.", source: CT },
+        { quote: "Lungs CTA.", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05455619-exc-13",
+      status: "pass",
+      rationale: "None of her current medications (denosumab, oxycodone, amlodipine, atorvastatin, calcium/vitamin D) is a strong CYP3A4 inducer, a BCRP inhibitor or a sulfonylurea.",
+    },
+    {
+      id: "NCT05455619-exc-14",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No acute or chronic pancreatitis appears in her history.",
+      evidence: [{ quote: "PMH: HTN, HLD, osteopenia (DEXA 2023 T-score -1.8). No DM.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-15",
+      status: "pass",
+      rationale: "On denosumab since March 2025 with no dental issues and no osteonecrosis of the jaw, so the alpelisib option is not restricted.",
+      evidence: [{ quote: "Tolerating denosumab, no dental isues.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-16",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Her only recorded drug reaction is a sulfa rash; no SJS, TEN, erythema multiforme or DRESS is documented.",
+      evidence: [{ quote: "ALLERGIES: sulfa (rash)", source: "Allergies" }],
+      actionNeeded: "Confirm the sulfa reaction was a simple rash, not SJS/TEN, erythema multiforme or DRESS.",
+    },
+    {
+      id: "NCT05455619-exc-17",
+      status: "pass",
+      rationale: "No systemic corticosteroids on her medication list or in the recent history.",
+    },
+    {
+      id: "NCT05455619-exc-18",
+      status: "not-applicable",
+      rationale: "Postmenopausal (natural menopause at about 51, now 58); not pregnant or nursing, so this criterion cannot apply.",
+      evidence: [{ quote: "58 yo postmenopausal F (natural menopause ~51)", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-19",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No prior investigational study: her last therapy was standard letrozole + palbociclib (stopped 2026-08-20), and she is only now reviewing trial options.",
+      evidence: [{ quote: "Pt interested in trials, wants to hear options before deciding.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-20",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Comorbidities are controlled hypertension (amlodipine), hyperlipidaemia (atorvastatin) and osteopenia; no cardiac events, hepatic impairment or other uncontrolled illness is recorded.",
+      evidence: [{ quote: "HTN - amlodipine, controlled.", source: NOTE }],
+    },
+    {
+      id: "NCT05455619-exc-21",
+      status: "pass",
+      confidence: "low",
+      rationale: "Retired teacher with no cognitive or adherence concerns recorded; ability to follow study instructions, including fasting days, is confirmed at screening.",
+      evidence: [{ quote: "SH: retired teacher, never smoker, wine socially.", source: NOTE }],
+    },
+  ],
+);

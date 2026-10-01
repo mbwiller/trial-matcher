@@ -1,65 +1,59 @@
 import { describe, expect, it } from "vitest";
+import { prescreenTrials } from "@/lib/ctgov/prescreen";
+import { DEFAULT_LIMIT } from "@/lib/ctgov/query";
+import { explainScore } from "@/lib/scoring";
+import { checkMatch } from "./match-check";
 import { DEMO_MATCHES } from "./matches";
 import { DEMO_MATCH_PROBLEMS } from "./match-helpers";
 import { DEMO_PATIENTS } from "./patients";
 import { DEMO_PROFILES } from "./profiles";
-import { DEMO_TRIALS } from "./trials";
+import { demoTrials, getDemoTrial } from "./trials";
 
 /**
- * Structural integrity of the precomputed demo verdicts:
- * every match references a real fixture trial, covers every criterion exactly
- * once, and only quotes text that exists in the patient's record.
+ * Integrity of the precomputed demo verdicts. The app serves a curated match
+ * only for the trials the pre-screen selects, so the two must line up exactly:
+ * every selected trial has a match, and no match is left over for a trial the
+ * pre-screen no longer selects.
  */
 describe("demo matches", () => {
-  const patientIds = Object.keys(DEMO_MATCHES);
-
-  it("was authored without structural problems", () => {
+  it("were authored without structural problems", () => {
     expect(DEMO_MATCH_PROBLEMS).toEqual([]);
   });
 
-  it("only references demo patients that exist", () => {
-    for (const id of patientIds) {
-      expect(DEMO_PROFILES[id], `profile for ${id}`).toBeDefined();
-      expect(DEMO_PATIENTS.find((p) => p.id === id), `patient ${id}`).toBeDefined();
-    }
+  it("exist for every demo patient", () => {
+    expect(Object.keys(DEMO_MATCHES).sort()).toEqual(DEMO_PATIENTS.map((p) => p.id).sort());
   });
 
-  it("covers every fixture trial for every patient with verdicts", () => {
-    for (const id of patientIds) {
-      const byTrial = DEMO_MATCHES[id];
-      for (const trial of DEMO_TRIALS) {
-        const match = byTrial[trial.nctId];
-        expect(match, `${id} × ${trial.nctId}`).toBeDefined();
-        if (!match) continue;
-        expect(match.nctId).toBe(trial.nctId);
-        const ids = trial.criteria.map((c) => c.id).sort();
-        const got = match.verdicts.map((v) => v.criterionId).sort();
-        expect(got, `${id} × ${trial.nctId} verdict ids`).toEqual(ids);
-        expect(match.headline.length).toBeGreaterThan(10);
-        expect(match.reasoning.length).toBeGreaterThan(40);
-        expect(match.score).toBeGreaterThanOrEqual(0);
-        expect(match.score).toBeLessThanOrEqual(100);
-        expect(match.source).toBe("demo");
-        for (const v of match.verdicts) {
-          expect(v.rationale.length, `${v.criterionId} rationale`).toBeGreaterThan(8);
-          if (v.status === "unknown") {
-            expect(v.actionNeeded, `${v.criterionId} actionNeeded`).toBeTruthy();
-          }
-        }
+  it.each(DEMO_PATIENTS.map((p) => [p.id, p] as const))("%s: cover exactly the trials the pre-screen selects", (id) => {
+    const { selected } = prescreenTrials(DEMO_PROFILES[id], demoTrials(), { limit: DEFAULT_LIMIT, country: "United States" });
+    expect(selected).toHaveLength(DEFAULT_LIMIT);
+    expect(Object.keys(DEMO_MATCHES[id] ?? {}).sort()).toEqual(selected.map((t) => t.nctId).sort());
+  });
+
+  it.each(DEMO_PATIENTS.map((p) => [p.id, p] as const))("%s: verdicts are complete and quote the record verbatim", (id, patient) => {
+    const problems: string[] = [];
+    for (const [nctId, match] of Object.entries(DEMO_MATCHES[id] ?? {})) {
+      if (match.nctId !== nctId) problems.push(`${nctId}: keyed under the wrong trial (${match.nctId})`);
+      if (match.source !== "demo") problems.push(`${nctId}: source must be "demo"`);
+      problems.push(...checkMatch(match, patient.record));
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it("explains every score with the same arithmetic that produced it", () => {
+    for (const byTrial of Object.values(DEMO_MATCHES)) {
+      for (const match of Object.values(byTrial)) {
+        const trial = getDemoTrial(match.nctId);
+        expect(trial, match.nctId).toBeDefined();
+        if (trial) expect(explainScore(trial, match.verdicts).score, match.nctId).toBe(match.score);
       }
     }
   });
 
-  it("quotes only text that exists in the record", () => {
-    for (const id of patientIds) {
-      const record = DEMO_PATIENTS.find((p) => p.id === id)?.record ?? "";
-      for (const match of Object.values(DEMO_MATCHES[id])) {
-        for (const v of match.verdicts) {
-          for (const e of v.evidence) {
-            expect(record.includes(e.quote), `${id} × ${match.nctId} ${v.criterionId}: "${e.quote}"`).toBe(true);
-          }
-        }
-      }
+  it("gives every patient at least one trial worth pursuing", () => {
+    for (const patient of DEMO_PATIENTS) {
+      const tiers = Object.values(DEMO_MATCHES[patient.id] ?? {}).map((m) => m.tier);
+      expect(tiers.filter((t) => t === "strong" || t === "possible").length, patient.id).toBeGreaterThanOrEqual(1);
     }
   });
 });

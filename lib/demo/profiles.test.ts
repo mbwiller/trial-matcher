@@ -31,13 +31,23 @@ function profileFor(id: string): PatientProfile {
 }
 
 describe("demo patients", () => {
-  it("bundles three fictional records with stable ids", () => {
-    expect(DEMO_PATIENTS.map((p) => p.id)).toEqual(["margaret-h", "danielle-r", "rosa-v"]);
+  it("bundles eight fictional records with stable ids", () => {
+    expect(DEMO_PATIENTS.map((p) => p.id)).toEqual([
+      "margaret-h",
+      "danielle-r",
+      "rosa-v",
+      "aisha-k",
+      "linda-p",
+      "priya-s",
+      "james-t",
+      "helen-w",
+    ]);
     for (const p of DEMO_PATIENTS) {
       expect(getDemoPatient(p.id)).toBe(p);
       expect(p.label.length).toBeGreaterThan(0);
       expect(p.subtitle.length).toBeGreaterThan(0);
-      expect(p.record).toMatch(/^MEDICAL ONCOLOGY FOLLOW-UP NOTE/);
+      expect(p.tags.length).toBeGreaterThanOrEqual(2);
+      expect(p.record).toMatch(/^MEDICAL ONCOLOGY /);
     }
     expect(getDemoPatient("nobody")).toBeUndefined();
   });
@@ -58,13 +68,15 @@ describe("demo patients", () => {
 });
 
 describe("demo profiles", () => {
-  it("has exactly one profile per demo patient, keyed and labelled consistently", () => {
+  it("has exactly one profile per demo patient, keyed and labeled consistently", () => {
     expect(Object.keys(DEMO_PROFILES).sort()).toEqual(DEMO_PATIENTS.map((p) => p.id).sort());
     for (const patient of DEMO_PATIENTS) {
       const profile = profileFor(patient.id);
       expect(profile.id).toBe(patient.id);
       expect(profile.label).toBe(patient.label);
       expect(profile.source).toBe("demo");
+      expect(profile.demographics.age?.value).toBe(patient.age);
+      expect(profile.demographics.sex?.value).toBe(patient.sex === "F" ? "female" : "male");
       expect(profile.extractedAt).toMatch(/^2026-09-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/);
     }
   });

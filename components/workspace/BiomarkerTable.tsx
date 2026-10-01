@@ -1,7 +1,7 @@
 "use client";
 
 import type { BiomarkerResult, Evidence } from "@/lib/types";
-import { Badge, EvidencePopover, cn } from "@/components/ui";
+import { Badge, EditedTag, EvidencePopover, cn } from "@/components/ui";
 import { formatDate } from "@/lib/ctgov/format";
 import { BIOMARKER_STATUS_LABEL, biomarkerTone } from "./labels";
 
@@ -35,14 +35,14 @@ export function BiomarkerTable({ biomarkers, onActiveEvidence }: BiomarkerTableP
               <td className="py-2.5 pr-3 align-top">
                 <span className="flex items-center gap-1.5">
                   <span className="text-[14px] font-medium leading-snug text-ink-900">{b.name}</span>
-                  {b.confidence === "low" && (
+                  {!b.edited && b.confidence === "low" && (
                     <span
                       className="inline-block size-1.5 shrink-0 rounded-full bg-warn-500"
                       title="Low confidence — verify against the record"
                       aria-label="Low confidence"
                     />
                   )}
-                  {b.confidence === "medium" && (
+                  {!b.edited && b.confidence === "medium" && (
                     <span
                       className="inline-block size-1.5 shrink-0 rounded-full bg-ink-300"
                       title="Medium confidence — inferred from context"
@@ -61,11 +61,15 @@ export function BiomarkerTable({ biomarkers, onActiveEvidence }: BiomarkerTableP
                 {meta}
               </td>
               <td className="py-2 align-top text-right">
-                <EvidencePopover
-                  evidence={b.evidence}
-                  align="right"
-                  onActiveChange={(active) => onActiveEvidence(active ? b.evidence : undefined)}
-                />
+                {b.edited ? (
+                  <EditedTag className="mt-1" />
+                ) : (
+                  <EvidencePopover
+                    evidence={b.evidence}
+                    align="right"
+                    onActiveChange={(active) => onActiveEvidence(active ? b.evidence : undefined)}
+                  />
+                )}
               </td>
             </tr>
           );

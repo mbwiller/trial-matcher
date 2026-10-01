@@ -55,6 +55,8 @@ export function normalizeStudy(study: any): Trial {
     status: str(l.status),
   }));
 
+  const countries = [...new Set(allLocations.map((l) => str(l.country)).filter((c): c is string => Boolean(c)))];
+
   const interventions = (Array.isArray(arms.interventions) ? arms.interventions : [])
     .map((i: any) => ({ type: str(i.type) ?? "OTHER", name: str(i.name) ?? "" }))
     .filter((i: { name: string }) => i.name);
@@ -69,6 +71,7 @@ export function normalizeStudy(study: any): Trial {
     phases: Array.isArray(design.phases) ? design.phases.map(String) : [],
     status: asStatus(status.overallStatus),
     studyType: str(design.studyType) ?? "UNKNOWN",
+    primaryPurpose: str(design.designInfo?.primaryPurpose),
     conditions: Array.isArray(cond.conditions) ? cond.conditions.map(String) : [],
     interventions,
     sponsor: str(sponsor.leadSponsor?.name) ?? "Unknown sponsor",
@@ -80,6 +83,7 @@ export function normalizeStudy(study: any): Trial {
     enrollment: typeof design.enrollmentInfo?.count === "number" ? design.enrollmentInfo.count : undefined,
     locations,
     locationCount: allLocations.length,
+    countries,
     eligibilityText,
     criteria: parseCriteria(nctId, eligibilityText),
     keywords: Array.isArray(cond.keywords) ? cond.keywords.map(String) : undefined,

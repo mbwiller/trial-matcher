@@ -12,7 +12,7 @@ export const EVIDENCE_NOT_FOUND_NOTE = "Evidence could not be located in the rec
 const PREFIX_LENGTH = 40;
 
 // ---------------------------------------------------------------------------
-// Normalised text index
+// Normalized text index
 // ---------------------------------------------------------------------------
 
 interface NormIndex {
@@ -91,7 +91,7 @@ const EDGE_ELLIPSIS = /^(?:\.{3}|…)\s*|\s*(?:\.{3}|…)$/g;
 /**
  * Find `rawQuote` in `record`: verified offsets → exact → exact without
  * wrapping quotes/ellipses → whitespace- and case-insensitive → first 40
- * normalised characters (extended as far as the text keeps matching).
+ * normalized characters (extended as far as the text keeps matching).
  */
 function locateQuote(record: string, index: NormIndex, rawQuote: string, hint?: { start?: number; end?: number }): Span | null {
   const quote = rawQuote.trim();

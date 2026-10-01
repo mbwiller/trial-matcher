@@ -1,5 +1,12 @@
+import { PATIENT as aishaK } from "./patients/aisha-k";
+import { PATIENT as helenW } from "./patients/helen-w";
+import { PATIENT as jamesT } from "./patients/james-t";
+import { PATIENT as lindaP } from "./patients/linda-p";
+import { PATIENT as priyaS } from "./patients/priya-s";
+
 /**
- * Bundled demo patient records (fictional).
+ * Bundled demo patient records (fictional). The first three live in this file;
+ * the rest are one file each under ./patients/.
  *
  * Each record is what a clinician would paste from the EHR: several documents
  * concatenated (latest clinic note first, then pathology, molecular, imaging,
@@ -19,6 +26,11 @@ export interface DemoPatient {
   label: string;
   /** One-line clinical summary for the sample chip, e.g. "HR+/HER2-low metastatic · PIK3CA H1047R". */
   subtitle: string;
+  /** Age in years and sex, for the sample picker ("58 F"). */
+  age: number;
+  sex: "F" | "M";
+  /** Two or three short chips for the sample picker: subtype, setting, the detail that makes the case interesting. */
+  tags: string[];
   /** The raw multi-document record exactly as it would be pasted from an EHR. */
   record: string;
 }
@@ -28,6 +40,9 @@ export const DEMO_PATIENTS: DemoPatient[] = [
     id: "margaret-h",
     label: "Margaret H.",
     subtitle: "HR+/HER2-low metastatic · PIK3CA H1047R · progressed on CDK4/6i",
+    age: 58,
+    sex: "F",
+    tags: ["HR+/HER2-low", "Metastatic", "PIK3CA H1047R"],
     record: `MEDICAL ONCOLOGY FOLLOW-UP NOTE
 Pt: Margaret H. | MRN: 00-demo-1 | DOB: 1968 (58 yo F)
 Date of service: 09/18/2026
@@ -105,6 +120,9 @@ ALLERGIES: sulfa (rash)`,
     id: "danielle-r",
     label: "Danielle R.",
     subtitle: "TNBC · residual disease after neoadjuvant chemo-immunotherapy · gBRCA1",
+    age: 39,
+    sex: "F",
+    tags: ["TNBC", "Early, residual disease", "gBRCA1"],
     record: `MEDICAL ONCOLOGY FOLLOW-UP NOTE
 Pt: Danielle R. | MRN: 00-demo-2 | DOB: 1987 (39 yo F)
 Date of service: 2026-09-22
@@ -179,6 +197,9 @@ ALLERGIES: NKDA`,
     id: "rosa-v",
     label: "Rosa V.",
     subtitle: "HER2+ metastatic · treated brain metastases · progressed on T-DXd",
+    age: 66,
+    sex: "F",
+    tags: ["HER2+", "Metastatic", "Treated brain mets"],
     record: `MEDICAL ONCOLOGY FOLLOW-UP NOTE
 Pt: Rosa V. | MRN: 00-demo-3 | DOB: 1960 (66 yo F)
 Date of service: Sept 24, 2026
@@ -251,6 +272,11 @@ MEDICATIONS
 
 ALLERGIES: NKDA`,
   },
+  aishaK,
+  lindaP,
+  priyaS,
+  jamesT,
+  helenW,
 ];
 
 export function getDemoPatient(id: string): DemoPatient | undefined {

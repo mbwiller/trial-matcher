@@ -1,0 +1,225 @@
+import { demoMatch } from "../../match-helpers";
+
+export default demoMatch(
+  "NCT06134375",
+  "Excluded: surgery on 6/11/26 was 15.6 weeks ago, past the 12-week limit for study start",
+  "Clinically she is the population this trial wants: TNBC with RCB-II residual disease after KEYNOTE-522, continuing adjuvant pembrolizumab, with no prior capecitabine. The blocker is timing: her final breast surgery was 6/11/26, 109 days (15.6 weeks) before today, and the 12-week maximum from surgery to study start lapsed on 9/3/26. Had she been in window, a post-operative bone scan or PET and a vitamin B12 level would still have been needed.",
+  [
+    {
+      id: "NCT06134375-inc-1",
+      status: "pass",
+      rationale: "Triple negative: ER 0% and PR 0% (under the 1% cut-off) and HER2 IHC 0 on both the 11/2025 core biopsy and the residual tumor.",
+      evidence: [{ quote: "ER 0%, PR 0%, HER2 IHC 0 - triple negative, concordant with core bx.", source: "Pathology 2026-06-17" }],
+    },
+    {
+      id: "NCT06134375-inc-2",
+      status: "pass",
+      rationale: "She completed KEYNOTE-522: 12 weeks of weekly paclitaxel/carboplatin (12/2025-3/2026) then 4 cycles of dose-dense AC (3/2026-5/2026), more than 6 cycles of chemotherapy.",
+      evidence: [
+        { quote: "pembro + weekly paclitaxel + carboplatin x12 wks (12/2025-3/2026)", source: "Clinic note 2026-09-22" },
+        { quote: "then pembro + ddAC x4 (3/2026-5/2026)", source: "Clinic note 2026-09-22" },
+      ],
+    },
+    {
+      id: "NCT06134375-inc-3",
+      status: "pass",
+      rationale: "Residual invasive carcinoma with RCB class II (score 2.6) after anthracycline/taxane-based KEYNOTE-522, followed by mastectomy to negative margins and axillary dissection.",
+      evidence: [
+        { quote: "Residual Cancer Burden: RCB class II (RCB score 2.6)", source: "Pathology 2026-06-17" },
+        {
+          quote: "Surgery 6/11/26: bilateral mastectomy (L risk-reducing) + R ALND -> ypT1c (1.2 cm) ypN1a (2/11), RCB class II (RCB 2.6), margins neg.",
+          source: "Clinic note 2026-09-22",
+        },
+      ],
+    },
+    {
+      id: "NCT06134375-inc-4",
+      status: "pass",
+      rationale: "KEYNOTE-522 is a listed regimen; she received neoadjuvant pembrolizumab and is continuing it adjuvantly (cycle 4 of 9 on 9/22/26), meeting the phase Ib requirement, and her RCB II disease meets the phase 2 requirement.",
+      evidence: [
+        { quote: "Neoadj per KEYNOTE-522: pembro + weekly paclitaxel + carboplatin x12 wks (12/2025-3/2026) then pembro + ddAC x4 (3/2026-5/2026).", source: "Clinic note 2026-09-22" },
+        { quote: "Adj pembro C4 of 9 today.", source: "Clinic note 2026-09-22" },
+      ],
+    },
+    {
+      id: "NCT06134375-inc-5",
+      status: "pass",
+      rationale: "Post-mastectomy radiation was completed 8/28/26 and neoadjuvant therapy was KEYNOTE-522, a listed standard regimen; pembrolizumab is allowed. She would stratify as chemo-immunotherapy, age ≤ 40, RCB 2.",
+      evidence: [
+        { quote: "PMRT 7/20/26-8/28/26, completed.", source: "Clinic note 2026-09-22" },
+        { quote: "Residual Cancer Burden: RCB class II (RCB score 2.6)", source: "Pathology 2026-06-17" },
+      ],
+    },
+    {
+      id: "NCT06134375-inc-6",
+      status: "pass",
+      rationale: "Radiation ended 8/28/26 (31 days ago), chemotherapy ended 5/2026 and surgery was 6/11/26 (15.6 weeks ago). The A/P line to continue weekly paclitaxel/carboplatin is a stale copy-forward; her medication list shows only pembrolizumab.",
+      evidence: [
+        { quote: "PMRT 7/20/26-8/28/26, completed.", source: "Clinic note 2026-09-22" },
+        { quote: "then pembro + ddAC x4 (3/2026-5/2026)", source: "Clinic note 2026-09-22" },
+        { quote: "pembrolizumab 200 mg IV q3 weeks (adjuvant, C4 of 9)", source: "Medications" },
+      ],
+    },
+    {
+      id: "NCT06134375-inc-7",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "CT chest/abdomen/pelvis on 7/9/26 showed no disease, but no bone scan or PET has been done since surgery; the only bone scan was baseline staging in 11/2025.",
+      evidence: [
+        { quote: "No evidence of metastatic disease in the chest, abdomen or pelvis.", source: "CT CAP 2026-07-09" },
+        { quote: "Baseline staging 11/2025: CT CAP + bone scan without distant disease.", source: "Imaging" },
+      ],
+      actionNeeded: "Obtain a bone scan or PET/CT before enrollment, and repeat CT CAP if 7/9/26 falls outside the protocol window",
+    },
+    {
+      id: "NCT06134375-inc-8",
+      status: "pass",
+      rationale: "Capecitabine has not been given; it is one of the adjuvant options still under discussion, and starting it off-study would make her ineligible.",
+      evidence: [{ quote: "Adj olaparib vs cape: pt to decide by next visit.", source: "Clinic note 2026-09-22" }],
+    },
+    {
+      id: "NCT06134375-inc-9",
+      status: "pass",
+      rationale: "She is 39 years old, so the exclusion of patients under 18 does not affect her.",
+      evidence: [{ quote: "39 yo premenopausal F", source: "Clinic note 2026-09-22" }],
+    },
+    {
+      id: "NCT06134375-inc-10",
+      status: "pass",
+      confidence: "medium",
+      rationale: "ECOG 0 with no functional limitation corresponds to KPS 90–100; a KPS score itself is not recorded.",
+      evidence: [{ quote: "EXAM: ECOG 0.", source: "Clinic note 2026-09-22" }],
+      actionNeeded: "Record KPS at screening; 90 or 100 required",
+    },
+    {
+      id: "NCT06134375-inc-11",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No evidence of disease after curative-intent treatment and ECOG 0; life expectancy is far beyond 3 months.",
+      evidence: [{ quote: "Currently NED.", source: "Clinic note 2026-09-22" }],
+    },
+    {
+      id: "NCT06134375-inc-12",
+      status: "pass",
+      rationale: "Labs 9/19/26: Hgb 12.4 g/dL, ANC 1,900/µL, platelets 180,000/µL, bilirubin 0.5 mg/dL, AST 22/ALT 25 U/L, all within the limits; ANC is close to 1,500 and was flagged for recheck.",
+      evidence: [
+        { quote: "WBC 3.4 (L) | ANC 1.9 | Hgb 12.4 | Plt 180", source: "Labs 2026-09-19" },
+        { quote: "AST 22 | ALT 25 | T bili 0.5 | Alk phos 71", source: "Labs 2026-09-19" },
+        { quote: "ANC 1.9 today, borderline, recheck.", source: "Clinic note 2026-09-22" },
+      ],
+      actionNeeded: "Repeat CBC at screening; ANC must exceed 1,500/µL",
+    },
+    {
+      id: "NCT06134375-inc-13",
+      status: "pass",
+      rationale: "Permissive clause allowing bone-modifying agents; she is not receiving any, so it places no restriction on her.",
+    },
+    {
+      id: "NCT06134375-inc-14",
+      status: "pass",
+      rationale: "Her grade 1 paclitaxel neuropathy is stable and not treated with medication, so the 2-week stable-dose requirement does not apply.",
+      evidence: [{ quote: "PN G1 - stable, no intervention.", source: "Clinic note 2026-09-22" }],
+    },
+    {
+      id: "NCT06134375-inc-15",
+      status: "pass",
+      confidence: "low",
+      rationale: "The contraception agreement is confirmed at screening; she already has a levonorgestrel IUD (hormonal method) in place since 2023.",
+      evidence: [{ quote: "levonorgestrel IUD (placed 2023)", source: "Medications" }],
+    },
+    {
+      id: "NCT06134375-inc-16",
+      status: "pass",
+      confidence: "low",
+      rationale: "Ability and willingness to consent is confirmed at screening; she has asked to hear about trial options.",
+      evidence: [{ quote: "wants to hear about trials for residual disease first", source: "Clinic note 2026-09-22" }],
+    },
+    {
+      id: "NCT06134375-inc-17",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "No vitamin B12 level is recorded in the labs or notes.",
+      actionNeeded: "Check serum vitamin B12; must be within the normal range",
+    },
+    {
+      id: "NCT06134375-exc-1",
+      status: "pass",
+      rationale: "Last chemotherapy 5/2026 and radiation completed 8/28/26 (both more than 2 weeks ago); surgery 6/11/26 (more than 4 weeks ago). No chemotherapy is ongoing despite the copied-forward A/P line.",
+      evidence: [
+        { quote: "PMRT 7/20/26-8/28/26, completed.", source: "Clinic note 2026-09-22" },
+        { quote: "pembrolizumab 200 mg IV q3 weeks (adjuvant, C4 of 9)", source: "Medications" },
+      ],
+    },
+    {
+      id: "NCT06134375-exc-2",
+      status: "pass",
+      rationale: "No prior capecitabine (still under discussion) and no warfarin; her medications are pembrolizumab, levothyroxine, sertraline and a levonorgestrel IUD.",
+      evidence: [{ quote: "Adj olaparib vs cape: pt to decide by next visit.", source: "Clinic note 2026-09-22" }],
+    },
+    {
+      id: "NCT06134375-exc-3",
+      status: "fail",
+      rationale: "Final breast surgery was 6/11/26, 109 days (15.6 weeks) before 9/28/26; the 12-week limit passed on 9/3/26.",
+      evidence: [{ quote: "Procedure date: 2026-06-11", source: "Pathology 2026-06-17" }],
+    },
+    {
+      id: "NCT06134375-exc-4",
+      status: "pass",
+      rationale: "She received neoadjuvant pembrolizumab and is continuing it adjuvantly (cycle 4 of 9 on 9/22/26), so the phase Ib immunotherapy requirement is met.",
+      evidence: [{ quote: "pembrolizumab 200 mg IV q3 weeks (adjuvant, C4 of 9)", source: "Medications" }],
+    },
+    {
+      id: "NCT06134375-exc-5",
+      status: "pass",
+      rationale: "No objective evidence of breast cancer: healed mastectomy scars without chest wall nodularity or adenopathy, and post-operative CT on 7/9/26 was clear.",
+      evidence: [
+        { quote: "Mastectomy scars well healed, no chest wall nodularity.", source: "Exam 2026-09-22" },
+        { quote: "Currently NED.", source: "Clinic note 2026-09-22" },
+      ],
+    },
+    {
+      id: "NCT06134375-exc-6",
+      status: "pass",
+      rationale: "CT chest/abdomen/pelvis on 7/9/26 showed no metastatic disease.",
+      evidence: [{ quote: "No evidence of metastatic disease in the chest, abdomen or pelvis.", source: "CT CAP 2026-07-09" }],
+    },
+    {
+      id: "NCT06134375-exc-7",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No neurological symptoms (no headache) and no metastatic disease elsewhere; brain imaging has not been done and is not routinely indicated.",
+      evidence: [{ quote: "No new lumps, bone pain, HA or cough.", source: "Clinic note 2026-09-22" }],
+    },
+    {
+      id: "NCT06134375-exc-8",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Creatinine 0.7 mg/dL at age 39; weight is not recorded, but Cockcroft-Gault gives ≥ 60 mL/min for any body weight above about 36 kg.",
+      evidence: [{ quote: "Cr 0.7", source: "Labs 2026-09-19" }],
+      actionNeeded: "Calculate CrCl with screening weight; ≥ 60 mL/min required",
+    },
+    {
+      id: "NCT06134375-exc-9",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No known drug allergies, and she has never received capecitabine or another fluoropyrimidine.",
+      evidence: [{ quote: "ALLERGIES: NKDA", source: "Allergies" }],
+    },
+    {
+      id: "NCT06134375-exc-10",
+      status: "pass",
+      rationale: "Serum hCG negative on 9/19/26; she is not pregnant and not breastfeeding.",
+      evidence: [
+        { quote: "hCG (serum) negative", source: "Labs 2026-09-19" },
+        { quote: "Not pregnant, not breastfeeding.", source: "Clinic note 2026-09-22" },
+      ],
+    },
+    {
+      id: "NCT06134375-exc-11",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No HIV diagnosis is recorded and her medication list contains no antiretroviral therapy, so this exclusion (HIV-positive patients on combination ART) is not triggered.",
+      evidence: [{ quote: "PMH: irAE hypothyroidism (on levo), anxiety (sertraline).", source: "Clinic note 2026-09-22" }],
+    },
+  ],
+);

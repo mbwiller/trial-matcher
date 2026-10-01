@@ -1,0 +1,201 @@
+import { demoMatch } from "../../match-helpers";
+
+const NOTE = "Oncology note 2026-09-25";
+const PATH = "Pathology 2025-11-25";
+const LABS = "Labs 2026-09-23";
+
+export default demoMatch(
+  "NCT06637306",
+  "Excluded: neoadjuvant study for untreated localized TNBC; she has treated stage IV disease",
+  "This pilot tests neoadjuvant dupilumab with pembrolizumab, paclitaxel and carboplatin before surgery in previously untreated, non-metastatic TNBC. Aisha presented with de novo stage IV disease (cT3 cN2 M1) and has had ~9 months of pembrolizumab + gemcitabine/carboplatin, so she fails the untreated, localized-disease and no-distant-metastasis requirements on documented facts. No change in her workup would alter this.",
+  [
+    {
+      id: "NCT06637306-inc-1",
+      status: "pass",
+      rationale: "Triple-negative by ASCO/CAP: ER 0%, PR 0%, HER2 IHC 0 on breast core (2025-11-12) and RLL metastasis (2025-11-20).",
+      evidence: [{ quote: "L breast core bx 11/12/2025: IDC, grade 3 (Nottingham 9/9), ER 0%, PR 0%, HER2 IHC 0, Ki-67 80%.", source: PATH }],
+    },
+    {
+      id: "NCT06637306-inc-2",
+      status: "fail",
+      rationale: "Not localized or untreated: de novo metastatic disease at diagnosis (cT3 cN2 M1) with lung, nodal, bone and now liver metastases, treated since 12/2025.",
+      evidence: [{ quote: "lytic T11 + L iliac lesions (cT3 cN2 M1)", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-3",
+      status: "fail",
+      rationale: "She has received systemic chemotherapy with therapeutic intent for this cancer: gemcitabine/carboplatin with pembrolizumab, 12/2025 to 2026-08-26.",
+      evidence: [{ quote: "1L pembrolizumab + gemcitabine/carboplatin (KEYNOTE-355) started 12/2025", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-4",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Taxane-naive and tolerated ~9 months of carboplatin; no neuropathy or contraindication recorded.",
+      evidence: [{ quote: "No prior taxane, anthracycline, ADC or PARP inhibitor.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-5",
+      status: "pass",
+      confidence: "low",
+      rationale: "Willingness to give study blood samples is confirmed at screening.",
+    },
+    {
+      id: "NCT06637306-inc-6",
+      status: "pass",
+      confidence: "medium",
+      rationale: "She is open to biopsy (liver biopsy offered if needed); core biopsies of the breast mass are feasible.",
+      evidence: [{ quote: "Archival tissue available (RLL core bx 11/2025); open to liver bx if needed.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-7",
+      status: "pass",
+      rationale: "She is 46 years old.",
+      evidence: [{ quote: "46 yo premenopausal F", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-8",
+      status: "pass",
+      rationale: "ECOG 1 on 2026-09-25.",
+      evidence: [{ quote: "EXAM: ECOG 1.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-9",
+      status: "pass",
+      rationale: "On 2026-09-23: ANC 1.6, platelets 132, bilirubin 0.9 (normal), AST/ALT 1.5 × ULN (≤ 2.5), creatinine 0.7 (normal).",
+      evidence: [
+        { quote: "ANC 1.6", source: LABS },
+        { quote: "T bili 0.9", source: LABS },
+        { quote: "AST 58 (H, 1.5x ULN)", source: LABS },
+      ],
+    },
+    {
+      id: "NCT06637306-inc-10",
+      status: "pass",
+      confidence: "low",
+      rationale: "Bilateral tubal ligation (2014) provides highly effective contraception; agreement is confirmed at screening.",
+      evidence: [{ quote: "46 yo premenopausal F (s/p BTL 2014)", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-11",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Part of the childbearing-potential definition: no hysterectomy or oophorectomy is recorded (tubal ligation only), so contraception and pregnancy rules apply to her.",
+      evidence: [{ quote: "46 yo premenopausal F (s/p BTL 2014)", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-12",
+      status: "pass",
+      rationale: "Part of the childbearing-potential definition: she is premenopausal, so the contraception and pregnancy rules apply.",
+      evidence: [{ quote: "46 yo premenopausal F", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-inc-13",
+      status: "pass",
+      confidence: "low",
+      rationale: "Informed consent is obtained at screening.",
+    },
+    {
+      id: "NCT06637306-exc-1",
+      status: "fail",
+      rationale: "She has had treatment with therapeutic intent for this breast cancer (pembrolizumab + gemcitabine/carboplatin, last chemotherapy 2026-08-26).",
+      evidence: [{ quote: "Last gem/carbo 8/26/26.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-exc-2",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Not receiving any investigational agent; all treatment on hold since progression.",
+      evidence: [{ quote: "All tx on hold since.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-exc-3",
+      status: "fail",
+      rationale: "Stage IV: distant metastases to lung, bone and liver (CT 2026-09-15), biopsy-proven in the lung.",
+      evidence: [{ quote: "De novo metastatic TNBC (HER2 IHC 0, PD-L1 CPS 15), lung/nodal/bone, now new liver met.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-exc-4",
+      status: "pass",
+      confidence: "medium",
+      rationale: "HIV negative and no systemic steroids or immunosuppressants on the medication list.",
+      evidence: [{ quote: "Serologies 12/2025: HBsAg neg, anti-HBc POS, HCV Ab neg, HIV Ag/Ab neg", source: LABS }],
+    },
+    {
+      id: "NCT06637306-exc-5",
+      status: "pass",
+      rationale: "Immune-related hypothyroidism needs levothyroxine replacement only, which is explicitly acceptable.",
+      evidence: [{ quote: "irAE hypothyroidism G2: levothyroxine 88 mcg, TSH 2.2, continue.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-exc-6",
+      status: "pass",
+      confidence: "low",
+      rationale: "No confounding condition beyond those assessed elsewhere; final judgment rests with the investigator.",
+    },
+    {
+      id: "NCT06637306-exc-7",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Tolerated carboplatin and pembrolizumab (a monoclonal antibody) for ~9 months without recorded reaction; only penicillin allergy listed.",
+      evidence: [{ quote: "ALLERGIES: penicillin (hives)", source: "Allergies" }],
+    },
+    {
+      id: "NCT06637306-exc-8",
+      status: "pass",
+      rationale: "HIV Ag/Ab negative in 12/2025.",
+      evidence: [{ quote: "Serologies 12/2025: HBsAg neg, anti-HBc POS, HCV Ab neg, HIV Ag/Ab neg", source: LABS }],
+    },
+    {
+      id: "NCT06637306-exc-9",
+      status: "pass",
+      rationale: "No active hepatitis: HBsAg negative with HBV DNA not detected (2026-08-28) on entecavir; HCV antibody negative.",
+      evidence: [{ quote: "HBV DNA 08/28/2026: not detected", source: LABS }],
+    },
+    {
+      id: "NCT06637306-exc-10",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No helminth infection is recorded.",
+    },
+    {
+      id: "NCT06637306-exc-11",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No hematopoietic or solid organ transplant is mentioned.",
+    },
+    {
+      id: "NCT06637306-exc-12",
+      status: "pass",
+      confidence: "low",
+      rationale: "No live vaccine is recorded; confirmed at screening.",
+      actionNeeded: "Confirm no live vaccine within 30 days of planned start",
+    },
+    {
+      id: "NCT06637306-exc-13",
+      status: "pass",
+      rationale: "Her only irAE is grade 2 hypothyroidism treated with hormone replacement, which this criterion specifically does not count.",
+      evidence: [{ quote: "irAE hypothyroidism G2 2/2026 -> levothyroxine; no pneumonitis/colitis.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-exc-14",
+      status: "pass",
+      rationale: "No pneumonitis on pembrolizumab, no ILD on CT 2026-09-15 and no prior radiotherapy.",
+      evidence: [{ quote: "No interstitial lung disease or pneumonitis.", source: "CT CAP 2026-09-15" }],
+    },
+    {
+      id: "NCT06637306-exc-15",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No uncontrolled intercurrent illness: no cardiac history, HBV controlled, no active infection or psychiatric history recorded.",
+      evidence: [{ quote: "No DM, no cardiac hx.", source: NOTE }],
+    },
+    {
+      id: "NCT06637306-exc-16",
+      status: "pass",
+      confidence: "low",
+      rationale: "Tubal ligation in 2014; no pregnancy or nursing recorded, confirmed at screening.",
+      evidence: [{ quote: "46 yo premenopausal F (s/p BTL 2014)", source: NOTE }],
+    },
+  ],
+);

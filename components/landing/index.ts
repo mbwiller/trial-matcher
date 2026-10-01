@@ -1,7 +1,8 @@
 export { Hero } from "./Hero";
-export { ShortlistPreview } from "./ShortlistPreview";
-export { FeatureCards } from "./FeatureCards";
+export { Problem } from "./Problem";
+export { FinePrint } from "./FinePrint";
 export { HowItWorks } from "./HowItWorks";
+export { SamplePatients } from "./SamplePatients";
 export { Footer } from "./Footer";
 export {
   ButtonLink,

@@ -234,8 +234,8 @@ function extractDemographics(text: string): PatientProfile["demographics"] {
     if (withSex[2]) out.sex = ex(sexFromToken(withSex[2]), "medium", [evidenceOf(text, withSex)]);
   }
   if (!out.age) {
-    const labelled = first(text, AGE_LABEL);
-    if (labelled && +labelled[1] >= 1 && +labelled[1] <= 110) out.age = ex(+labelled[1], "medium", [evidenceOf(text, labelled)]);
+    const labeled = first(text, AGE_LABEL);
+    if (labeled && +labeled[1] >= 1 && +labeled[1] <= 110) out.age = ex(+labeled[1], "medium", [evidenceOf(text, labeled)]);
   }
   if (!out.age) {
     const compact = first(text, AGE_SEX_COMPACT);
@@ -245,8 +245,8 @@ function extractDemographics(text: string): PatientProfile["demographics"] {
     }
   }
   if (!out.sex) {
-    const labelled = first(text, SEX_LABEL) ?? first(text, SEX_WORD);
-    if (labelled) out.sex = ex(sexFromToken(labelled[1]), "medium", [evidenceOf(text, labelled)]);
+    const labeled = first(text, SEX_LABEL) ?? first(text, SEX_WORD);
+    if (labeled) out.sex = ex(sexFromToken(labeled[1]), "medium", [evidenceOf(text, labeled)]);
   }
   const menopause = first(text, MENOPAUSE);
   if (menopause) {
@@ -1188,7 +1188,7 @@ function buildOpenQuestions(profile: Omit<PatientProfile, "openQuestions" | "sum
   else if (lvef.date && monthsBetween(lvef.date, now) > 12) questions.push(`LVEF last documented ${lvef.date}, older than 12 months`);
   if (!lab("HbA1c")) questions.push("HbA1c not documented (required by PI3K/AKT-pathway trials)");
   if (!biomarker("ESR1")) questions.push("ESR1 / ctDNA mutation status not documented");
-  if (!biomarker("PIK3CA") && profile.diagnosis.subtype?.value.startsWith("HR+")) questions.push("PIK3CA / AKT1 / PTEN tumour testing not documented");
+  if (!biomarker("PIK3CA") && profile.diagnosis.subtype?.value.startsWith("HR+")) questions.push("PIK3CA / AKT1 / PTEN tumor testing not documented");
   if (!profile.diagnosis.cnsStatus) questions.push("Brain imaging / CNS status not documented");
   if (profile.diagnosis.measurableDisease === undefined) questions.push("RECIST 1.1 measurable disease not documented");
   if (!/\b(?:hepatitis|HBV|HCV|HIV)\b/i.test(text)) questions.push("Hepatitis B/C and HIV serology not documented");

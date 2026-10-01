@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "fixture": "tsx scripts/build-fixture.ts"
+    "fixture": "tsx scripts/build-fixture.ts",
+    "demo:index": "tsx scripts/build-match-index.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",

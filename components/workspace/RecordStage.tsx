@@ -58,7 +58,7 @@ function ReadingState() {
   );
 }
 
-function SampleChip({
+function SampleCard({
   patient,
   selected,
   disabled,
@@ -69,6 +69,7 @@ function SampleChip({
   disabled: boolean;
   onSelect: () => void;
 }) {
+  const [subtype, ...rest] = patient.tags;
   return (
     <button
       type="button"
@@ -77,23 +78,20 @@ function SampleChip({
       onClick={onSelect}
       title={`${patient.label} — ${patient.subtitle}`}
       className={cn(
-        "inline-flex h-9 max-w-full items-center gap-2 rounded-chip px-3.5 text-[13px] tracking-[-0.005em]",
-        "transition-[background-color,color,transform,box-shadow] duration-200 ease-out-quart active:translate-y-px",
+        "flex w-full min-w-0 flex-col rounded-field px-3.5 py-3 text-left",
+        "transition-[background-color,transform,box-shadow] duration-200 ease-out-quart active:translate-y-px",
         "disabled:pointer-events-none disabled:opacity-50",
-        selected
-          ? "bg-accent-100 text-accent-800 shadow-[inset_0_0_0_1px_var(--color-accent-200)]"
-          : "glass-strong text-ink-800 hover:bg-white/90",
+        selected ? "bg-accent-100 shadow-[inset_0_0_0_1px_var(--color-accent-200)]" : "glass-strong hover:bg-white/90",
       )}
     >
-      <span className="shrink-0 font-medium">{patient.label}</span>
-      <span
-        className={cn(
-          "max-w-[220px] truncate font-normal",
-          selected ? "text-accent-700" : "text-ink-400",
-        )}
-      >
-        {patient.subtitle}
+      <span className="flex items-baseline justify-between gap-2">
+        <span className={cn("truncate text-[13.5px] font-medium", selected ? "text-accent-900" : "text-ink-900")}>{patient.label}</span>
+        <span className={cn("shrink-0 font-mono text-[11.5px] tnum", selected ? "text-accent-700" : "text-ink-400")}>
+          {patient.age} {patient.sex}
+        </span>
       </span>
+      <span className={cn("mt-1.5 truncate text-[12.5px] font-medium", selected ? "text-accent-800" : "text-ink-700")}>{subtype}</span>
+      <span className={cn("mt-0.5 truncate text-[12px]", selected ? "text-accent-700" : "text-ink-400")}>{rest.join(" · ")}</span>
     </button>
   );
 }
@@ -173,42 +171,34 @@ export function RecordStage() {
         </div>
       )}
 
-      <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-[12px] font-medium tracking-[0.02em] text-ink-400">Load a sample</div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {DEMO_PATIENTS.map((patient) => (
-              <SampleChip
-                key={patient.id}
-                patient={patient}
-                selected={patient.id === demoPatientId}
-                disabled={extracting}
-                onSelect={() => loadSample(patient)}
-              />
-            ))}
-            {DEMO_PATIENTS.length === 0 && (
-              <span className="text-[13px] text-ink-400">No samples bundled.</span>
-            )}
-          </div>
-        </div>
-        <Button
-          icon={<Sparkles />}
-          disabled={!ready}
-          loading={extracting}
-          onClick={() => void extract()}
-          className="shrink-0 sm:mt-5"
-        >
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <p className="text-[12.5px] leading-snug text-ink-400">
+          Processed in memory for this session, never stored ·{" "}
+          <span className="font-mono text-[12px] tnum" aria-live="off">
+            {formatInt(recordText.length)} characters
+          </span>
+        </p>
+        <Button icon={<Sparkles />} disabled={!ready} loading={extracting} onClick={() => void extract()} className="shrink-0">
           Structure record
         </Button>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-4">
-        <p className="text-[12.5px] leading-snug text-ink-400">
-          Records are processed in memory for this session and never stored.
-        </p>
-        <span className="shrink-0 font-mono text-[12px] tnum text-ink-400" aria-live="off">
-          {formatInt(recordText.length)} characters
-        </span>
+      <div className="mt-9">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-[13px] font-semibold tracking-[-0.005em] text-ink-900">Or start from a sample patient</h2>
+          <span className="text-[12px] text-ink-400">Fictional records, {DEMO_PATIENTS.length} scenarios</span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          {DEMO_PATIENTS.map((patient) => (
+            <SampleCard
+              key={patient.id}
+              patient={patient}
+              selected={patient.id === demoPatientId}
+              disabled={extracting}
+              onSelect={() => loadSample(patient)}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -51,7 +51,7 @@ function makeTrial(nctId: string, title: string, extra: Partial<Trial> = {}): Tr
 const page = (trials: Trial[], totalCount?: number): CtgovTrialPage => ({ trials, totalCount });
 
 describe("searchTrialsForProfile", () => {
-  it("merges the main and biomarker searches, filters by age, ranks and truncates", async () => {
+  it("merges the main and biomarker searches, pre-screens by age, ranks and truncates", async () => {
     const her2 = makeTrial("NCT00000001", "Zanidatamab in HER2-positive metastatic breast cancer");
     const tooOld = makeTrial("NCT00000002", "Tucatinib in HER2-positive metastatic breast cancer", { maximumAge: "50 Years" });
     const tnbc = makeTrial("NCT00000003", "Sacituzumab in triple-negative breast cancer");
@@ -68,15 +68,34 @@ describe("searchTrialsForProfile", () => {
     expect(result.totalAvailable).toBe(300);
     expect(result.trials.map((t) => t.nctId)).toEqual(["NCT00000004", "NCT00000001"]);
     expect(result.queryDescription).toBe("Recruiting · Interventional · breast cancer · HER2-positive · metastatic · PIK3CA");
+
+    // The trace records both requests and one pre-screen decision per harvested study.
+    expect(result.trace?.mode).toBe("live");
+    expect(result.trace?.requests.map((r) => r.label)).toEqual(["Focused query", "Biomarker query"]);
+    expect(result.trace?.harvested).toBe(4);
+    const outcome = Object.fromEntries((result.trace?.prescreen ?? []).map((e) => [e.nctId, e.reason ?? e.outcome]));
+    expect(outcome).toEqual({ NCT00000001: "selected", NCT00000002: "age", NCT00000003: "subtype", NCT00000004: "selected" });
+  });
+
+  it("adds the site-country filter to every request when a country is configured", async () => {
+    const seen: string[] = [];
+    const searchPage = vi.fn(async (params: CtgovSearchParams): Promise<CtgovTrialPage> => {
+      seen.push(params.advanced ?? "");
+      return page([makeTrial("NCT00000001", "HER2-positive metastatic breast cancer trial", { countries: ["United States"] })], 1);
+    });
+    const result = await searchTrialsForProfile(makeProfile(), { searchPage, country: "United States", minCandidates: 1 });
+    expect(seen.every((a) => a.includes("AREA[LocationCountry]United States"))).toBe(true);
+    expect(result.trace?.country).toBe("United States");
+    expect(result.trace?.requests[0].filters).toContain("Site in United States");
   });
 
   it("widens the query while too few candidates come back", async () => {
     const seen: string[] = [];
     const searchPage = vi.fn(async (params: CtgovSearchParams): Promise<CtgovTrialPage> => {
       seen.push(params.term ?? "<none>");
-      if (params.term?.includes("metastatic")) return page([makeTrial("NCT00000001", "Focused hit")], 1);
-      if (params.term) return page([makeTrial("NCT00000002", "Broad hit")], 2);
-      return page([makeTrial("NCT00000003", "Widest hit"), makeTrial("NCT00000001", "Focused hit")], 900);
+      if (params.term?.includes("metastatic")) return page([makeTrial("NCT00000001", "Focused hit in HER2-positive metastatic breast cancer")], 1);
+      if (params.term) return page([makeTrial("NCT00000002", "Broad hit in HER2-positive breast cancer")], 2);
+      return page([makeTrial("NCT00000003", "Widest hit in HER2-positive breast cancer"), makeTrial("NCT00000001", "Focused hit in HER2-positive metastatic breast cancer")], 900);
     });
     const result = await searchTrialsForProfile(makeProfile(), { limit: 10, searchPage, minCandidates: 3 });
     expect(seen).toEqual(['(HER2-positive OR "HER2 positive") AND (metastatic OR advanced OR "stage IV")', '(HER2-positive OR "HER2 positive")', "<none>"]);

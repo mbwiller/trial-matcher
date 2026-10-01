@@ -4,13 +4,13 @@ import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { EngineBadge, TopBar } from "@/components/shell";
-import { Badge, Stepper } from "@/components/ui";
+import { Badge, Stepper, cn } from "@/components/ui";
 import { getDemoPatient } from "@/lib/demo/patients";
 import { STAGES, STAGE_LABELS, useWorkspace, type Stage } from "./store";
 import { patientDisplay } from "./labels";
 import { RecordStage } from "./RecordStage";
 import { ProfileStage } from "./ProfileStage";
-import { ShortlistStage } from "./ShortlistStage";
+import { TrialsStage } from "./TrialsStage";
 
 const STEPS = STAGES.map((key) => ({ key, label: STAGE_LABELS[key] }));
 
@@ -25,7 +25,7 @@ function StageView({ stage }: { stage: Stage }) {
     case "profile":
       return <ProfileStage />;
     case "shortlist":
-      return <ShortlistStage />;
+      return <TrialsStage />;
   }
 }
 
@@ -59,9 +59,11 @@ export function Workspace() {
   const profile = useWorkspace((s) => s.profile);
   const patientLabel = useWorkspace((s) => s.patientLabel);
 
+  const view = useWorkspace((s) => s.view);
+
   useEffect(() => {
     window.scrollTo({ top: 0 });
-  }, [stage]);
+  }, [stage, view]);
 
   const patient = profile ? patientDisplay(profile, patientLabel) : undefined;
 
@@ -69,6 +71,7 @@ export function Workspace() {
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-screen flex-col">
         <TopBar
+          wide={stage === "shortlist"}
           center={
             <Stepper
               steps={STEPS}
@@ -92,7 +95,13 @@ export function Workspace() {
           }
         />
 
-        <main className="mx-auto flex w-full max-w-[1180px] flex-1 flex-col px-6 pb-16 pt-10">
+        <main
+          className={cn(
+            "mx-auto flex w-full flex-1 flex-col px-6 pb-16",
+            // The Trials stage is a dashboard: it gets the wider canvas.
+            stage === "shortlist" ? "max-w-[1480px] pt-7" : "max-w-[1180px] pt-10",
+          )}
+        >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={stage}

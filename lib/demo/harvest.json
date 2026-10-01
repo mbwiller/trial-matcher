@@ -1,0 +1,120 @@
+{
+  "fetchedAt": "2026-10-01T05:10:30.351Z",
+  "api": {
+    "base": "https://clinicaltrials.gov/api/v2",
+    "version": "2.0.5",
+    "dataTimestamp": "2026-09-30T09:00:05"
+  },
+  "query": {
+    "cond": "breast cancer",
+    "overallStatus": [
+      "RECRUITING"
+    ],
+    "advanced": "AREA[StudyType]INTERVENTIONAL",
+    "pageSize": 200,
+    "url": "https://clinicaltrials.gov/api/v2/studies?query.cond=breast+cancer&filter.overallStatus=RECRUITING&filter.advanced=AREA%5BStudyType%5DINTERVENTIONAL&countTotal=true&pageSize=200&fields=NCTId%2CBriefTitle%2COfficialTitle%2COverallStatus%2CStartDate%2CPrimaryCompletionDate%2CLastUpdatePostDate%2CLeadSponsorName%2CBriefSummary%2CCondition%2CKeyword%2CStudyType%2CDesignPrimaryPurpose%2CPhase%2CEnrollmentCount%2CInterventionType%2CInterventionName%2CEligibilityCriteria%2CSex%2CMinimumAge%2CMaximumAge%2CLocationFacility%2CLocationCity%2CLocationState%2CLocationCountry%2CLocationStatus&format=json"
+  },
+  "registry": {
+    "totalStudies": 605156,
+    "recruitingInterventionalCancer": 14342,
+    "matching": 1866
+  },
+  "pages": [
+    {
+      "page": 1,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1445975,
+      "ms": 233
+    },
+    {
+      "page": 2,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1292919,
+      "ms": 223
+    },
+    {
+      "page": 3,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1291920,
+      "ms": 238
+    },
+    {
+      "page": 4,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1547769,
+      "ms": 218
+    },
+    {
+      "page": 5,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1207746,
+      "ms": 199
+    },
+    {
+      "page": 6,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1275667,
+      "ms": 222
+    },
+    {
+      "page": 7,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1331716,
+      "ms": 252
+    },
+    {
+      "page": 8,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1322034,
+      "ms": 213
+    },
+    {
+      "page": 9,
+      "studies": 200,
+      "added": 200,
+      "bytes": 1790395,
+      "ms": 230
+    },
+    {
+      "page": 10,
+      "studies": 66,
+      "added": 66,
+      "bytes": 446796,
+      "ms": 115
+    }
+  ],
+  "totals": {
+    "studies": 1866,
+    "bytes": 12952937,
+    "ms": 2143,
+    "criteria": 36753,
+    "inclusion": 18257,
+    "exclusion": 18496,
+    "medianCriteria": 17,
+    "maxCriteria": 134,
+    "withoutCriteria": 0,
+    "eligibilityChars": 5639303,
+    "sites": 26088,
+    "sponsors": 803,
+    "countries": 82,
+    "withUsSite": 765,
+    "phases": {
+      "Not applicable": 738,
+      "Phase 2": 499,
+      "Phase 1": 196,
+      "Phase 3": 188,
+      "Phase 1/2": 158,
+      "Phase 4": 38,
+      "Early phase 1": 31,
+      "Phase 2/3": 18
+    }
+  }
+}

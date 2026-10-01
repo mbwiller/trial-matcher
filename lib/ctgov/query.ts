@@ -9,7 +9,8 @@ import type { CtgovSearchParams } from "./client";
  *   query.cond        "breast cancer" for any breast carcinoma, else the diagnosis text
  *   query.term        <subtype clause> AND <setting clause>   (Essie; omitted parts drop out)
  *   filter.overallStatus  RECRUITING
- *   filter.advanced   AREA[StudyType]INTERVENTIONAL AND AREA[Sex](ALL OR FEMALE)   (sex clause per patient)
+ *   filter.advanced   AREA[StudyType]INTERVENTIONAL AND AREA[Sex](ALL OR FEMALE)   (sex clause per patient,
+ *                     plus AREA[LocationCountry]<country> when a site country is configured)
  * Key biomarkers are searched with a second, targeted query (`biomarkerParams`)
  * rather than ANDed into the main one, so a PIK3CA/ESR1/BRCA-specific trial
  * is never crowded out but the main query stays broad (typically 100–500
@@ -18,17 +19,19 @@ import type { CtgovSearchParams } from "./client";
  * client-side with filterByAge().
  */
 
-export const DEFAULT_LIMIT = 24;
+export const DEFAULT_LIMIT = 16;
 export const MIN_CANDIDATE_PAGE = 40;
 export const MAX_CANDIDATE_PAGE = 100;
 
 export type QueryBreadth = "focused" | "broad" | "widest";
 
 export interface BuildQueryOptions {
-  /** Trials to return after ranking (default 24). Drives the page size requested from the registry. */
+  /** Trials to return after ranking (default 16). Drives the page size requested from the registry. */
   limit?: number;
   /** "focused" = subtype AND setting; "broad" = subtype only; "widest" = condition only. */
   breadth?: QueryBreadth;
+  /** Only studies with a site in this country (exact CT.gov country name, e.g. "United States"). */
+  country?: string;
 }
 
 export interface TrialQuery {
@@ -97,13 +100,13 @@ export function conditionTerm(diagnosis: string, histology?: string): string {
   return cleaned || text;
 }
 
-function normaliseName(name: string): string {
+function normalizeName(name: string): string {
   return name.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 function biomarkerStatus(profile: PatientProfile, ...names: string[]): BiomarkerResult["status"] | undefined {
-  const wanted = names.map(normaliseName);
-  const hit = (profile.biomarkers ?? []).find((b) => wanted.includes(normaliseName(b.name ?? "")));
+  const wanted = names.map(normalizeName);
+  const hit = (profile.biomarkers ?? []).find((b) => wanted.includes(normalizeName(b.name ?? "")));
   return hit?.status;
 }
 
@@ -149,9 +152,9 @@ export function keyBiomarkers(profile: PatientProfile, her2Low: boolean): KeyBio
   const out: KeyBiomarker[] = [];
   const seen = new Set<string>();
   for (const b of profile.biomarkers ?? []) {
-    const key = normaliseName(b.name ?? "");
+    const key = normalizeName(b.name ?? "");
     for (const spec of ACTIONABLE) {
-      if (!spec.names.map(normaliseName).includes(key) || !spec.statuses.includes(b.status)) continue;
+      if (!spec.names.map(normalizeName).includes(key) || !spec.statuses.includes(b.status)) continue;
       if (seen.has(spec.label)) continue;
       seen.add(spec.label);
       out.push({ label: spec.label, clause: spec.clause, pattern: spec.pattern });
@@ -277,7 +280,10 @@ export function buildTrialQuery(profile: PatientProfile, opts: BuildQueryOptions
   const setting = breadth === "focused" ? settingClause(f.setting, f.residualDisease) : undefined;
   const termParts = [subtype, setting].filter((p): p is string => Boolean(p));
 
-  const advanced = ["AREA[StudyType]INTERVENTIONAL", sexClause(f.sex)].filter(Boolean).join(" AND ");
+  const country = opts.country?.trim();
+  const advanced = ["AREA[StudyType]INTERVENTIONAL", sexClause(f.sex), country ? `AREA[LocationCountry]${country}` : undefined]
+    .filter(Boolean)
+    .join(" AND ");
   const base: CtgovSearchParams = {
     cond: f.condition || undefined,
     overallStatus: ["RECRUITING"],
@@ -353,6 +359,8 @@ export interface RelevanceScore {
   nctId: string;
   score: number;
   reasons: string[];
+  /** Hard mismatches between the trial's title/conditions and the profile; the pre-screen sets these trials aside. */
+  conflicts: Array<"subtype" | "setting">;
 }
 
 const HER2POS_RE = /her2[- ]?positive|her2\s*\+|her2[- ]?pos\b|her2[- ]?(?:directed|targeted|expressing)|anti[- ]?her2|erbb2[- ]?positive|her2[- ]?amplif/;
@@ -360,8 +368,9 @@ const TNBC_RE = /triple[- ]?negative|\btnbc\b/;
 const HRPOS_RE = /\bhr[- ]?positive|\ber[- ]?positive|hormone[- ]receptor[- ]?positive|estrogen[- ]receptor[- ]?positive|\bhr\s*\+|\ber\s*\+|luminal|endocrine/;
 const HER2NEG_RE = /her2[- ]?negative|her2\s*-(?!\s*low)(?![a-z])|her2[- ]?neg\b/;
 const HER2LOW_RE = /her2[- ]?(?:low|ultralow)/;
-const METASTATIC_RE = /metasta|advanced|stage iv\b|unresectable|\bmbc\b|\babc\b/;
-const EARLY_RE = /\bearly\b|adjuvant|neoadjuvant|residual|high[- ]risk|operable|stage i{1,3}\b|\bebc\b|post-neoadjuvant/;
+const METASTATIC_RE = /metasta|advanced|stage iv\b|unresectable|inoperable|\bmbc\b|\babc\b/;
+// `\boperable\b`: "inoperable" must not read as an early-stage signal.
+const EARLY_RE = /\bearly\b|adjuvant|neoadjuvant|residual|high[- ]risk|\boperable\b|stage i{1,3}\b|\bebc\b|post-neoadjuvant/;
 const BRAIN_RE = /brain metasta|cns metasta|intracranial|leptomeningeal|central nervous system/;
 /** Trials for residual disease after neoadjuvant therapy ("did not achieve pCR", "post-neoadjuvant", "RCB"). */
 const RESIDUAL_TRIAL_RE = /residual|non-?pcr|\bno pcr\b|not achieve[ds]? (?:a )?pcr|without (?:a )?pcr|post-?neoadjuvant|after neoadjuvant|following neoadjuvant|\brcb\b/;
@@ -404,10 +413,12 @@ export function scoreTrialRelevance(profile: PatientProfile, trial: Trial): Rele
   return scoreWithFacets(f, trial);
 }
 
-function scoreWithFacets(f: ProfileFacets, trial: Trial): RelevanceScore {
+export function scoreWithFacets(f: ProfileFacets, trial: Trial): RelevanceScore {
   const reasons: string[] = [];
+  const conflicts: RelevanceScore["conflicts"] = [];
   let score = 0;
-  const head = [trial.title, trial.officialTitle ?? "", ...(trial.conditions ?? []), ...(trial.keywords ?? [])].join(" | ").toLowerCase();
+  const title = `${trial.title} | ${trial.officialTitle ?? ""}`.toLowerCase();
+  const head = [title, ...(trial.conditions ?? []), ...(trial.keywords ?? [])].join(" | ").toLowerCase();
   const body = (trial.summary ?? "").toLowerCase();
   const elig = (trial.eligibilityText ?? "").slice(0, 6000).toLowerCase();
   const any = `${head} ${body}`;
@@ -420,24 +431,27 @@ function scoreWithFacets(f: ProfileFacets, trial: Trial): RelevanceScore {
   if (f.family === "her2-positive") {
     if (headHer2Pos) { score += 4; reasons.push("HER2-positive in title/conditions"); }
     else if (HER2POS_RE.test(body)) { score += 1; reasons.push("HER2-positive in summary"); }
-    if (!headHer2Pos && (headTnbc || (headHrPos && headHer2Neg) || headHer2Neg)) { score -= 3; reasons.push("subtype conflict (not HER2-positive)"); }
+    if (!headHer2Pos && (headTnbc || (headHrPos && headHer2Neg) || headHer2Neg)) { score -= 3; conflicts.push("subtype"); reasons.push("subtype conflict (not HER2-positive)"); }
   } else if (f.family === "triple-negative") {
     if (headTnbc) { score += 4; reasons.push("triple-negative in title/conditions"); }
     else if (TNBC_RE.test(body)) { score += 1; reasons.push("triple-negative in summary"); }
-    if (!headTnbc && (headHer2Pos || headHrPos)) { score -= 3; reasons.push("subtype conflict (not triple-negative)"); }
+    if (!headTnbc && (headHer2Pos || headHrPos)) { score -= 3; conflicts.push("subtype"); reasons.push("subtype conflict (not triple-negative)"); }
   } else if (f.family === "hr-positive") {
     if (headHrPos || headHer2Neg) { score += 4; reasons.push("HR-positive/HER2-negative in title/conditions"); }
     else if (HRPOS_RE.test(body) || HER2NEG_RE.test(body)) { score += 1; reasons.push("HR-positive/HER2-negative in summary"); }
-    if (!headHrPos && !headHer2Neg && (headHer2Pos || headTnbc)) { score -= 3; reasons.push("subtype conflict (not HR-positive/HER2-negative)"); }
+    if (!headHrPos && !headHer2Neg && (headHer2Pos || headTnbc)) { score -= 3; conflicts.push("subtype"); reasons.push("subtype conflict (not HR-positive/HER2-negative)"); }
   }
-  if (f.her2Low && HER2LOW_RE.test(any)) { score += 2; reasons.push("HER2-low mentioned"); }
 
   // Setting
-  const headMeta = METASTATIC_RE.test(head);
-  const headEarly = EARLY_RE.test(head);
+  // The title decides when it names exactly one setting; conditions and keywords often list both.
+  const titleMeta = METASTATIC_RE.test(title);
+  const titleEarly = EARLY_RE.test(title);
+  const titleDecides = titleMeta !== titleEarly;
+  const headMeta = titleDecides ? titleMeta : METASTATIC_RE.test(head);
+  const headEarly = titleDecides ? titleEarly : EARLY_RE.test(head);
   if (f.setting === "metastatic" || f.setting === "recurrent") {
     if (headMeta) { score += 2; reasons.push("advanced/metastatic setting"); }
-    if (!headMeta && headEarly) { score -= 3; reasons.push("setting conflict (early-stage trial)"); }
+    if (!headMeta && headEarly) { score -= 3; conflicts.push("setting"); reasons.push("setting conflict (early-stage trial)"); }
   } else if (f.setting === "early") {
     if (headEarly) { score += 2; reasons.push("early-stage setting"); }
     if (f.residualDisease) {
@@ -446,14 +460,15 @@ function scoreWithFacets(f: ProfileFacets, trial: Trial): RelevanceScore {
       else if (RESIDUAL_TRIAL_RE.test(body)) { score += 1; reasons.push("residual disease mentioned in summary"); }
       if (!headResidual && /neoadjuvant|preoperative|pre-operative/.test(head)) { score -= 2; reasons.push("pre-operative trial (neoadjuvant therapy already completed)"); }
     }
-    if (!headEarly && headMeta) { score -= 3; reasons.push("setting conflict (advanced/metastatic trial)"); }
+    if (!headEarly && headMeta) { score -= 3; conflicts.push("setting"); reasons.push("setting conflict (advanced/metastatic trial)"); }
   } else if (f.setting === "locally-advanced") {
     if (/locally advanced|unresectable|neoadjuvant/.test(head)) { score += 2; reasons.push("locally advanced setting"); }
   }
 
   // Biomarkers
   for (const b of f.biomarkers) {
-    if (b.pattern.test(any)) { score += 2; reasons.push(`${b.label} mentioned`); }
+    if (b.pattern.test(head)) { score += 3; reasons.push(`${b.label} in title/conditions`); }
+    else if (b.pattern.test(body)) { score += 2; reasons.push(`${b.label} in summary`); }
     else if (b.pattern.test(elig)) { score += 1; reasons.push(`${b.label} in eligibility text`); }
   }
 
@@ -468,12 +483,15 @@ function scoreWithFacets(f: ProfileFacets, trial: Trial): RelevanceScore {
   }
   score += Math.min(2, therapyBonus);
 
+  // Breast-specific studies rank ahead of all-comer solid-tumor baskets.
+  if (f.breast && /\bbreast\b|\btnbc\b|\bmbc\b/.test(title)) { score += 1; reasons.push("breast-specific study"); }
+
   // CNS
   const brainTrial = BRAIN_RE.test(head);
   if (f.cns && BRAIN_RE.test(any)) { score += 2; reasons.push("CNS metastases addressed"); }
   if (!f.cns && brainTrial) { score -= 2; reasons.push("brain-metastasis-specific trial"); }
 
-  return { nctId: trial.nctId, score, reasons };
+  return { nctId: trial.nctId, score, reasons, conflicts };
 }
 
 /** Rank trials by simple relevance to the profile (highest first). Does not mutate the input. */

@@ -1,0 +1,148 @@
+import { demoMatch } from "../../match-helpers";
+
+export default demoMatch(
+  "NCT07612215",
+  "Excluded: requires triple-positive (HER2+) disease; hers is HER2 IHC 0 on both specimens",
+  "This single-arm study gives elacestrant with trastuzumab and pertuzumab and is restricted to ER+/PR+/HER2-positive breast cancer. Linda's tumor is HER2 IHC 0 on the 2017 primary and the 2024 bone metastasis, with no ERBB2 alteration on ctDNA, so she cannot enter regardless of her otherwise favorable profile (SERD-naive, ESR1 Y537S, ECOG 1). Nothing short of a new biopsy showing HER2 3+ or ISH-amplified disease would change this.",
+  [
+    {
+      id: "NCT07612215-inc-1",
+      status: "pass",
+      rationale: "67-year-old woman, well above the 18-year minimum.",
+      evidence: [{ quote: "67 yo postmenopausal F", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-2",
+      status: "pass",
+      confidence: "low",
+      rationale: "She is open to trials and has been referred to the research coordinator; consent is confirmed at screening.",
+      evidence: [{ quote: "Pt prefers oral tx, open to trials", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-3",
+      status: "fail",
+      rationale: "ER 90% and PR 5% qualify, but HER2 is IHC 0 on both the 2024 bone metastasis and the 2017 primary, with no ERBB2 alteration on ctDNA; HER2-positive (IHC 3+ or 2+/amplified) disease is required.",
+      evidence: [
+        { quote: "HER2 IHC: 0 (negative)", source: "Bone biopsy 2024-05-21" },
+        { quote: "ER 95% strong, PR 40%, HER2 IHC 0.", source: "Primary 2017" },
+        { quote: "ERBB2: no alterations detected", source: "Guardant360 2026-09-23" },
+      ],
+    },
+    {
+      id: "NCT07612215-inc-4",
+      status: "pass",
+      rationale: "Progressed in bone on first-line letrozole + ribociclib, an NCCN-recommended regimen (PET/CT 2026-09-09).",
+      evidence: [{ quote: "PD on 1L AI + CDK4/6i after ~27 mo.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-5",
+      status: "pass",
+      rationale: "ECOG 1 on 2026-09-25, within the ≤ 2 limit.",
+      evidence: [{ quote: "EXAM: ECOG 1.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-6",
+      status: "unknown",
+      confidence: "low",
+      rationale: "Hemoglobin 11.4 g/dL, ANC 1.7 and platelets 168 on 2026-09-22 meet the thresholds without transfusion or growth factors, but no echocardiogram has ever been done, so LVEF is unknown.",
+      evidence: [
+        { quote: "WBC 3.6 (L) | ANC 1.7 | Hgb 11.4 (L) | Plt 168", source: "Labs 2026-09-22" },
+        { quote: "No echocardiogram on file.", source: "Cardiac testing" },
+      ],
+      actionNeeded: "Obtain echocardiogram within 28 days before treatment; LVEF ≥ 50% (or ≥ institutional LLN) required",
+    },
+    {
+      id: "NCT07612215-inc-7",
+      status: "not-applicable",
+      rationale: "Pregnancy and breastfeeding restrictions cannot apply to a 67-year-old postmenopausal woman.",
+      evidence: [{ quote: "67 yo postmenopausal F", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-8",
+      status: "not-applicable",
+      rationale: "Pregnancy testing applies to women of childbearing potential; she is 67 and postmenopausal.",
+      evidence: [{ quote: "67 yo postmenopausal F", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-9",
+      status: "not-applicable",
+      rationale: "Contraception requirements apply to women of childbearing potential; she is postmenopausal at 67.",
+      evidence: [{ quote: "67 yo postmenopausal F", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-10",
+      status: "not-applicable",
+      rationale: "Applies to pre- or perimenopausal women; she is postmenopausal.",
+      evidence: [{ quote: "67 yo postmenopausal F", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-inc-11",
+      status: "not-applicable",
+      rationale: "List of acceptable contraceptive methods for women of childbearing potential; does not apply to a postmenopausal woman.",
+    },
+    {
+      id: "NCT07612215-inc-12",
+      status: "not-applicable",
+      rationale: "List of unacceptable contraceptive methods for women of childbearing potential; does not apply to a postmenopausal woman.",
+    },
+    {
+      id: "NCT07612215-exc-1",
+      status: "pass",
+      rationale: "No prior SERD: the note records no fulvestrant and no oral SERD.",
+      evidence: [{ quote: "No prior chemo for MBC, no fulvestrant, no oral SERD, no PI3K/AKT/mTOR inhibitor.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-exc-2",
+      status: "pass",
+      rationale: "No chemotherapy or ADC for metastatic disease.",
+      evidence: [{ quote: "No prior chemo for MBC, no fulvestrant, no oral SERD, no PI3K/AKT/mTOR inhibitor.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-exc-3",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No known CNS metastases and no neurological symptoms; brain imaging has never been performed.",
+      evidence: [{ quote: "No brain imaging to date (asymptomatic); MRI if trial requires.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-exc-4",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No other malignancy within the past 5 years is recorded.",
+    },
+    {
+      id: "NCT07612215-exc-5",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No GI disease or malabsorption recorded; she took oral letrozole and ribociclib for about 27 months.",
+      evidence: [{ quote: "Pt prefers oral tx, open to trials", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-exc-6",
+      status: "pass",
+      rationale: "She has never received elacestrant or any oral SERD, so no intolerance is known.",
+      evidence: [{ quote: "No prior chemo for MBC, no fulvestrant, no oral SERD, no PI3K/AKT/mTOR inhibitor.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-exc-7",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No active infection or uncontrolled illness recorded, and no known HBV, HCV or HIV; CKD 3a and diet-controlled diabetes are stable.",
+      evidence: [{ quote: "CKD 3a - eGFR 52, stable.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07612215-exc-8",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Current medications are zoledronic acid, tramadol, escitalopram and calcium/vitamin D, with no CYP3A4 inhibitor or inducer; the protocol's prohibited list was not available to check.",
+      evidence: [{ quote: "escitalopram 10 mg PO daily", source: "Medication list" }],
+      actionNeeded: "Check her medication list against protocol sections 7.4 and 7.6",
+    },
+    {
+      id: "NCT07612215-exc-9",
+      status: "pass",
+      rationale: "She is female, so the male exclusion does not apply.",
+      evidence: [{ quote: "67 yo postmenopausal F", source: "Oncology note 2026-09-25" }],
+    },
+  ],
+);

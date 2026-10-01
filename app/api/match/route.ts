@@ -16,7 +16,7 @@ function jsonError(error: string, status: number): Response {
 
 /**
  * POST /api/match — MatchRequest → MatchResponse.
- * Precomputed demo match → returned after a short randomised delay; API key
+ * Precomputed demo match → returned after a short randomized delay; API key
  * configured → live evaluation; otherwise the offline keyword screen.
  */
 export async function POST(request: Request): Promise<Response> {
@@ -34,7 +34,8 @@ export async function POST(request: Request): Promise<Response> {
   const trial = parsed.data.trial as unknown as Trial;
 
   try {
-    const curated = DEMO_MATCHES[profile.id]?.[trial.nctId];
+    // Precomputed reviews were written for the curated profile; once the clinician edits it they no longer apply.
+    const curated = profile.editedAt ? undefined : DEMO_MATCHES[profile.id]?.[trial.nctId];
     if (curated) {
       await sleep(250 + Math.random() * 650);
       const match: TrialMatch = { ...curated, source: "demo" };

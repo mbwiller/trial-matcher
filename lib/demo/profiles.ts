@@ -1,4 +1,10 @@
-import type { Confidence, Evidence, Extracted, PatientProfile } from "@/lib/types";
+import type { PatientProfile } from "@/lib/types";
+import { EXTRACTED_AT, ev, x } from "./profile-helpers";
+import { PROFILE as aishaK } from "./profiles/aisha-k";
+import { PROFILE as helenW } from "./profiles/helen-w";
+import { PROFILE as jamesT } from "./profiles/james-t";
+import { PROFILE as lindaP } from "./profiles/linda-p";
+import { PROFILE as priyaS } from "./profiles/priya-s";
 
 /**
  * Curated structured profiles for the demo patients, keyed by DemoPatient.id.
@@ -12,16 +18,6 @@ import type { Confidence, Evidence, Extracted, PatientProfile } from "@/lib/type
  * "medium" when it is inferred (subtype from receptor values, current stage
  * from "mets", CNS status from "no neuro sx" without imaging).
  */
-
-const ev = (quote: string, source: string): Evidence => ({ quote, source });
-
-function x<T>(value: T, confidence: Confidence, evidence: Evidence[], note?: string): Extracted<T> {
-  const out: Extracted<T> = { value, confidence, evidence };
-  if (note) out.note = note;
-  return out;
-}
-
-const EXTRACTED_AT = "2026-09-28T09:00:00.000Z";
 
 // ---------------------------------------------------------------------------
 // Margaret H. — HR+/HER2-low metastatic, PIK3CA H1047R, progressed on CDK4/6i
@@ -412,7 +408,7 @@ const margaret: PatientProfile = {
     "No echocardiogram since the pre-anthracycline study in 2019 (LVEF 62%); most trials require LVEF within the last 6–12 months or at screening.",
     "Brain imaging has never been performed (asymptomatic); trials that mandate a baseline brain MRI will need one.",
     "Hepatitis B/C and HIV status are not documented.",
-    "No repeat tumour or ctDNA genotyping at progression on letrozole + palbociclib; ESR1 status is from March 2025 tissue and ESR1 mutations commonly emerge on aromatase inhibitors.",
+    "No repeat tumor or ctDNA genotyping at progression on letrozole + palbociclib; ESR1 status is from March 2025 tissue and ESR1 mutations commonly emerge on aromatase inhibitors.",
     "Confirm 2026-08-20 as the last dose of palbociclib/letrozole for washout windows; the 2026-09-18 A/P also carries a stale copy-forward line ('continue letrozole/palbociclib').",
     "Prior therapy count: one endocrine-based line in the metastatic setting and no chemotherapy, fulvestrant or PI3K/AKT/mTOR inhibitor to date; confirm nothing else was given between 2019 and 2025.",
     "ECG/QTc not documented.",
@@ -503,7 +499,7 @@ const danielle: PatientProfile = {
     {
       name: "ER",
       status: "negative",
-      detail: "0% (core biopsy 11/2025; repeated on residual tumour 2026-06, concordant)",
+      detail: "0% (core biopsy 11/2025; repeated on residual tumor 2026-06, concordant)",
       method: "IHC",
       date: "2026-06-11",
       specimen: "mastectomy 2026-06-11 (concordant with core biopsy 11/2025)",
@@ -516,7 +512,7 @@ const danielle: PatientProfile = {
     {
       name: "PR",
       status: "negative",
-      detail: "0% (core biopsy 11/2025; repeated on residual tumour 2026-06, concordant)",
+      detail: "0% (core biopsy 11/2025; repeated on residual tumor 2026-06, concordant)",
       method: "IHC",
       date: "2026-06-11",
       specimen: "mastectomy 2026-06-11 (concordant with core biopsy 11/2025)",
@@ -529,7 +525,7 @@ const danielle: PatientProfile = {
     {
       name: "HER2",
       status: "negative",
-      detail: "IHC 0 (not HER2-low), on core biopsy and residual tumour",
+      detail: "IHC 0 (not HER2-low), on core biopsy and residual tumor",
       method: "IHC",
       date: "2026-06-11",
       specimen: "mastectomy 2026-06-11 (concordant with core biopsy 11/2025)",
@@ -751,7 +747,7 @@ const danielle: PatientProfile = {
   openQuestions: [
     "Signatera ctDNA result (drawn 2026-08-25) is pending; ctDNA-directed post-neoadjuvant trials hinge on it.",
     "Adjuvant olaparib vs capecitabine has not been decided; starting either would exclude her from most post-neoadjuvant residual-disease trials, and neither has been studied in combination with pembrolizumab.",
-    "Timing windows: surgery 2026-06-11 and radiation completed 2026-08-28 — check each trial's maximum interval from surgery or radiation to enrolment (often 12–16 weeks from surgery).",
+    "Timing windows: surgery 2026-06-11 and radiation completed 2026-08-28 — check each trial's maximum interval from surgery or radiation to enrollment (often 12–16 weeks from surgery).",
     "Concurrent adjuvant pembrolizumab (cycle 4 of 9): confirm whether candidate trials allow ongoing anti-PD-1 therapy or require its completion.",
     "Hepatitis B/C and HIV status are not documented.",
     "ANC 1.9 with WBC 3.4 (L) on 2026-09-19 — adequate for most trials (≥ 1.5) but borderline; repeat before screening.",
@@ -1004,7 +1000,7 @@ const rosa: PatientProfile = {
       [ev("Residual G2 PN hands/feet from docetaxel", R_NOTE)],
       "Numbness of hands and feet, drops small objects; no falls.",
     ),
-    x("Chronic mild anaemia (Hgb 10.9 g/dL)", "high", [ev("7. Mild anemia Hgb 10.9, chronic, no bleeding.", R_NOTE)]),
+    x("Chronic mild anemia (Hgb 10.9 g/dL)", "high", [ev("7. Mild anemia Hgb 10.9, chronic, no bleeding.", R_NOTE)]),
   ],
   medications: [
     x(
@@ -1047,7 +1043,7 @@ const rosa: PatientProfile = {
   ],
   openQuestions: [
     "Hepatitis B/C and HIV status are not documented.",
-    "No tumour NGS or ctDNA on file and no repeat biopsy at progression on T-DXd; HER2 status rests on January 2024 tissue, so trials requiring a fresh biopsy or central HER2 confirmation will need one.",
+    "No tumor NGS or ctDNA on file and no repeat biopsy at progression on T-DXd; HER2 status rests on January 2024 tissue, so trials requiring a fresh biopsy or central HER2 confirmation will need one.",
     "PD-L1 has not been tested.",
     "CNS timing: SRS 2026-08-07, last dexamethasone 2026-08-30, stable MRI 2026-09-12 — check each trial's required interval since SRS, steroid-free period (often ≥ 2–4 weeks) and MRI window.",
     "LVEF 55% (down from 62% in 2024): meets a ≥ 50% threshold but is borderline for trials requiring ≥ 55%.",
@@ -1059,7 +1055,7 @@ const rosa: PatientProfile = {
     "2 kg weight loss over 2 months and Hgb 10.9 g/dL: confirm no transfusion or growth-factor support within the trial's window.",
   ],
   summary:
-    "66-year-old postmenopausal woman with de novo metastatic HER2-positive (IHC 3+), HR-negative right breast cancer (January 2024; lung, mediastinal nodal and liver metastases) who progressed on first-line THP followed by trastuzumab/pertuzumab maintenance and then on second-line trastuzumab deruxtecan (PR, no ILD) in July 2026 with liver progression and three new brain metastases. All three brain lesions were treated with Gamma Knife SRS on 2026-08-07, dexamethasone was tapered off by 2026-08-30, and the 2026-09-12 MRI shows smaller treated lesions with no new disease or oedema. ECOG 1 with measurable liver disease (2.8 and 2.2 cm), LVEF 55%, AST 1.3× ULN, residual grade 2 neuropathy and well-controlled type 2 diabetes; tucatinib-, T-DM1-, lapatinib- and neratinib-naive, and weighing tucatinib + trastuzumab + capecitabine against a trial.",
+    "66-year-old postmenopausal woman with de novo metastatic HER2-positive (IHC 3+), HR-negative right breast cancer (January 2024; lung, mediastinal nodal and liver metastases) who progressed on first-line THP followed by trastuzumab/pertuzumab maintenance and then on second-line trastuzumab deruxtecan (PR, no ILD) in July 2026 with liver progression and three new brain metastases. All three brain lesions were treated with Gamma Knife SRS on 2026-08-07, dexamethasone was tapered off by 2026-08-30, and the 2026-09-12 MRI shows smaller treated lesions with no new disease or edema. ECOG 1 with measurable liver disease (2.8 and 2.2 cm), LVEF 55%, AST 1.3× ULN, residual grade 2 neuropathy and well-controlled type 2 diabetes; tucatinib-, T-DM1-, lapatinib- and neratinib-naive, and weighing tucatinib + trastuzumab + capecitabine against a trial.",
   extractedAt: EXTRACTED_AT,
   source: "demo",
 };
@@ -1068,4 +1064,9 @@ export const DEMO_PROFILES: Record<string, PatientProfile> = {
   [margaret.id]: margaret,
   [danielle.id]: danielle,
   [rosa.id]: rosa,
+  [aishaK.id]: aishaK,
+  [lindaP.id]: lindaP,
+  [priyaS.id]: priyaS,
+  [jamesT.id]: jamesT,
+  [helenW.id]: helenW,
 };

@@ -1,0 +1,181 @@
+import { demoMatch } from "../../match-helpers";
+
+export default demoMatch(
+  "NCT07060807",
+  "Excluded: needs measurable disease and endocrine-ineligible status; she is bone-only with ET options left",
+  "Her history fits the post-CDK4/6 window this trial studies (one line of letrozole + ribociclib, no chemotherapy or ADC), but two documented facts exclude her: the disease is bone-only and not RECIST-measurable, and she remains a candidate for further endocrine therapy (ESR1 Y537S, about 27 months on first-line treatment, elacestrant and fulvestrant combinations under consideration). It becomes relevant only after endocrine options are exhausted and if measurable disease appears; a central HER3/HR/HER2 result would also be needed, likely from a fresh biopsy.",
+  [
+    {
+      id: "NCT07060807-inc-1",
+      status: "pass",
+      rationale: "HR-positive, HER2-negative invasive lobular carcinoma with bone metastases since May 2024, not treatable with curative intent.",
+      evidence: [
+        { quote: "Metastatic HR+/HER2-neg (IHC 0) ILC, bone-only", source: "Oncology note 2026-09-25" },
+        { quote: "DIAGNOSIS: Metastatic carcinoma c/w breast primary, lobular phenotype.", source: "Bone biopsy 2024-05-21" },
+      ],
+    },
+    {
+      id: "NCT07060807-inc-2",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Her only metastatic biopsy is the May 2024 left iliac core, which was decalcified; central HR/HER2/HER3 testing has not been done and decalcified bone is often not evaluable.",
+      evidence: [{ quote: "Specimen: Bone, left iliac, CT-guided core biopsy (decalcified)", source: "Bone biopsy 2024-05-21" }],
+      actionNeeded: "Submit the 2024 iliac biopsy for central HR/HER2/HER3 testing; if not evaluable, a fresh (non-decalcified) metastatic biopsy is needed",
+    },
+    {
+      id: "NCT07060807-inc-3",
+      status: "pass",
+      rationale: "Radiographic progression in bone on PET/CT 2026-09-09 during first-line letrozole + ribociclib, her only line of therapy in the advanced setting.",
+      evidence: [
+        { quote: "PET/CT 9/9/26 w/ bone PD (new T10, sacrum, R acetabulum), no visceral dz.", source: "Oncology note 2026-09-25" },
+        { quote: "PD on 1L AI + CDK4/6i after ~27 mo.", source: "Oncology note 2026-09-25" },
+      ],
+    },
+    {
+      id: "NCT07060807-inc-4",
+      status: "fail",
+      rationale: "Bone-only disease, explicitly not measurable by RECIST 1.1; the left iliac lesion's 2.3 cm lytic component has no soft-tissue mass.",
+      evidence: [
+        { quote: "Bone-only dz, NOT measurable by RECIST 1.1 (evaluable only).", source: "Oncology note 2026-09-25" },
+        { quote: "Mixed lytic/sclerotic L iliac lesion, lytic component 2.3 cm, no extraosseous soft tissue component.", source: "PET/CT 2026-09-09" },
+      ],
+    },
+    {
+      id: "NCT07060807-inc-5",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Applies only to people living with HIV; HIV is not on her otherwise detailed problem list.",
+      evidence: [{ quote: "PMH: CKD 3a, T2DM diet-controlled (A1c 6.4% 8/2026), osteoporosis (DEXA 2021 T-score -2.6), depression.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-inc-6",
+      status: "pass",
+      rationale: "ECOG 1 on 2026-09-25; it must be reassessed within 7 days before randomization.",
+      evidence: [{ quote: "EXAM: ECOG 1.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-exc-1",
+      status: "pass",
+      rationale: "Metastatic bone disease since May 2024, treated with palliative intent; no curative option.",
+      evidence: [{ quote: "Metastatic HR+/HER2-neg (IHC 0) ILC, bone-only", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-exc-2",
+      status: "fail",
+      rationale: "Her oncologist lists endocrine-based options as the next step (elacestrant for ESR1 Y537S after more than 12 months on CDK4/6i, or a fulvestrant combination), so she is eligible for further endocrine therapy.",
+      evidence: [
+        { quote: "Options: elacestrant (ESR1m, >12 mo on prior CDK4/6i) vs fulvestrant-based combination vs clinical trial of next-gen oral SERD.", source: "Oncology note 2026-09-25" },
+        { quote: "ESR1 p.Y537S, VAF 2.1%", source: "Guardant360 2026-09-23" },
+      ],
+    },
+    {
+      id: "NCT07060807-exc-3",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No known germline BRCA mutation: germline testing has never been done (now being sent), and ctDNA showed no BRCA1/2 alteration.",
+      evidence: [
+        { quote: "BRCA1/BRCA2: not detected", source: "Guardant360 2026-09-23" },
+        { quote: "Germline testing offered, pt agreeable, will send.", source: "Oncology note 2026-09-25" },
+      ],
+      actionNeeded: "Follow up the germline panel; a deleterious gBRCA1/2 variant would trigger this exclusion",
+    },
+    {
+      id: "NCT07060807-exc-4",
+      status: "pass",
+      rationale: "Bone-only disease with no visceral involvement on PET/CT 2026-09-09; no visceral crisis.",
+      evidence: [{ quote: "No FDG-avid visceral, nodal or soft tissue disease.", source: "PET/CT 2026-09-09" }],
+    },
+    {
+      id: "NCT07060807-exc-5",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No oxygen requirement or lung disease recorded; never-smoker with no pulmonary findings on PET/CT. Resting SpO2 is not documented.",
+      evidence: [{ quote: "SH: widowed, lives alone, never smoker, no EtOH.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-exc-6",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No cardiovascular or cerebrovascular disease on her problem list; BP 136/82, HR 70, ECG in sinus rhythm.",
+      evidence: [
+        { quote: "BP 136/82 HR 70.", source: "Oncology note 2026-09-25" },
+        { quote: "ECG 9/17/2026: NSR 68, QTcF 462 ms.", source: "ECG 2026-09-17" },
+      ],
+    },
+    {
+      id: "NCT07060807-exc-7",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No neuropathy recorded and no prior neurotoxic chemotherapy; she denies numbness.",
+      evidence: [{ quote: "No new weakness, numbness or bowel/bladder sx.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-exc-8",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No eye disease on her problem list and no visual symptoms.",
+      evidence: [{ quote: "No HA or visual chnages.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-exc-9",
+      status: "pass",
+      rationale: "No chemotherapy for metastatic disease.",
+      evidence: [{ quote: "No prior chemo for MBC, no fulvestrant, no oral SERD, no PI3K/AKT/mTOR inhibitor.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-exc-10",
+      status: "pass",
+      rationale: "Never treated with chemotherapy, an anti-HER3 agent or a topoisomerase I inhibitor ADC; systemic therapy has been endocrine plus ribociclib only.",
+      evidence: [
+        { quote: "Oncotype RS 14 -> no chemo, no PMRT.", source: "Oncology note 2026-09-25" },
+        { quote: "No prior chemo for MBC, no fulvestrant, no oral SERD, no PI3K/AKT/mTOR inhibitor.", source: "Oncology note 2026-09-25" },
+      ],
+    },
+    {
+      id: "NCT07060807-exc-11",
+      status: "pass",
+      rationale: "Last letrozole + ribociclib dose 2026-09-14, 14 days ago as of 2026-09-28, which meets the 2-week minimum for prior ET + CDK4/6 inhibitor.",
+      evidence: [{ quote: "letrozole 2.5 mg daily + ribociclib 400 mg - DISCONTINUED 9/14/2026 (PD)", source: "Medication list" }],
+    },
+    {
+      id: "NCT07060807-exc-12",
+      status: "pass",
+      rationale: "Only radiotherapy was 8 Gy to the left hip in July 2024, far outside the 14-day window.",
+      evidence: [{ quote: "Palliative RT L hip 8 Gy x1 7/2024.", source: "Oncology note 2026-09-25" }],
+    },
+    {
+      id: "NCT07060807-exc-13",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No immunodeficiency recorded and no systemic steroids on her medication list.",
+    },
+    {
+      id: "NCT07060807-exc-14",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No other malignancy is recorded in her history.",
+    },
+    {
+      id: "NCT07060807-exc-15",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No ILD or pneumonitis history; PET/CT on 2026-09-09 described no lung disease. A screening chest CT must rule out ILD.",
+      evidence: [{ quote: "No FDG-avid visceral, nodal or soft tissue disease.", source: "PET/CT 2026-09-09" }],
+      actionNeeded: "Confirm no ILD on the screening chest CT",
+    },
+    {
+      id: "NCT07060807-exc-16",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Never exposed to HER3-DXd; her only recorded allergy is codeine (nausea).",
+      evidence: [{ quote: "ALLERGIES: codeine (nausea)", source: "Allergies" }],
+    },
+    {
+      id: "NCT07060807-exc-17",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No hypersensitivity to any treatment-of-physician's-choice agent is recorded; her only allergy is codeine (nausea).",
+      evidence: [{ quote: "ALLERGIES: codeine (nausea)", source: "Allergies" }],
+    },
+  ],
+);

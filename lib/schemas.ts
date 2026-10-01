@@ -215,7 +215,7 @@ export const CriterionVerdictSchema = z.object({
 
 export const MatchOutputSchema = z.object({
   verdicts: z.array(CriterionVerdictSchema).describe("Exactly one verdict per criterion id."),
-  headline: z.string().describe('At most 110 characters summarising fit, e.g. "Meets all 9 inclusion criteria · LVEF not documented".'),
+  headline: z.string().describe('At most 110 characters summarizing fit, e.g. "Meets all 9 inclusion criteria · LVEF not documented".'),
   reasoning: z.string().describe("Two to four sentences on overall fit and what would change the answer."),
 });
 

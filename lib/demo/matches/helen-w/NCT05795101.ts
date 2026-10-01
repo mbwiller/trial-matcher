@@ -1,0 +1,303 @@
+import { demoMatch } from "../../match-helpers";
+
+const NOTE = "Oncology note 2026-09-25";
+const PATH = "Pathology 2026-05-19";
+const LABS = "Labs 2026-09-23";
+const MEDS = "Medication list";
+
+export default demoMatch(
+  "NCT05795101",
+  "Excluded: for untreated inflammatory breast cancer; hers is non-inflammatory and already resected",
+  "TRUDI gives neoadjuvant trastuzumab deruxtecan with durvalumab to treatment-naïve stage III inflammatory breast cancer that is HER2-positive or HER2-low. Helen's tumor is HER2-low, but it was a screen-detected spiculated mass (pT2 pN2a) with no inflammatory features, and it has already been treated with mastectomy, adjuvant TC, letrozole and ongoing radiation. Her daily metoprolol and CYP3A4-substrate medications would also clash with the concomitant-medication exclusion. There is no route to eligibility for this diagnosis.",
+  [
+    {
+      id: "NCT05795101-inc-1",
+      status: "pass",
+      rationale: "Histologically confirmed invasive ductal carcinoma with lobular features on the 5/12/26 mastectomy specimen.",
+      evidence: [{ quote: "DIAGNOSIS: Invasive ductal carcinoma with lobular features, Nottingham grade 3 (8/9), 3.8 cm. E-cadherin positive.", source: PATH }],
+    },
+    {
+      id: "NCT05795101-inc-2",
+      status: "pass",
+      rationale: "Any histologic subtype is accepted; hers is ductal with lobular features.",
+      evidence: [{ quote: "R breast IDC w/ lobular features, grade 3", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-3",
+      status: "fail",
+      rationale: "Not inflammatory breast cancer: a 3.4 cm spiculated mass found on screening mammography, staged pT2 pN2a (not T4d), with no skin changes described. Diagnosis 4/14/26 is within 6 months, but the IBC requirement fails.",
+      evidence: [
+        { quote: "Screening mammogram 04/02/2026: R breast UOQ 3.4 cm spiculated mass, BI-RADS 5.", source: "Mammogram 2026-04-02" },
+        { quote: "Pathologic stage (AJCC 8th): pT2 pN2a", source: PATH },
+      ],
+    },
+    {
+      id: "NCT05795101-inc-4",
+      status: "pass",
+      rationale: "HER2-low: IHC 2+ with ISH not amplified (ratio 1.3, copy number 3.4), one of the listed HER2-low categories.",
+      evidence: [
+        { quote: "HER2 IHC: 2+ (equivocal)", source: PATH },
+        { quote: "HER2 ISH: not amplified (HER2/CEP17 ratio 1.3, mean HER2 copy number 3.4) - HER2-negative, HER2-low", source: PATH },
+      ],
+    },
+    {
+      id: "NCT05795101-inc-5",
+      status: "pass",
+      rationale: "ER (90%) and PR (5%) are both known.",
+      evidence: [{ quote: "ER 90% / PR 5% / HER2 2+ ISH neg (HER2-low)", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-6",
+      status: "fail",
+      rationale: "Not treatment-naïve: mastectomy 5/12/26, adjuvant docetaxel/cyclophosphamide ×4 (6/17–8/19/26), letrozole since 9/8/26 and radiation in progress.",
+      evidence: [
+        { quote: "s/p MRM + adj TC x4, on PMRT + letrozole. NED.", source: NOTE },
+        { quote: "Adj TC (docetaxel/cyclophosphamide) x4 6/17/26-8/19/26", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05795101-inc-7",
+      status: "pass",
+      confidence: "low",
+      rationale: "No residual tumor is accessible for research biopsy, so archival tissue would be required; the mastectomy blocks are documented as available. Agreement is confirmed at screening.",
+      evidence: [{ quote: "MRM blocks available.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-8",
+      status: "pass",
+      rationale: "Postmenopausal woman aged 72.",
+      evidence: [{ quote: "72 yo postmenopausal F", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-9",
+      status: "pass",
+      rationale: "ECOG 1 on 9/25/26, within 0–1.",
+      evidence: [{ quote: "EXAM: ECOG 1.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-10",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Only echo is 5/28/26 (LVEF 52%, low-normal), four months ago and pre-chemotherapy, outside the 28-day window and close to the 50% cut-off.",
+      evidence: [{ quote: "ECHO 05/28/2026: LVEF 52% (low-normal), mild LA enlargement, no WMA.", source: "Echo 2026-05-28" }],
+      actionNeeded: "Repeat echocardiogram within 28 days of enrollment; LVEF ≥ 50% required",
+    },
+    {
+      id: "NCT05795101-inc-11",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Labs 9/23/26 meet the listed limits (ANC 2.3, Plt 201, Hgb 11.1, bilirubin 0.6, AST 22/ALT 18, Cr 1.1), but albumin and PT/INR/aPTT are not on file and she takes apixaban.",
+      evidence: [
+        { quote: "WBC 4.4 | ANC 2.3 | Hgb 11.1 (L) | Plt 201", source: LABS },
+        { quote: "Cr 1.1 | eGFR 49 (L)", source: LABS },
+        { quote: "AST 22 | ALT 18 | T bili 0.6", source: LABS },
+      ],
+      actionNeeded: "Obtain serum albumin (≥ 2.5 g/dL) and PT/INR/aPTT (≤ 1.5 × ULN, interpreted on apixaban)",
+    },
+    {
+      id: "NCT05795101-inc-12",
+      status: "not-applicable",
+      rationale: "Contraception rule for women of child-bearing potential; she is 72 and postmenopausal since about age 50.",
+      evidence: [{ quote: "72 yo postmenopausal F (menopause ~50, no HRT)", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-13",
+      status: "not-applicable",
+      rationale: "Contraception rule for male participants only.",
+    },
+    {
+      id: "NCT05795101-inc-14",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No evidence of disease after curative-intent treatment and ECOG 1; life expectancy is far beyond 12 weeks, though not formally stated.",
+      evidence: [{ quote: "s/p MRM + adj TC x4, on PMRT + letrozole. NED.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-15",
+      status: "pass",
+      rationale: "Weight 68 kg on 9/25/26, above 30 kg.",
+      evidence: [{ quote: "Wt 68 kg.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-inc-16",
+      status: "pass",
+      confidence: "low",
+      rationale: "She is engaged and keen to discuss trials; capacity and written consent are confirmed at screening.",
+      evidence: [{ quote: "Pt keen to hear about trials before deciding -> research coordinator.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-exc-1",
+      status: "fail",
+      rationale: "She has received systemic therapy for her current breast cancer: adjuvant TC ×4 completed 8/19/26 and letrozole since 9/8/26.",
+      evidence: [
+        { quote: "docetaxel + cyclophosphamide - COMPLETED 8/19/2026 (C4 of 4)", source: MEDS },
+        { quote: "letrozole 2.5 mg PO daily (started 9/8/2026)", source: MEDS },
+      ],
+    },
+    {
+      id: "NCT05795101-exc-2",
+      status: "fail",
+      rationale: "She has had surgery (modified radical mastectomy 5/12/26) and is receiving post-mastectomy radiation (started 9/14/26) for this cancer.",
+      evidence: [
+        { quote: "R MRM 5/12/26: 3.8 cm, 5/18 LN+ w/ ENE, LVI+, margins neg -> pT2 pN2a M0, stage IIIA.", source: NOTE },
+        { quote: "PMRT (chest wall + RNI) started 9/14/26, planned completion 10/20/26.", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05795101-exc-3",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Only recorded allergy is lisinopril cough; she has never received durvalumab, trastuzumab deruxtecan or any monoclonal antibody.",
+      evidence: [{ quote: "ALLERGIES: lisinopril (cough)", source: "Allergies" }],
+    },
+    {
+      id: "NCT05795101-exc-4",
+      status: "pass",
+      rationale: "Last major surgery was the mastectomy on 5/12/26, about 20 weeks ago, with the scar healed.",
+      evidence: [{ quote: "R chest wall: MRM scar healed, G1 RT erythema.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-exc-5",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No uncontrolled illness: paroxysmal AF is rate-controlled and in sinus rhythm, BP 136/78, no palpitations, infection or heart-failure symptoms documented.",
+      evidence: [
+        { quote: "BP 136/78 HR 64 reg.", source: NOTE },
+        { quote: "2. pAF: apixaban 5 mg BID, metoprolol succ. SR on ECG.", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05795101-exc-6",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No systemic steroids or immunosuppressants on her medication list, and no condition requiring them in her history.",
+    },
+    {
+      id: "NCT05795101-exc-7",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No autoimmune or inflammatory disorder in her past medical history; hand stiffness began with letrozole and is attributed to it.",
+      evidence: [{ quote: "Mild hand stiffness since letrozole.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-exc-8",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No ILD or pneumonitis history; the 5/21/26 staging CT chest noted no lung findings, lungs are clear and she has no cough. Ongoing chest-wall radiation adds pneumonitis risk.",
+      evidence: [
+        { quote: "Lungs clear.", source: NOTE },
+        { quote: "No bone pain, cough, HA.", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT05795101-exc-9",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No underlying lung disease, autoimmune disorder or recent pulmonary embolism; her only VTE was a provoked leg DVT in 2019.",
+      evidence: [{ quote: "provoked DVT L leg 2019 after L TKA, completed 3 mo anticoagulation", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-exc-10",
+      status: "pass",
+      rationale: "QTcF 448 ms on the 9/21/26 ECG, below 470 ms.",
+      evidence: [{ quote: "ECG 09/21/2026: sinus rhythm 64, QTcF 448 ms.", source: "ECG 2026-09-21" }],
+    },
+    {
+      id: "NCT05795101-exc-11",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "No QT-prolonging drugs or heart failure, but paroxysmal AF (rate-controlled, in sinus rhythm 9/21/26) may count as a risk factor for arrhythmic events; potassium is not on file.",
+      evidence: [{ quote: "paroxysmal AF (dx 2021) on apixaban, rate controlled on metoprolol", source: NOTE }],
+      actionNeeded: "Ask the PI whether controlled paroxysmal AF is acceptable; check serum potassium",
+    },
+    {
+      id: "NCT05795101-exc-12",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No coronary event, angina, revascularisation, heart failure or stroke in the past 6 months in an otherwise detailed cardiac history.",
+    },
+    {
+      id: "NCT05795101-exc-13",
+      status: "pass",
+      confidence: "medium",
+      rationale: "LVEF 52% on 5/28/26, reported as low-normal (within the lab's normal range) and above 50%, but the margin is narrow and the study is four months old.",
+      evidence: [{ quote: "ECHO 05/28/2026: LVEF 52% (low-normal), mild LA enlargement, no WMA.", source: "Echo 2026-05-28" }],
+      actionNeeded: "Repeat echocardiogram at screening; LVEF must be ≥ 50% and within institutional normal range",
+    },
+    {
+      id: "NCT05795101-exc-14",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No other primary malignancy appears in her past medical history.",
+    },
+    {
+      id: "NCT05795101-exc-15",
+      status: "pass",
+      rationale: "Her only VTE was a provoked DVT in 2019, well outside the 3-month window.",
+      evidence: [{ quote: "provoked DVT L leg 2019 after L TKA, completed 3 mo anticoagulation", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-exc-16",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No primary immunodeficiency in her past medical history.",
+    },
+    {
+      id: "NCT05795101-exc-17",
+      status: "unknown",
+      confidence: "low",
+      rationale: "No active infection clinically, but hepatitis B and C serology and TB screening are not documented.",
+      actionNeeded: "Obtain HBsAg, anti-HBc and HCV antibody (HCV RNA if positive); TB screening per local practice",
+    },
+    {
+      id: "NCT05795101-exc-18",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No known HIV infection in her history; HIV testing is not required by the protocol.",
+    },
+    {
+      id: "NCT05795101-exc-19",
+      status: "pass",
+      confidence: "low",
+      rationale: "No vaccinations are recorded; absence of a live vaccine in the 30 days before treatment is confirmed at screening.",
+      actionNeeded: "Confirm no live vaccine within 30 days before first dose",
+    },
+    {
+      id: "NCT05795101-exc-20",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Comorbidities (rate-controlled AF, stable CKD 3a, treated HTN) are controlled and would not obviously confound results; final call rests with the investigator.",
+      evidence: [{ quote: "4. CKD 3a stable.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-exc-21",
+      status: "fail",
+      confidence: "medium",
+      rationale: "Daily metoprolol is a sensitive CYP2D6 substrate, and atorvastatin, amlodipine and apixaban are CYP3A4 substrates; they would need review or substitution 2 weeks before dosing.",
+      evidence: [
+        { quote: "metoprolol succinate 50 mg PO daily", source: MEDS },
+        { quote: "atorvastatin 20 mg PO nightly", source: MEDS },
+        { quote: "apixaban 5 mg PO BID", source: MEDS },
+      ],
+    },
+    {
+      id: "NCT05795101-exc-22",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Hydroxychloroquine is not on her medication list and she has no rheumatological condition that would call for it.",
+    },
+    {
+      id: "NCT05795101-exc-23",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No leptomeningeal disease; she has early-stage disease with no headache or neurological symptoms beyond fingertip neuropathy.",
+      evidence: [{ quote: "No bone pain, cough, HA.", source: NOTE }],
+    },
+    {
+      id: "NCT05795101-exc-24",
+      status: "not-applicable",
+      rationale: "Pregnancy and contraception exclusion cannot apply; she is 72 and postmenopausal since about age 50.",
+      evidence: [{ quote: "72 yo postmenopausal F (menopause ~50, no HRT)", source: NOTE }],
+    },
+  ],
+);

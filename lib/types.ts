@@ -46,6 +46,12 @@ export interface Extracted<T> {
   evidence: Evidence[];
   /** Short caveat from the extractor, e.g. "Inferred from 'postmenopausal' in HPI". */
   note?: string;
+  /**
+   * True when a clinician entered or corrected this value during profile review.
+   * An edited value carries no evidence (the quote no longer supports it) and is
+   * treated as a stated fact by the matching engine.
+   */
+  edited?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -92,6 +98,8 @@ export interface BiomarkerResult {
   specimen?: string;
   evidence: Evidence[];
   confidence: Confidence;
+  /** Entered or corrected by a clinician during profile review (see Extracted.edited). */
+  edited?: boolean;
 }
 
 export type TreatmentCategory =
@@ -137,6 +145,8 @@ export interface TreatmentEvent {
   reasonStopped?: string;
   evidence: Evidence[];
   confidence: Confidence;
+  /** Entered or corrected by a clinician during profile review (see Extracted.edited). */
+  edited?: boolean;
 }
 
 export interface LabResult {
@@ -147,6 +157,8 @@ export interface LabResult {
   date?: string;
   flag?: "normal" | "abnormal" | "unknown";
   evidence: Evidence[];
+  /** Entered or corrected by a clinician during profile review (see Extracted.edited). */
+  edited?: boolean;
 }
 
 export interface KeyDate {
@@ -221,10 +233,16 @@ export interface PatientProfile {
   extractedAt: string;
   source: "llm" | "demo" | "heuristic";
   modelId?: string;
+  /**
+   * ISO timestamp of the last clinician edit in profile review; absent when the
+   * profile is exactly what the extractor produced. Precomputed demo reviews
+   * only apply to an unedited profile.
+   */
+  editedAt?: string;
 }
 
 // ---------------------------------------------------------------------------
-// Trials (normalised from ClinicalTrials.gov API v2)
+// Trials (normalized from ClinicalTrials.gov API v2)
 // ---------------------------------------------------------------------------
 
 export type CriterionType = "inclusion" | "exclusion";
@@ -249,7 +267,7 @@ export interface Criterion {
   /** `${nctId}-${"inc"|"exc"}-${n}` e.g. "NCT05563220-inc-3". Stable within a fixture. */
   id: string;
   type: CriterionType;
-  /** The criterion as written (bullet/numbering stripped, whitespace normalised). */
+  /** The criterion as written (bullet/numbering stripped, whitespace normalized). */
   text: string;
   /** Best-effort category assigned by the parser (heuristic) or the LLM. */
   category?: CriterionCategory;
@@ -285,6 +303,8 @@ export interface Trial {
   phases: string[];
   status: TrialStatus;
   studyType: string;
+  /** CT.gov primary purpose, e.g. "TREATMENT", "SUPPORTIVE_CARE", "DIAGNOSTIC", "PREVENTION". */
+  primaryPurpose?: string;
   conditions: string[];
   interventions: Array<{ type: string; name: string }>;
   sponsor: string;
@@ -298,6 +318,8 @@ export interface Trial {
   /** Up to ~12 representative sites; `locationCount` is the true total. */
   locations: TrialLocation[];
   locationCount: number;
+  /** Distinct countries across all sites (not just the representative ones). */
+  countries?: string[];
   /** Raw eligibility text from CT.gov. */
   eligibilityText: string;
   /** Parsed criteria. Inclusion first, then exclusion, in document order. */
@@ -395,16 +417,93 @@ export interface ExtractResponse {
 
 export interface TrialSearchRequest {
   profile: PatientProfile;
-  /** Max trials to return (default 25). */
+  /** Max trials sent to criterion-level review (default 16). */
   limit?: number;
 }
 
 export interface TrialSearchResponse {
+  /** The trials selected for criterion-level review, best pre-screen fit first. */
   trials: Trial[];
   /** Human-readable description of the query that was run, for the UI ("Recruiting · Interventional · breast cancer · HER2-positive"). */
   queryDescription: string;
   source: "registry" | "fixture";
   totalAvailable?: number;
+  /** How the candidate set was produced: every request, every study, every pre-screen decision. */
+  trace?: SearchTrace;
+}
+
+// ---------------------------------------------------------------------------
+// Search trace (the glass box around the registry step)
+// ---------------------------------------------------------------------------
+
+/** One request (possibly paginated) made to the ClinicalTrials.gov API. */
+export interface RegistryRequestTrace {
+  /** What the request was for, e.g. "Registry harvest", "Focused query", "Biomarker query". */
+  label: string;
+  /** Full URL of the first page. */
+  url: string;
+  /** `query.cond`. */
+  cond?: string;
+  /** `query.term` (Essie expression). */
+  term?: string;
+  /** Human-readable filters, e.g. ["Recruiting", "Interventional", "Sex: all or female"]. */
+  filters: string[];
+  pages: Array<{ page: number; studies: number; ms: number; bytes?: number }>;
+  /** The registry's own count of studies matching this request. */
+  total?: number;
+}
+
+/**
+ * Pre-screen outcome for one harvested study. The pre-screen is deterministic
+ * (lib/ctgov/prescreen.ts): hard gates first, then a relevance score.
+ *   "selected"  → sent to criterion-level review
+ *   "relevant"  → passed every gate but ranked below the review cut-off
+ *   "set-aside" → stopped at a gate (see `reason`)
+ */
+export type PrescreenOutcome = "selected" | "relevant" | "set-aside";
+
+export type PrescreenReason =
+  | "location" // no site in the configured country
+  | "sex" // enrolls the other sex only
+  | "age" // age window excludes the patient
+  | "study-type" // supportive-care, behavioral, device or diagnostic study
+  | "subtype" // written for a different receptor subtype
+  | "setting" // written for a different disease setting
+  | "relevance"; // no subtype, setting or biomarker signal
+
+export interface PrescreenEntry {
+  nctId: string;
+  title: string;
+  phases: string[];
+  outcome: PrescreenOutcome;
+  /** Set when `outcome` is "set-aside". */
+  reason?: PrescreenReason;
+  /** Relevance score (higher = closer to the profile); meaningful once the hard gates are passed. */
+  score: number;
+  /** The signals behind the decision, e.g. ["PIK3CA mentioned", "advanced/metastatic setting"]. */
+  signals: string[];
+}
+
+export interface SearchTrace {
+  /** "live": the requests were made for this search. "snapshot": the bundled harvest is replayed. */
+  mode: "live" | "snapshot";
+  /** When the registry data was fetched. */
+  fetchedAt: string;
+  /** The registry's data timestamp, when known. */
+  dataTimestamp?: string;
+  /** Every study registered on ClinicalTrials.gov, when known. */
+  registryTotal?: number;
+  requests: RegistryRequestTrace[];
+  /** Distinct studies harvested across all requests. */
+  harvested: number;
+  /** Eligibility criteria parsed out of free text across the harvested studies. */
+  criteriaParsed: number;
+  /** Country required by the location gate, if one is configured. */
+  country?: string;
+  /** One entry per harvested study, in harvest order. */
+  prescreen: PrescreenEntry[];
+  /** How many studies the pre-screen may send to criterion-level review. */
+  reviewLimit: number;
 }
 
 export interface MatchRequest {

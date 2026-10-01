@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { Evidence, TreatmentEvent } from "@/lib/types";
-import { EvidencePopover, cn } from "@/components/ui";
+import { EditedTag, EvidencePopover, cn } from "@/components/ui";
 import {
   TREATMENT_CATEGORY_LABEL,
   TREATMENT_INTENT_LABEL,
@@ -93,7 +93,7 @@ export function TreatmentTimeline({ treatments, onActiveEvidence }: TreatmentTim
               <div className="flex items-start gap-1">
                 <span className="min-w-0 text-[14px] font-medium leading-snug text-ink-900">
                   {t.name}
-                  {t.confidence === "low" && (
+                  {!t.edited && t.confidence === "low" && (
                     <span
                       className="ml-1.5 inline-block size-1.5 -translate-y-px rounded-full bg-warn-500 align-middle"
                       title="Low confidence — verify against the record"
@@ -101,12 +101,16 @@ export function TreatmentTimeline({ treatments, onActiveEvidence }: TreatmentTim
                     />
                   )}
                 </span>
-                <EvidencePopover
-                  evidence={t.evidence}
-                  align="right"
-                  className="-mt-0.5 shrink-0"
-                  onActiveChange={(active) => onActiveEvidence(active ? t.evidence : undefined)}
-                />
+                {t.edited ? (
+                  <EditedTag className="ml-1 mt-0.5" />
+                ) : (
+                  <EvidencePopover
+                    evidence={t.evidence}
+                    align="right"
+                    className="-mt-0.5 shrink-0"
+                    onActiveChange={(active) => onActiveEvidence(active ? t.evidence : undefined)}
+                  />
+                )}
               </div>
               <div className="mt-0.5 text-[12.5px] leading-snug text-ink-500">{detailLine(t)}</div>
             </div>

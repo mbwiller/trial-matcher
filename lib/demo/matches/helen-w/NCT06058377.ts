@@ -1,0 +1,303 @@
+import { demoMatch } from "../../match-helpers";
+
+const NOTE = "Oncology note 2026-09-25";
+const PATH = "Pathology 2026-05-19";
+const LABS = "Labs 2026-09-23";
+const MEDS = "Medication list";
+
+export default demoMatch(
+  "NCT06058377",
+  "Excluded: neoadjuvant trial for untreated disease; she has had mastectomy, adjuvant TC and letrozole",
+  "This SWOG phase III trial randomises untreated MammaPrint High-2 HR+/HER2- stage II–III cancer to neoadjuvant durvalumab with paclitaxel and doxorubicin/cyclophosphamide. Helen's biology and stage would have fitted (ER 90%, HER2-low, stage IIIA), but she had upfront mastectomy on 5/12/26, completed adjuvant TC on 8/19/26 and is on letrozole and radiation, so the no-prior-treatment requirement fails. Doxorubicin was also deliberately avoided because of paroxysmal AF and LVEF 52%. No MammaPrint has been run; nothing short of a new untreated primary would make her eligible.",
+  [
+    {
+      id: "NCT06058377-inc-1",
+      status: "pass",
+      rationale: "ER 90%, PR 5%, HER2 IHC 2+ with ISH not amplified: HER2-negative (HER2-low) by ASCO/CAP, which the trial explicitly allows.",
+      evidence: [
+        { quote: "ER: positive, 90%, strong intensity", source: PATH },
+        { quote: "HER2 ISH: not amplified (HER2/CEP17 ratio 1.3, mean HER2 copy number 3.4) - HER2-negative, HER2-low", source: PATH },
+      ],
+    },
+    {
+      id: "NCT06058377-inc-2",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Stage II–III disease: a 3.4 cm mass on the 4/2/26 mammogram (cT2 at least) and pathologic stage IIIA (pT2 pN2a); not inflammatory or occult. The tumor has since been resected (see prior-treatment criterion).",
+      evidence: [
+        { quote: "Screening mammogram 04/02/2026: R breast UOQ 3.4 cm spiculated mass, BI-RADS 5.", source: "Mammogram 2026-04-02" },
+        { quote: "Pathologic stage (AJCC 8th): pT2 pN2a", source: PATH },
+      ],
+    },
+    {
+      id: "NCT06058377-inc-3",
+      status: "pass",
+      rationale: "M0: staging CT chest/abdomen/pelvis and bone scan on 5/21/26 showed no distant metastatic disease.",
+      evidence: [{ quote: "No evidence of distant metastatic disease.", source: "CT + bone scan 2026-05-21" }],
+    },
+    {
+      id: "NCT06058377-inc-4",
+      status: "pass",
+      rationale: "No local recurrence; this is a primary cancer diagnosed 4/14/26 and she is NED after mastectomy.",
+      evidence: [{ quote: "s/p MRM + adj TC x4, on PMRT + letrozole. NED.", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-5",
+      status: "not-applicable",
+      rationale: "Unifocal disease (single 3.8 cm tumor, one mass on mammogram), so the multifocal/bilateral rules do not apply; the MP2 requirement is assessed separately.",
+      evidence: [{ quote: "DIAGNOSIS: Invasive ductal carcinoma with lobular features, Nottingham grade 3 (8/9), 3.8 cm. E-cadherin positive.", source: PATH }],
+    },
+    {
+      id: "NCT06058377-inc-6",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "No MammaPrint result exists. Mastectomy blocks are documented as available, but on-study testing uses the initial core biopsy (4/14/26), whose block availability is not stated.",
+      evidence: [{ quote: "MRM blocks available.", source: NOTE }],
+      actionNeeded: "Confirm the 4/14/26 core biopsy block is available for MammaPrint (moot unless the prior-treatment criterion were met)",
+    },
+    {
+      id: "NCT06058377-inc-7",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Ten unstained FFPE slides from the initial tumor biopsy are required; only the mastectomy blocks are documented as available, not the 4/14/26 core biopsy material.",
+      evidence: [{ quote: "MRM blocks available.", source: NOTE }],
+      actionNeeded: "Confirm ≥ 10 unstained 4–5 µm FFPE slides can be cut from the 4/14/26 core biopsy",
+    },
+    {
+      id: "NCT06058377-inc-8",
+      status: "not-applicable",
+      rationale: "Pathway for patients enrolling with a commercial MammaPrint result; no MammaPrint has been performed for her.",
+    },
+    {
+      id: "NCT06058377-inc-9",
+      status: "fail",
+      rationale: "She has already been treated: mastectomy 5/12/26, adjuvant TC ×4 to 8/19/26, letrozole since 9/8/26 and radiation in progress. Doxorubicin was deliberately avoided for paroxysmal AF and LVEF 52%.",
+      evidence: [
+        { quote: "s/p MRM + adj TC x4, on PMRT + letrozole. NED.", source: NOTE },
+        { quote: "anthracycline avoided given pAF + LVEF 52%", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT06058377-inc-10",
+      status: "pass",
+      rationale: "Age 72, above the 18-year minimum.",
+      evidence: [{ quote: "72 yo postmenopausal F", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-11",
+      status: "pass",
+      rationale: "Weight 68 kg on 9/25/26, above 30 kg.",
+      evidence: [{ quote: "Wt 68 kg.", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-12",
+      status: "pass",
+      rationale: "ECOG (Zubrod) 1 on 9/25/26, within 0–2.",
+      evidence: [{ quote: "EXAM: ECOG 1.", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-13",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No prior or concurrent malignancy other than this breast cancer appears in her detailed history.",
+    },
+    {
+      id: "NCT06058377-inc-14",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No pneumonitis or autoimmune disease in her past medical history and no steroids or immunosuppressants on her medication list.",
+    },
+    {
+      id: "NCT06058377-inc-15",
+      status: "not-applicable",
+      rationale: "Administrative note about the site's IRB approval date in the OPEN registration system, not a patient eligibility requirement.",
+    },
+    {
+      id: "NCT06058377-inc-16",
+      status: "pass",
+      confidence: "low",
+      rationale: "She is keen to hear about trials; informed consent is obtained at screening.",
+      evidence: [{ quote: "Pt keen to hear about trials before deciding -> research coordinator.", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-17",
+      status: "not-applicable",
+      rationale: "Provision for consent by a legally authorised representative; no impaired decision-making is documented and she would consent herself.",
+    },
+    {
+      id: "NCT06058377-inc-18",
+      status: "fail",
+      rationale: "Step 1 eligibility is not met: she has already received surgery, adjuvant chemotherapy and endocrine therapy for this cancer.",
+      evidence: [{ quote: "s/p MRM + adj TC x4, on PMRT + letrozole. NED.", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-19",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "No MammaPrint has been performed, so MP2 status is unknown; Oncotype was also not done.",
+      evidence: [{ quote: "Oncotype not done (N2).", source: NOTE }],
+      actionNeeded: "Only if otherwise eligible: obtain MammaPrint on the 4/14/26 core biopsy; MP2 index −1.0 to −0.57 required",
+    },
+    {
+      id: "NCT06058377-inc-20",
+      status: "not-applicable",
+      rationale: "Timing rule that starts once an on-study MP2 result is issued; she has no MammaPrint result.",
+    },
+    {
+      id: "NCT06058377-inc-21",
+      status: "not-applicable",
+      rationale: "Applies to participants submitting a commercial MammaPrint score from the last 12 weeks; she has none.",
+    },
+    {
+      id: "NCT06058377-inc-22",
+      status: "pass",
+      confidence: "low",
+      rationale: "No vaccinations are recorded in the record; absence of a live vaccine in the 28 days before randomization is confirmed at screening.",
+      actionNeeded: "Confirm no live vaccine (e.g. MMR, varicella, yellow fever, intranasal flu) within 28 days of randomization",
+    },
+    {
+      id: "NCT06058377-inc-23",
+      status: "fail",
+      confidence: "medium",
+      rationale: "She is taking adjuvant letrozole (since 9/8/26) with a plan to add a CDK4/6 inhibitor, i.e. ongoing non-protocol hormonal therapy for this cancer.",
+      evidence: [
+        { quote: "letrozole 2.5 mg PO daily (started 9/8/2026)", source: MEDS },
+        { quote: "Discussed adj abemaciclib x2 yrs vs ribociclib x3 yrs (w/ AI) vs clinical trial", source: NOTE },
+      ],
+    },
+    {
+      id: "NCT06058377-inc-24",
+      status: "pass",
+      rationale: "ECOG (Zubrod) 1 on 9/25/26, within 0–2.",
+      evidence: [{ quote: "EXAM: ECOG 1.", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-25",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No pneumonitis in her history; lungs clear and no cough on 9/25/26.",
+      evidence: [{ quote: "Lungs clear.", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-26",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No autoimmune disease in her past medical history and no steroids or immunosuppressants on her medication list.",
+    },
+    {
+      id: "NCT06058377-inc-27",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Full history and examination documented on 9/25/26; it must still fall within 28 days of randomization.",
+      evidence: [{ quote: "Date of service: 9/25/2026", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-28",
+      status: "pass",
+      rationale: "WBC 4.4 × 10³/µL on 9/23/26, above 3.0.",
+      evidence: [{ quote: "WBC 4.4 | ANC 2.3 | Hgb 11.1 (L) | Plt 201", source: LABS }],
+    },
+    {
+      id: "NCT06058377-inc-29",
+      status: "pass",
+      rationale: "ANC 2.3 × 10³/µL on 9/23/26, above 1.5.",
+      evidence: [{ quote: "WBC 4.4 | ANC 2.3 | Hgb 11.1 (L) | Plt 201", source: LABS }],
+    },
+    {
+      id: "NCT06058377-inc-30",
+      status: "pass",
+      rationale: "Platelets 201 × 10³/µL on 9/23/26, above 100.",
+      evidence: [{ quote: "WBC 4.4 | ANC 2.3 | Hgb 11.1 (L) | Plt 201", source: LABS }],
+    },
+    {
+      id: "NCT06058377-inc-31",
+      status: "pass",
+      rationale: "Total bilirubin 0.6 mg/dL on 9/23/26, within the ULN.",
+      evidence: [{ quote: "AST 22 | ALT 18 | T bili 0.6", source: LABS }],
+    },
+    {
+      id: "NCT06058377-inc-32",
+      status: "pass",
+      rationale: "AST 22 and ALT 18 U/L on 9/23/26, within 3 × ULN.",
+      evidence: [{ quote: "AST 22 | ALT 18 | T bili 0.6", source: LABS }],
+    },
+    {
+      id: "NCT06058377-inc-33",
+      status: "unknown",
+      confidence: "medium",
+      rationale: "Cockcroft-Gault with age 72, weight 68 kg and Cr 1.1 gives ≈ 49.6 mL/min, at the 50 mL/min cut-off (eGFR 49, CKD 3a); her baseline Cr of 1.0 would give ≈ 55.",
+      evidence: [
+        { quote: "Cr 1.1 | eGFR 49 (L)", source: LABS },
+        { quote: "CKD 3a (baseline Cr 1.0-1.1)", source: NOTE },
+      ],
+      actionNeeded: "Repeat creatinine within 28 days of randomization; Cockcroft-Gault CrCl ≥ 50 mL/min required",
+    },
+    {
+      id: "NCT06058377-inc-34",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Cardiac history (paroxysmal AF, LVEF 52%) calls for NYHA assessment; she has no palpitations or heart-failure symptoms and is ECOG 1, consistent with class I, though no class is recorded.",
+      evidence: [
+        { quote: "paroxysmal AF (dx 2021) on apixaban, rate controlled on metoprolol", source: NOTE },
+        { quote: "ECHO 05/28/2026: LVEF 52% (low-normal), mild LA enlargement, no WMA.", source: "Echo 2026-05-28" },
+      ],
+      actionNeeded: "Document NYHA functional class; class 2B or better required",
+    },
+    {
+      id: "NCT06058377-inc-35",
+      status: "unknown",
+      confidence: "low",
+      rationale: "No diabetes on her problem list, but no HbA1c is on file and the criterion specifies a value within 28 days.",
+      actionNeeded: "Obtain HbA1c within 28 days of randomization; must be < 9.0%",
+    },
+    {
+      id: "NCT06058377-inc-36",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No HIV infection in her past medical history; the clause applies only to patients with known HIV.",
+    },
+    {
+      id: "NCT06058377-inc-37",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No history of chronic hepatitis B in the record; the viral-load condition applies only to patients with known HBV.",
+    },
+    {
+      id: "NCT06058377-inc-38",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No history of hepatitis C in the record and liver tests are normal (AST 22, ALT 18).",
+      evidence: [{ quote: "AST 22 | ALT 18 | T bili 0.6", source: LABS }],
+    },
+    {
+      id: "NCT06058377-inc-39",
+      status: "not-applicable",
+      rationale: "Pregnancy, contraception and nursing rules cannot apply; she is 72 with no menses since about age 50.",
+      evidence: [{ quote: "72 yo postmenopausal F (menopause ~50, no HRT)", source: NOTE }],
+    },
+    {
+      id: "NCT06058377-inc-40",
+      status: "pass",
+      confidence: "low",
+      rationale: "Offer of specimen banking is a site procedure at enrollment; participation is optional.",
+    },
+    {
+      id: "NCT06058377-inc-41",
+      status: "pass",
+      confidence: "low",
+      rationale: "Offer of the quality-of-life study is a site procedure at enrollment; she can presumably complete questionnaires in English.",
+    },
+    {
+      id: "NCT06058377-inc-42",
+      status: "not-applicable",
+      rationale: "Administrative note about the site's IRB approval date in the OPEN registration system, not a patient eligibility requirement.",
+    },
+    {
+      id: "NCT06058377-inc-43",
+      status: "pass",
+      confidence: "low",
+      rationale: "Informed consent for randomization is obtained at enrollment; she is engaged in trial discussions.",
+      evidence: [{ quote: "Pt keen to hear about trials before deciding -> research coordinator.", source: NOTE }],
+    },
+  ],
+);

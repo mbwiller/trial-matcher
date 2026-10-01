@@ -1,24 +1,28 @@
 import { NextResponse } from "next/server";
-import type { PatientProfile, TrialSearchResponse } from "@/lib/types";
-import { DEMO_TRIALS } from "@/lib/demo/trials";
+import type { PatientProfile, SearchTrace, TrialSearchResponse } from "@/lib/types";
+import { demoHarvest } from "@/lib/demo/harvest";
+import { demoTrials } from "@/lib/demo/trials";
 import { CtgovError } from "@/lib/ctgov/client";
-import { buildTrialQuery, DEFAULT_LIMIT, prioritizeTrials } from "@/lib/ctgov/query";
+import { prescreenTrials } from "@/lib/ctgov/prescreen";
+import { buildTrialQuery, DEFAULT_LIMIT } from "@/lib/ctgov/query";
 import { searchTrialsForProfile } from "@/lib/ctgov/search";
 
 /**
  * POST /api/trials — TrialSearchRequest → TrialSearchResponse.
  *
  * Demo profiles (`profile.source === "demo"`) and deployments with
- * TRIAL_MATCHER_LIVE_REGISTRY=0 always get the bundled fixture, so the
- * precomputed demo verdicts line up. Everything else queries
- * ClinicalTrials.gov live and falls back to the fixture on any failure.
+ * TRIAL_MATCHER_LIVE_REGISTRY=0 always get the bundled registry snapshot, so
+ * the precomputed demo verdicts line up. Everything else queries
+ * ClinicalTrials.gov live and falls back to the snapshot on any failure.
+ * Either way the response carries a trace: every request, every harvested
+ * study and the pre-screen decision made about it.
  * Request bodies are never logged.
  */
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-/** Leave headroom under maxDuration for serialisation. */
+/** Leave headroom under maxDuration for serialization. */
 const SEARCH_BUDGET_MS = 40_000;
 const MAX_LIMIT = 50;
 
@@ -28,6 +32,12 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 function isLiveRegistryEnabled(): boolean {
   return process.env.TRIAL_MATCHER_LIVE_REGISTRY !== "0";
+}
+
+/** Country a study must have a site in (default United States); set TRIAL_MATCHER_COUNTRY="" to disable the gate. */
+function siteCountry(): string | undefined {
+  const raw = process.env.TRIAL_MATCHER_COUNTRY;
+  return raw === undefined ? "United States" : raw.trim() || undefined;
 }
 
 /** Minimal structural validation: `profile` is an object carrying a `diagnosis` object. */
@@ -48,16 +58,42 @@ function parseRequest(body: unknown): { profile: PatientProfile; limit: number }
   return { profile: profile as unknown as PatientProfile, limit };
 }
 
-function fixtureResponse(profile: PatientProfile, queryDescription: string): TrialSearchResponse {
+/** Pre-screen the bundled snapshot and replay its harvest manifest as the trace. */
+function snapshotResponse(profile: PatientProfile, limit: number, note?: string): TrialSearchResponse {
+  const trials = demoTrials();
+  const harvest = demoHarvest();
+  const country = siteCountry();
+  const { entries, selected } = prescreenTrials(profile, trials, { limit, country });
+  const trace: SearchTrace = {
+    mode: "snapshot",
+    fetchedAt: harvest.fetchedAt,
+    dataTimestamp: harvest.api.dataTimestamp,
+    registryTotal: harvest.registry.totalStudies,
+    requests: [
+      {
+        label: "Registry harvest",
+        url: harvest.query.url,
+        cond: harvest.query.cond,
+        filters: ["Recruiting", "Interventional"],
+        pages: harvest.pages.map((p) => ({ page: p.page, studies: p.studies, ms: p.ms, bytes: p.bytes })),
+        total: harvest.registry.matching,
+      },
+    ],
+    harvested: trials.length,
+    criteriaParsed: harvest.totals.criteria,
+    country,
+    prescreen: entries,
+    reviewLimit: limit,
+  };
+  const description = `Registry snapshot · ${trials.length.toLocaleString("en-US")} recruiting interventional breast cancer studies`;
   return {
-    trials: prioritizeTrials(profile, DEMO_TRIALS),
-    queryDescription,
+    trials: selected,
+    queryDescription: note ? `${description} · ${note}` : description,
     source: "fixture",
-    totalAvailable: DEMO_TRIALS.length,
+    totalAvailable: trials.length,
+    trace,
   };
 }
-
-const BUNDLED = `Bundled trial set · ${DEMO_TRIALS.length} recruiting breast cancer trials`;
 
 export async function POST(request: Request): Promise<NextResponse> {
   let body: unknown;
@@ -72,22 +108,26 @@ export async function POST(request: Request): Promise<NextResponse> {
   const { profile, limit } = parsed;
 
   if (!isLiveRegistryEnabled() || profile.source === "demo") {
-    return NextResponse.json(fixtureResponse(profile, BUNDLED));
+    return NextResponse.json(snapshotResponse(profile, limit));
   }
 
   const diagnosis = profile.diagnosis.primary?.value?.trim() ?? "";
   if (!diagnosis) {
-    return NextResponse.json(fixtureResponse(profile, `${BUNDLED} · no primary diagnosis in the profile`));
+    return NextResponse.json(snapshotResponse(profile, limit, "no primary diagnosis in the profile"));
   }
 
   try {
-    const result = await searchTrialsForProfile(profile, { limit, signal: AbortSignal.timeout(SEARCH_BUDGET_MS) });
+    const result = await searchTrialsForProfile(profile, {
+      limit,
+      country: siteCountry(),
+      signal: AbortSignal.timeout(SEARCH_BUDGET_MS),
+    });
     return NextResponse.json(result);
   } catch (err) {
     // Log only the failure class, never the request or query text.
     const detail = err instanceof CtgovError ? `${err.kind}${err.status ? ` ${err.status}` : ""}` : err instanceof Error ? err.name : "unknown";
-    console.error(`[api/trials] live registry search failed (${detail}); serving bundled fixture`);
+    console.error(`[api/trials] live registry search failed (${detail}); serving the bundled snapshot`);
     const attempted = buildTrialQuery(profile, { limit }).description;
-    return NextResponse.json(fixtureResponse(profile, `${attempted} · registry unavailable, showing the bundled trial set`));
+    return NextResponse.json(snapshotResponse(profile, limit, `registry unavailable for "${attempted}"`));
   }
 }

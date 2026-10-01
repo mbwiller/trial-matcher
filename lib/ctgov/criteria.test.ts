@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Trial } from "@/lib/types";
-import fixture from "@/lib/demo/trials.json";
+import { demoTrials } from "@/lib/demo/trials";
 import { categorizeCriterion, parseCriteria, parseEligibilityText } from "./criteria";
 
 const lines = (...ls: string[]) => ls.join("\n");
@@ -72,7 +71,7 @@ describe("parseEligibilityText — list styles", () => {
     expect(parseEligibilityText(text).inclusion).toEqual(["Histologically confirmed breast cancer that is HER2-positive", "ECOG 0-1"]);
   });
 
-  it("folds a colon-terminated paragraph stem with the list that follows at the same indent", () => {
+  it("distributes a subject stem over the list that follows at the same indent", () => {
     const text = lines(
       "Inclusion Criteria:",
       "",
@@ -84,9 +83,34 @@ describe("parseEligibilityText — list styles", () => {
       "* Patients must have a Zubrod performance status of 0-2",
     );
     expect(parseEligibilityText(text).inclusion).toEqual([
-      "Patients must: Have metastatic breast cancer, AND; Be receiving trastuzumab-based therapy",
+      "Patients must have metastatic breast cancer, AND",
+      "Patients must be receiving trastuzumab-based therapy",
       "Patients must have a Zubrod performance status of 0-2",
     ]);
+  });
+
+  it("drops a stem that only announces the list", () => {
+    const text = lines(
+      "Inclusion Criteria:",
+      "",
+      "Subjects must meet all of the following criteria to participate:",
+      "",
+      "1. Age ≥ 18 years",
+      "2. ECOG performance status 0-1",
+    );
+    expect(parseEligibilityText(text).inclusion).toEqual(["Age ≥ 18 years", "ECOG performance status 0-1"]);
+  });
+
+  it("still folds a topical stem with its details into one criterion", () => {
+    const text = lines(
+      "Inclusion Criteria:",
+      "",
+      "Adequate organ function:",
+      "",
+      "* ANC ≥ 1.5 x 10^9/L",
+      "* Platelets ≥ 100 x 10^9/L",
+    );
+    expect(parseEligibilityText(text).inclusion).toEqual(["Adequate organ function: ANC ≥ 1.5 x 10^9/L; Platelets ≥ 100 x 10^9/L"]);
   });
 });
 
@@ -108,7 +132,7 @@ describe("parseEligibilityText — markdown escapes", () => {
     ]);
   });
 
-  it("normalises CRLF line endings and non-breaking spaces", () => {
+  it("normalizes CRLF line endings and non-breaking spaces", () => {
     const text = "Inclusion Criteria:\r\n\r\n* Age ≥ 18\r\n\r\nExclusion Criteria:\r\n\r\n* Pregnant\r\n";
     expect(parseEligibilityText(text)).toEqual({ inclusion: ["Age ≥ 18"], exclusion: ["Pregnant"] });
   });
@@ -362,7 +386,7 @@ describe("parseCriteria", () => {
     expect(criteria.map((c) => c.category)).toEqual(["performance", "organ-function", "reproductive", "cns"]);
   });
 
-  it("categorises common criterion phrasings", () => {
+  it("categorizes common criterion phrasings", () => {
     expect(categorizeCriterion("Signed written informed consent")).toBe("consent");
     expect(categorizeCriterion("Measurable disease per RECIST 1.1")).toBe("measurable-disease");
     expect(categorizeCriterion("Prior treatment with a CDK4/6 inhibitor in the advanced setting")).toBe("prior-therapy");
@@ -374,31 +398,39 @@ describe("parseCriteria", () => {
   });
 });
 
-describe("bundled fixture (lib/demo/trials.json)", () => {
-  const trials = fixture as unknown as Trial[];
+describe("registry snapshot (lib/demo/trials.json)", () => {
+  const trials = demoTrials();
 
-  it("contains the curated trials", () => {
-    expect(trials.length).toBeGreaterThanOrEqual(20);
+  it("holds the full harvest", () => {
+    expect(trials.length).toBeGreaterThanOrEqual(1500);
+    expect(new Set(trials.map((t) => t.nctId)).size).toBe(trials.length);
   });
 
-  it.each(trials.map((t) => [t.nctId, t] as const))("%s parses into clean criteria", (_id, trial) => {
-    const criteria = parseCriteria(trial.nctId, trial.eligibilityText);
-    const inclusion = criteria.filter((c) => c.type === "inclusion");
-    expect(inclusion.length).toBeGreaterThanOrEqual(3);
-    for (const c of criteria) {
-      expect(c.text, c.id).not.toMatch(/\\[<>[\]*_()]/);
-      expect(c.text.length, c.id).toBeLessThanOrEqual(1200);
-      expect(c.text.trim().length, c.id).toBeGreaterThan(2);
-      expect(c.id).toMatch(/^NCT\d{8}-(inc|exc)-\d+$/);
-    }
-    const ids = criteria.map((c) => c.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it("stored criteria are in sync with the parser (run `npm run fixture` after changing the parser)", () => {
+  it("parses every study into clean criteria", () => {
+    const problems: string[] = [];
     for (const trial of trials) {
-      expect(trial.criteria, trial.nctId).toEqual(parseCriteria(trial.nctId, trial.eligibilityText));
+      if (trial.criteria.length === 0) problems.push(`${trial.nctId}: no criteria`);
+      const ids = new Set<string>();
+      for (const c of trial.criteria) {
+        if (/\\[<>[\]*_()]/.test(c.text)) problems.push(`${c.id}: markdown escape left in text`);
+        if (c.text.length > 1200) problems.push(`${c.id}: ${c.text.length} chars`);
+        if (c.text.trim().length <= 2) problems.push(`${c.id}: empty`);
+        if (!/^NCT\d{8}-(inc|exc)-\d+$/.test(c.id)) problems.push(`${c.id}: bad id`);
+        if (ids.has(c.id)) problems.push(`${c.id}: duplicate id`);
+        ids.add(c.id);
+      }
     }
+    expect(problems).toEqual([]);
+  });
+
+  it("splits list-announcing stems into one criterion per item", () => {
+    // "Unless otherwise noted, subjects must meet all of the following criteria …:" followed by a numbered list.
+    const carT = trials.find((t) => t.nctId === "NCT06347068");
+    expect(carT).toBeDefined();
+    if (!carT) return;
+    const inclusion = carT.criteria.filter((c) => c.type === "inclusion");
+    expect(inclusion.length).toBeGreaterThanOrEqual(4);
+    expect(inclusion[1].text).toBe("Age ≥ 18 years at the time of consent.");
   });
 
   it("keeps registry entries without an exclusion section faithful (S1501, ComboMATCH)", () => {

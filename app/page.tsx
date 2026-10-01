@@ -1,15 +1,19 @@
 import { TopBar } from "@/components/shell";
 import {
   ButtonLink,
-  FeatureCards,
+  FinePrint,
   Footer,
   Hero,
   HowItWorks,
   HowItWorksLink,
-  ShortlistPreview,
+  Problem,
+  SamplePatients,
 } from "@/components/landing";
+import { landingData } from "@/components/landing/data";
 
 export default function LandingPage() {
+  // Computed on the server from the registry snapshot and the sample patient's reviews.
+  const data = landingData();
   return (
     <div className="flex min-h-screen flex-col">
       <TopBar
@@ -25,20 +29,11 @@ export default function LandingPage() {
       />
 
       <main className="flex-1 pb-24">
-        <Hero />
-
-        <section aria-labelledby="preview-title" className="mx-auto w-full max-w-[1180px] px-6">
-          <h2 id="preview-title" className="sr-only">
-            Shortlist preview
-          </h2>
-          <ShortlistPreview />
-          <p className="mt-4 text-center text-[13px] text-ink-400">
-            The shortlist stage, shown with a bundled sample patient. Verdicts are illustrative.
-          </p>
-        </section>
-
-        <FeatureCards className="mt-20 md:mt-24" />
-        <HowItWorks className="mt-20 md:mt-24" />
+        <Hero data={data} />
+        <Problem data={data} />
+        <FinePrint data={data} className="mt-24 md:mt-32" />
+        <HowItWorks data={data} className="mt-24 md:mt-32" />
+        <SamplePatients data={data} className="mt-24 md:mt-28" />
       </main>
 
       <Footer />

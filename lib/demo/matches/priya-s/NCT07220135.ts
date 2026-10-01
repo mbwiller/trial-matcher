@@ -1,0 +1,176 @@
+import { demoMatch } from "../../match-helpers";
+
+export default demoMatch(
+  "NCT07220135",
+  "Meets all criteria for a start by 10/13 · confirm the left-breast focus is benign or HER2+",
+  "Treatment-naive cT3 cN1 HER2 IHC 3+ IDC with ER/PR percentages reported, FNA-proven nodes, ECOG 0, normal labs and LVEF 63% meets every NeoTHERa criterion. Timing is tight: the 9/22 labs cover a start through 10/13, ECOG through 10/21, mammogram/US through 10/16 and MRI through 10/30, so a later start needs repeat labs. If the 9/30 left-breast biopsy shows invasive cancer, she stays eligible only if it is also HER2+. As a THP vs TCHP de-escalation randomization, the trial needs a frank discussion of the THP arm for her stage III disease.",
+  [
+    {
+      id: "NCT07220135-inc-1",
+      status: "pass",
+      confidence: "low",
+      rationale: "She can consent for herself; capacity and willingness are confirmed at screening.",
+      evidence: [{ quote: "Pt interested in trials (neoadj de-escalation or novel anti-HER2 agent) - referred to research coordinator." }],
+    },
+    {
+      id: "NCT07220135-inc-2",
+      status: "pass",
+      rationale: "34 years old (DOB 1992).",
+      evidence: [{ quote: "DOB: 1992 (34 yo F)", source: "Consult 2026-09-23" }],
+    },
+    {
+      id: "NCT07220135-inc-3",
+      status: "pass",
+      rationale: "Histologically confirmed cT3 cN1 IDC, HER2 IHC 3+, with ER 60% and PR 20% documented in the pathology report.",
+      evidence: [
+        { quote: "cT3 cN1 M0, clinical stage IIIA", source: "Consult 2026-09-23" },
+        { quote: "HER2 IHC: 3+ (positive), complete intense circumferential membrane staining in >10% of cells", source: "Pathology 2026-09-08" },
+        { quote: "ER: positive, 60% of tumor cells, moderate intensity", source: "Pathology 2026-09-08" },
+      ],
+    },
+    {
+      id: "NCT07220135-inc-4",
+      status: "pass",
+      rationale: "No breast surgery: PSH none and the 5.4 cm mass is intact on MRI and exam. The 'Oncologic hx: s/p R lumpectomy + SLNB' line is a stale template contradicted by the HPI.",
+      evidence: [
+        { quote: "No prior chemo, anti-HER2 tx, endocrine tx, RT or surgery for cancer.", source: "Consult 2026-09-23" },
+        { quote: "PSH: none.", source: "Consult 2026-09-23" },
+      ],
+    },
+    {
+      id: "NCT07220135-inc-5",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No chemotherapy, anti-HER2, immunotherapy, endocrine therapy or RT for this cancer; letrozole since 9/21 is part of oocyte stimulation, not cancer treatment.",
+      evidence: [
+        { quote: "No prior chemo, anti-HER2 tx, endocrine tx, RT or surgery for cancer.", source: "Consult 2026-09-23" },
+        { quote: "letrozole 5 mg PO daily - ovarian stimulation per REI, started 9/21/2026", source: "Medications" },
+      ],
+      actionNeeded: "Confirm the PI does not count fertility-stimulation letrozole as prior endocrine therapy",
+    },
+    {
+      id: "NCT07220135-inc-6",
+      status: "pass",
+      rationale: "ECOG 0 documented 9/23, valid for a treatment start through 10/21.",
+      evidence: [{ quote: "EXAM: ECOG 0.", source: "Consult 2026-09-23" }],
+    },
+    {
+      id: "NCT07220135-inc-7",
+      status: "pass",
+      rationale: "Bilateral breast MRI 9/11 (valid to 10/30) and mammogram/US 8/28 (valid to 10/16) fall within 49 days of a start the week of 10/12.",
+      evidence: [
+        { quote: "MRI BREASTS BILATERAL W/ AND W/O CONTRAST - Sept 11, 2026", source: "MRI 2026-09-11" },
+        { quote: "DIAGNOSTIC MAMOGRAM + US - 08/28/2026: R breast 10:00 5.2 cm irregular hypoechoic mass, BI-RADS 5.", source: "Mammogram/US 2026-08-28" },
+      ],
+    },
+    {
+      id: "NCT07220135-inc-8",
+      status: "pass",
+      rationale: "The abnormal right axillary node was sampled by FNA on 9/3 and was positive for metastatic carcinoma.",
+      evidence: [{ quote: "B. Positive for metastatic carcinoma, c/w breast primary.", source: "Pathology 2026-09-08" }],
+    },
+    {
+      id: "NCT07220135-inc-9",
+      status: "pass",
+      confidence: "low",
+      rationale: "Co-enrollment in the PRO-HER2 observational registry is completed at study screening; nothing in the record prevents it.",
+      actionNeeded: "Enroll her in the PRO-HER2 registry at screening",
+    },
+    {
+      id: "NCT07220135-inc-10",
+      status: "pass",
+      confidence: "low",
+      rationale: "Primary-tumor tissue exists from the 9/3 US-guided core biopsy; the FFPE block or 16 slides can be requested at screening.",
+      evidence: [{ quote: "Collected: 2026-09-03 | Reported: 2026-09-08", source: "Pathology 2026-09-08" }],
+      actionNeeded: "Request the FFPE block or 16 slides from the 9/3 right-breast core biopsy",
+    },
+    {
+      id: "NCT07220135-inc-11",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Invasive cancer is proven only on the right. The 6 mm left BI-RADS 4 focus is biopsied 9/30; synchronous bilateral disease is allowed if HER2+.",
+      evidence: [{ quote: "ALSO 6 mm enhancing focus L breast, BI-RADS 4 -> MRI-guided bx scheduled 9/30, result pending.", source: "Consult 2026-09-23" }],
+      actionNeeded: "Review the 9/30 left-breast biopsy; if invasive, confirm it is HER2+",
+    },
+    {
+      id: "NCT07220135-inc-12",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No neuropathy recorded and no prior neurotoxic therapy.",
+    },
+    {
+      id: "NCT07220135-inc-13",
+      status: "pass",
+      confidence: "low",
+      rationale: "Not pregnant (serum hCG negative 9/22) and not breastfeeding (G0); she uses condoms, and agreement to institutional contraception guidelines is confirmed at screening.",
+      evidence: [
+        { quote: "hCG (serum) negative", source: "Labs 2026-09-22" },
+        { quote: "Contraception: condoms.", source: "Consult 2026-09-23" },
+      ],
+    },
+    {
+      id: "NCT07220135-inc-14",
+      status: "pass",
+      rationale: "Labs 9/22: ANC 4.1, platelets 255, WBC 6.8, Hgb 13.1, bilirubin 0.4, AST 18, ALT 21, albumin 4.4; echo 9/17 LVEF 63%. Labs cover a start through 10/13, echo through 11/5.",
+      evidence: [
+        { quote: "WBC 6.8 | ANC 4.1 | Hgb 13.1 | Plt 255", source: "Labs 2026-09-22" },
+        { quote: "AST 18 | ALT 21 | T bili 0.4 | Alk phos 62 | Albumin 4.4", source: "Labs 2026-09-22" },
+        { quote: "ECHO 9/17/2026: LVEF 63%, normal LV size and function.", source: "Echo 2026-09-17" },
+      ],
+      actionNeeded: "Repeat CBC and hepatic panel if treatment starts after 10/13",
+    },
+    {
+      id: "NCT07220135-exc-1",
+      status: "pass",
+      rationale: "No investigational agents in use or planned outside this study; medication list has only albuterol, fertility drugs and a prenatal vitamin.",
+      evidence: [{ quote: "prenatal vitamin PO daily", source: "Medications" }],
+    },
+    {
+      id: "NCT07220135-exc-2",
+      status: "pass",
+      rationale: "No distant metastases on PET/CT 9/15.",
+      evidence: [{ quote: "No FDG-avid distant metastases.", source: "PET/CT 2026-09-15" }],
+    },
+    {
+      id: "NCT07220135-exc-3",
+      status: "pass",
+      rationale: "Not inflammatory: no skin changes on exam and no skin involvement on MRI.",
+      evidence: [
+        { quote: "R breast 5 cm firm mobile mass 10 o'clock, no skin changes, no nipple retraction.", source: "Consult 2026-09-23" },
+        { quote: "No skin, nipple, pectoralis or chest wall involvement.", source: "MRI 2026-09-11" },
+      ],
+    },
+    {
+      id: "NCT07220135-exc-4",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No other prior or concurrent malignancy is recorded; the PMH lists only mild asthma.",
+      evidence: [{ quote: "PMH: mild intermitent asthma (albuterol prn, never hospitalized). No cardiac hx. No DM." }],
+    },
+    {
+      id: "NCT07220135-exc-5",
+      status: "pass",
+      confidence: "medium",
+      rationale: "NKDA, and she has never received carboplatin, docetaxel, trastuzumab or pertuzumab.",
+      evidence: [{ quote: "ALLERGIES: NKDA", source: "Allergies" }],
+    },
+    {
+      id: "NCT07220135-exc-6",
+      status: "pass",
+      confidence: "medium",
+      rationale: "No confounding condition or lab abnormality; ovarian stimulation ends at retrieval (~10/5), before the planned start the week of 10/12.",
+      evidence: [{ quote: "oocyte cryopreservation cycle in progress (letrozole + gonadotropins, random start 9/21), retrieval planned ~10/5." }],
+    },
+    {
+      id: "NCT07220135-exc-7",
+      status: "pass",
+      confidence: "medium",
+      rationale: "Not pregnant (hCG negative 9/22); she wants children but is banking oocytes so she can defer pregnancy until after treatment.",
+      evidence: [
+        { quote: "Fertilty: wants biological children.", source: "Consult 2026-09-23" },
+        { quote: "hCG (serum) negative", source: "Labs 2026-09-22" },
+      ],
+      actionNeeded: "Confirm she does not plan to conceive through 120 days after the last dose",
+    },
+  ],
+);

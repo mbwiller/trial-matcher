@@ -6,6 +6,7 @@ import type {
   PatientProfile,
   ReviewDecision,
   ReviewState,
+  SearchTrace,
   Trial,
   TrialMatch,
   TrialSearchResponse,
@@ -14,6 +15,7 @@ import { DEMO_PATIENTS, type DemoPatient } from "@/lib/demo/patients";
 import { formatPhase } from "@/lib/ctgov/format";
 import { errorMessage, extractRecord, matchTrial, searchTrials } from "./api";
 import { TIER_ORDER, phaseRank } from "./labels";
+import type { MatrixGroup } from "./insights";
 
 /* ---------------------------------------------------------------------------
    Types
@@ -24,8 +26,11 @@ export const STAGES: Stage[] = ["record", "profile", "shortlist"];
 export const STAGE_LABELS: Record<Stage, string> = {
   record: "Record",
   profile: "Profile",
-  shortlist: "Shortlist",
+  shortlist: "Trials",
 };
+
+/** The two faces of the Trials stage: the screening run (how the list was made) and the results dashboard. */
+export type TrialsView = "run" | "results";
 
 export type MatchStatus = "pending" | "running" | "done" | "error";
 export type SortKey = "rank" | "score" | "phase";
@@ -56,12 +61,25 @@ interface WorkspaceData {
   demoPatientId?: string;
   patientLabel?: string;
   profile?: PatientProfile;
+  /** The profile exactly as the extractor produced it, kept so clinician edits can be discarded. */
+  extractedProfile?: PatientProfile;
   extracting: boolean;
   extractError?: string;
   searching: boolean;
   searchError?: string;
   trials: Trial[];
   trialsMeta?: TrialsMeta;
+  /** How the candidate set was produced (requests, harvested studies, pre-screen decisions). */
+  trace?: SearchTrace;
+  /** Bumped for every new search so the run view replays from the start. */
+  runId: number;
+  view: TrialsView;
+  /** Trial open in the dashboard's detail panel. */
+  selected?: string;
+  /** Source-record drawer on the dashboard. */
+  recordOpen: boolean;
+  /** Criteria domain the detail panel is narrowed to (set from the eligibility matrix). */
+  criteriaFocus?: MatrixGroup;
   matches: Record<string, TrialMatch>;
   matchStatus: Record<string, MatchStatus>;
   matching: boolean;
@@ -69,18 +87,26 @@ interface WorkspaceData {
   reviews: Record<string, ReviewState>;
   activeEvidence?: Evidence[];
   filters: WorkspaceFilters;
-  expanded: Record<string, boolean>;
 }
 
 interface WorkspaceActions {
   setRecordText: (text: string) => void;
   loadSample: (patient: DemoPatient) => void;
   extract: () => Promise<void>;
+  /** Replace the profile with a clinician-edited version. Clears everything screened against the old one. */
+  saveProfile: (profile: PatientProfile) => void;
+  /** Discard clinician edits and go back to the extracted profile. */
+  resetProfile: () => void;
   confirmProfile: () => Promise<void>;
   matchAll: () => Promise<void>;
   retryMatch: (nctId: string) => void;
   setReview: (nctId: string, decision: ReviewDecision) => void;
-  toggleExpanded: (nctId: string) => void;
+  setView: (view: TrialsView) => void;
+  selectTrial: (nctId: string | undefined, focus?: MatrixGroup) => void;
+  setCriteriaFocus: (focus: MatrixGroup | undefined) => void;
+  /** Open the source record, optionally scrolled to and highlighting these quotes. */
+  openRecord: (evidence?: Evidence[]) => void;
+  closeRecord: () => void;
   setFilters: (patch: Partial<WorkspaceFilters>) => void;
   resetFilters: () => void;
   setActiveEvidence: (evidence?: Evidence[]) => void;
@@ -112,12 +138,19 @@ function initialData(): WorkspaceData {
     demoPatientId: undefined,
     patientLabel: undefined,
     profile: undefined,
+    extractedProfile: undefined,
     extracting: false,
     extractError: undefined,
     searching: false,
     searchError: undefined,
     trials: [],
     trialsMeta: undefined,
+    trace: undefined,
+    runId: 0,
+    view: "run",
+    selected: undefined,
+    recordOpen: false,
+    criteriaFocus: undefined,
     matches: {},
     matchStatus: {},
     matching: false,
@@ -125,7 +158,6 @@ function initialData(): WorkspaceData {
     reviews: {},
     activeEvidence: undefined,
     filters: defaultFilters(),
-    expanded: {},
   };
 }
 
@@ -134,23 +166,31 @@ function clearedResults(): Pick<
   WorkspaceData,
   | "trials"
   | "trialsMeta"
+  | "trace"
+  | "view"
+  | "selected"
+  | "recordOpen"
+  | "criteriaFocus"
   | "matches"
   | "matchStatus"
   | "matching"
   | "matchError"
   | "reviews"
-  | "expanded"
   | "searchError"
 > {
   return {
     trials: [],
     trialsMeta: undefined,
+    trace: undefined,
+    view: "run",
+    selected: undefined,
+    recordOpen: false,
+    criteriaFocus: undefined,
     matches: {},
     matchStatus: {},
     matching: false,
     matchError: undefined,
     reviews: {},
-    expanded: {},
     searchError: undefined,
   };
 }
@@ -210,6 +250,7 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
       set((s) => ({
         ...clearedResults(),
         profile,
+        extractedProfile: profile,
         patientLabel: profile.label ?? patientLabel,
         extracting: false,
         stage: "profile",
@@ -221,6 +262,35 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
       if (token !== generation) return;
       set({ extracting: false, extractError: errorMessage(error) });
     }
+  },
+
+  saveProfile: (profile) => {
+    if (!get().profile) return;
+    generation++; // any search or screening still running was for the old profile
+    set((s) => ({
+      ...clearedResults(),
+      profile: { ...profile, editedAt: new Date().toISOString() },
+      searching: false,
+      stage: "profile",
+      furthestStage: "profile",
+      activeEvidence: undefined,
+      filters: { ...s.filters, phases: [], onlyShortlisted: false },
+    }));
+  },
+
+  resetProfile: () => {
+    const { extractedProfile } = get();
+    if (!extractedProfile) return;
+    generation++;
+    set((s) => ({
+      ...clearedResults(),
+      profile: extractedProfile,
+      searching: false,
+      stage: "profile",
+      furthestStage: "profile",
+      activeEvidence: undefined,
+      filters: { ...s.filters, phases: [], onlyShortlisted: false },
+    }));
   },
 
   confirmProfile: async () => {
@@ -241,6 +311,8 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
           source: res.source,
           totalAvailable: res.totalAvailable,
         },
+        trace: res.trace,
+        runId: s.runId + 1,
         matchStatus,
         searching: false,
         stage: "shortlist",
@@ -312,13 +384,15 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
       if (token !== generation) return;
     } while (takeNext());
 
-    set({
+    set((s) => ({
       matching: false,
       matchError:
         failures > 0
           ? `${failures} ${failures === 1 ? "trial" : "trials"} could not be screened. ${lastError}`.trim()
           : undefined,
-    });
+      // Open the best-ranked trial in the detail panel unless the clinician already picked one.
+      selected: s.selected ?? rankTrials(s.trials, s.matches, s.matchStatus, s.reviews)[0]?.trial.nctId,
+    }));
   },
 
   retryMatch: (nctId) => {
@@ -337,9 +411,17 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
     }));
   },
 
-  toggleExpanded: (nctId) => {
-    set((s) => ({ expanded: { ...s.expanded, [nctId]: !s.expanded[nctId] } }));
+  setView: (view) => set({ view }),
+
+  selectTrial: (nctId, focus) => set({ selected: nctId, criteriaFocus: focus }),
+
+  setCriteriaFocus: (focus) => set({ criteriaFocus: focus }),
+
+  openRecord: (evidence) => {
+    set({ recordOpen: true, activeEvidence: evidence && evidence.length > 0 ? evidence : undefined });
   },
+
+  closeRecord: () => set({ recordOpen: false, activeEvidence: undefined }),
 
   setFilters: (patch) => {
     set((s) => ({ filters: { ...s.filters, ...patch } }));
@@ -355,7 +437,7 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
     const { furthestStage, stage: current } = get();
     if (stage === current) return;
     if (stageIndex(stage) > stageIndex(furthestStage)) return;
-    set({ stage, activeEvidence: undefined });
+    set({ stage, activeEvidence: undefined, recordOpen: false });
   },
 
   reset: () => {
@@ -365,7 +447,7 @@ export const useWorkspace = create<WorkspaceState>()((set, get) => ({
 }));
 
 /* ---------------------------------------------------------------------------
-   Derived data (pure functions + memoised hooks)
+   Derived data (pure functions + memoized hooks)
    --------------------------------------------------------------------------- */
 
 export interface RankedEntry {

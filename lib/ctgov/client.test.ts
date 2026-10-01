@@ -173,7 +173,7 @@ describe("requests", () => {
     await expect(fetchStudy("NCT99999999")).rejects.toMatchObject({ kind: "http", status: 404 });
   });
 
-  it("normalises and de-duplicates search results", async () => {
+  it("normalizes and de-duplicates search results", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ studies: [study("NCT00000001"), study("NCT00000001"), study("NCT00000002"), {}] }));
     const trials = await searchTrials({ cond: "breast cancer" });
     expect(trials.map((t) => t.nctId)).toEqual(["NCT00000001", "NCT00000002"]);

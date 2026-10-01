@@ -9,12 +9,14 @@ import type { Criterion, CriterionCategory, CriterionType } from "@/lib/types";
  * "Exclusion Criteria:" header. Escaped characters (`\<`, `\>`) appear
  * because the registry markdown-escapes comparison operators.
  *
- * Strategy: normalise → split into inclusion/exclusion sections (recognising
+ * Strategy: normalize → split into inclusion/exclusion sections (recognizing
  * cohort-prefixed and sentence-style headers) → build an item tree per
  * section (bullets, numbering, sub-bullets, colon-terminated stems followed
  * by a list, continuation paragraphs) → render: sub-items fold into their
  * parent unless the result would be unreasonably long, in which case the
- * list is flattened into one criterion per item → clean → categorise.
+ * list is flattened into one criterion per item; a paragraph that only
+ * announces a list ("must meet all of the following:", "Women who:") never
+ * becomes a criterion itself → clean → categorize.
  *
  * Fidelity notes:
  *   - A registry entry with no exclusion section (e.g. SWOG S1501, the
@@ -266,8 +268,24 @@ function fold(node: Node): string {
   return own.replace(/[:;,]\s*$/, "") + ": " + kids.join("; ");
 }
 
+/** A stem that only announces a list: "Subjects must meet all of the following criteria:", "Eligible patients are those with any of the following:". */
+const PREAMBLE_STEM_RE =
+  /\b(?:all|any|each|one|none) of the following\b|\bthe following (?:criteria|conditions|requirements|characteristics)\b|\bfollowing (?:inclusion|exclusion|eligibility) criteria\b|\bcriteria (?:apply|are met|must be met|below)\b|\b(?:must|should|need to) (?:meet|fulfil+|satisfy)\b/i;
+/** A stem that is the grammatical subject of every item in its list: "Women who:", "Patients with:", "Those who have:". */
+const SUBJECT_STEM_RE = /\b(?:who|that|with|without|must|should|have|has|having|are|is|if|be)\s*$/i;
+
 function render(node: Node): string[] {
   if (!node.children.length) return [tidy(node.text)];
+  if (node.paragraph && node.children.length >= 2) {
+    // A paragraph stem over a list is section scaffolding, not a criterion with details:
+    // every item is its own criterion.
+    const stem = tidy(node.text).replace(/[:;,]\s*$/, "").trim();
+    if (PREAMBLE_STEM_RE.test(stem)) return node.children.flatMap(render);
+    if (stem.split(" ").length <= 6 && SUBJECT_STEM_RE.test(stem)) {
+      // "Patients must:" + "Have metastatic disease" → "Patients must have metastatic disease" (acronyms keep their case).
+      return node.children.flatMap(render).map((item) => `${stem} ${/^[A-Z][a-z]/.test(item) ? item[0].toLowerCase() + item.slice(1) : item}`);
+    }
+  }
   const folded = fold(node);
   if (folded.length <= FOLD_MAX) return [folded];
   // Too long to read as one criterion: flatten into the stem plus one criterion per sub-item.
@@ -340,7 +358,7 @@ function renderSection(lines: string[]): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// Categorisation (heuristic)
+// Categorization (heuristic)
 // ---------------------------------------------------------------------------
 
 export function categorizeCriterion(text: string): CriterionCategory {

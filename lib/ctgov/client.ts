@@ -4,7 +4,7 @@ import { normalizeStudy } from "./normalize";
 /**
  * Thin client for the ClinicalTrials.gov API v2 (https://clinicaltrials.gov/data-api/api).
  *
- * Verified behaviour (Sept 2026):
+ * Verified behavior (Sept 2026):
  *   - `query.cond` / `query.term` take Essie expressions; space-separated words
  *     are ANDed, `OR`, parentheses and "quoted phrases" work. Trailing `+`/`-`
  *     on a token is ignored ("HER2+" ≡ "HER2").
@@ -37,6 +37,7 @@ export const STUDY_FIELDS: readonly string[] = [
   "Condition",
   "Keyword",
   "StudyType",
+  "DesignPrimaryPurpose",
   "Phase",
   "EnrollmentCount",
   "InterventionType",
@@ -174,7 +175,7 @@ export async function requestJson(url: string, options: CtgovRequestOptions = {}
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (external?.aborted) {
-      throw lastError ?? new CtgovError("ClinicalTrials.gov request was cancelled before it started.", { kind: "network", url });
+      throw lastError ?? new CtgovError("ClinicalTrials.gov request was canceled before it started.", { kind: "network", url });
     }
     if (attempt > 0) await sleep(RETRY_DELAY_MS * attempt);
 
@@ -221,12 +222,12 @@ export async function requestJson(url: string, options: CtgovRequestOptions = {}
         }
         throw cause;
       }
-      const cancelled = external?.aborted === true;
+      const canceled = external?.aborted === true;
       const message = cause instanceof Error ? cause.message : String(cause);
       const err = timedOut
         ? new CtgovError(`ClinicalTrials.gov did not respond within ${timeoutMs} ms.`, { kind: "timeout", url, retryable: true, cause })
-        : cancelled
-          ? new CtgovError("ClinicalTrials.gov request was cancelled.", { kind: "network", url, retryable: false, cause })
+        : canceled
+          ? new CtgovError("ClinicalTrials.gov request was canceled.", { kind: "network", url, retryable: false, cause })
           : new CtgovError(`Could not reach ClinicalTrials.gov: ${message}`, { kind: "network", url, retryable: true, cause });
       if (err.retryable && attempt < retries) {
         lastError = err;
@@ -273,7 +274,7 @@ export async function fetchStudy(nctId: string, options: CtgovRequestOptions = {
   return json;
 }
 
-/** Search and normalise one page of studies into Trial objects (de-duplicated by NCT id). */
+/** Search and normalize one page of studies into Trial objects (de-duplicated by NCT id). */
 export async function searchTrialsPage(
   params: CtgovSearchParams,
   options: CtgovRequestOptions = {},
@@ -290,12 +291,12 @@ export async function searchTrialsPage(
   return { trials, totalCount: page.totalCount, nextPageToken: page.nextPageToken };
 }
 
-/** Search and normalise via normalizeStudy(). */
+/** Search and normalize via normalizeStudy(). */
 export async function searchTrials(params: CtgovSearchParams, options: CtgovRequestOptions = {}): Promise<Trial[]> {
   return (await searchTrialsPage(params, options)).trials;
 }
 
-/** Fetch and normalise one study. */
+/** Fetch and normalize one study. */
 export async function fetchTrial(nctId: string, options: CtgovRequestOptions = {}): Promise<Trial> {
   return normalizeStudy(await fetchStudy(nctId, options));
 }

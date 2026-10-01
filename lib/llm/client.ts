@@ -43,7 +43,7 @@ export function hasLLM(): boolean {
 
 let client: Anthropic | undefined;
 
-/** Memoised zero-arg client (credentials come from the environment). */
+/** Memoized zero-arg client (credentials come from the environment). */
 export function getClient(): Anthropic {
   client ??= new Anthropic();
   return client;

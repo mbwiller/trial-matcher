@@ -28,7 +28,12 @@ soft, slowly-moving color field.
 6. **Provenance everywhere.** Every extracted value and every verdict can show
    the verbatim quote it came from. Evidence is one hover away.
 7. **Motion is functional.** 180–320ms, ease-out, transform + opacity only.
-   No bounce, no parallax, no attention-seeking loaders.
+   No bounce, no parallax, no attention-seeking loaders. Where the product
+   shows its own process (the screening run, the hero figure) motion paces real
+   data; it never stands in for work that is not happening.
+8. **Glass box.** Nothing the engine does is hidden: every request, every
+   study set aside and why, every verdict with its quote, and the arithmetic
+   behind every score are one click away.
 
 ## 3. Tokens (defined in `app/globals.css`)
 
@@ -54,7 +59,7 @@ blobs (teal, blue) at very low saturation. Glass panels get their life from it.
 | `glass-strong` | Top bar, sticky action bars, modals: `rgba(255,255,255,.8)`. |
 | `glass-soft` | Nested cards inside a `glass` panel: `rgba(255,255,255,.38)`, no blur. |
 | `glass-sheen` | Adds a specular top gradient (use on hero panels and score rings only). |
-| `hairline` | 1px `ink-200`-ish separator via box-shadow (no layout cost). |
+| `hairline` | 1px `ink-200`-ish separator via box-shadow (no layout cost). `hairline-t`, `hairline-b`, `hairline-l` draw one edge. |
 
 ### Radius
 
@@ -99,62 +104,146 @@ Use these; do not re-invent them in feature code.
 - `EmptyState` — icon + title + description, centered.
 - `Divider` — hairline.
 - `Kbd` — keyboard hint (rarely).
+- `Toggle` — small labeled switch (filters).
+- `Input`, `Select`, `Textarea` — form controls for editing structured values: 36px, `rounded-field`, faint white fill with a hairline, accent ring on focus; `mono` for dates and values.
+- `EditedTag` — marks a value the clinician entered or corrected; takes the place of the evidence trigger (also via `Field`'s `edited` prop).
+- `Tooltip` — short hover hint; `align="end"` for triggers near the right edge of the viewport.
 
 ## 5. Screens
 
 ### Landing (`/`)
-Single quiet hero. Eyebrow "Clinical trial matching", display headline
-"The registry, read for you.", two-sentence sub-copy, primary CTA "Open
-workspace" + ghost "How it works". Below: a wide glass panel with a static
-mock of the shortlist (real components, demo data) tilted 0°, no 3D. Then three
-small glass cards: *Structures the record*, *Matches the fine print*,
-*Clinician in the loop*. Footer: one line, ink-400.
+Says what the problem is and shows the product working, with as few words as
+possible. Everything on it is computed on the server from the registry snapshot
+and the sample patient's reviews (`components/landing/data.ts`); nothing is
+hard-coded or illustrative.
+
+1. **Hero.** Two columns. Left: eyebrow, display headline "The registry, read
+   for you.", one sentence, primary CTA "Open workspace" + ghost "Watch a
+   screening run". Right: the hero figure, a glass-sheen panel that plays one
+   screening run in miniature: one dot per harvested study, the four funnel
+   numbers, the top three results. It renders complete and then replays.
+2. **The problem.** Three figures set large (56–64px), each with one line and
+   its source. No cards: whitespace and hairline dividers only.
+3. **Why it is hard.** A glass panel pairing three lines of the chart with the
+   three protocol criteria they answer, joined by a hairline connector, each
+   with its `VerdictPill`. Closes with the one sentence on what the model does
+   and what the clinician keeps.
+4. **How it works.** Three steps in one glass panel, each led by a small
+   vignette (profile fields, set-aside reasons, verdict cells) rather than text.
+5. **Sample patients.** A glass-sheen panel of patient cards that deep-link to
+   `/workspace?sample=<id>`.
+6. Footer: one line, ink-400.
 
 ### Workspace (`/workspace`)
-Top bar (`glass-strong`, 56px): mark + wordmark left, `Stepper` centered,
-right: engine badge (`Demo data` / `Live · claude-opus-5-5`), patient label when
-present. Content max-width 1180px, 24px gutters.
+Top bar (`glass-strong`, 56px): mark + wordmark left, `Stepper` centered
+(Record → Profile → Trials), right: patient label, engine badge (`Demo data` /
+`Live · <model id from /api/status>`). Content max-width 1180px for Record and
+Profile; the Trials stage is a dashboard and widens to 1480px.
 
 **Stage 1 — Record.** Centered column (max 760px). Eyebrow "Patient record",
-title "Paste the record.", helper line. A tall glass textarea (min 380px)
-with a subtle inner shadow and mono-ish line-height for notes. Under it, a row
-of sample chips ("Load sample · Margaret H. — HR+/HER2-low, PIK3CA") and a
-primary button "Structure record". A PHI notice in `ink-400` small.
+title "Paste the record.", helper line. A tall glass textarea (min 380px).
+Under it, the privacy line and the primary button "Structure record"; then
+"Or start from a sample patient": a 4-column grid of patient cards (name,
+age/sex, subtype, two details).
 
 **Stage 2 — Profile review.** Two columns (5/7). Left, sticky: the source
-record in a glass panel with evidence spans highlighted (`accent-100`
-background, `accent-700` text, 2px radius) when a field is hovered/selected.
-Right: sections — *Diagnosis*, *Biomarkers*, *Treatment history* (vertical
-timeline with dates on the left), *Performance & labs*, *Open questions*. Each
-value is a `Field`; low-confidence values show a `warn` dot. Bottom sticky bar
-(`glass-strong`): "Looks right — find trials" primary + "Edit" ghost.
+record in a glass panel with evidence spans highlighted when a field is
+hovered. Right: *Diagnosis*, *Biomarkers*, *Treatment history*, *Performance &
+labs*, *Open questions*. Bottom sticky bar (`glass-strong`): "Looks right —
+find trials" primary, "Edit profile" secondary, "Back to record" ghost.
 
-**Stage 3 — Shortlist.** Left rail (300px, sticky): compact patient summary
-card, then filters (tier toggles, phase, "hide ineligible", sort). Main:
-summary strip ("22 trials screened · 4 strong · 6 possible · 12 ineligible"),
-then ranked `TrialCard`s. While matching, cards appear as skeletons and fill in
-as verdicts stream; a slim progress line shows "Screening 9 / 22".
+*Edit mode.* "Edit profile" swaps the read sections for forms over the same
+sections (summary, diagnosis, biomarkers, treatment history, performance and
+labs, comorbidities and medications, open questions); the source record stays
+beside them. Edits go into a draft: the bar becomes "Cancel" + "Save changes"
+and nothing is applied until saved. A value the clinician changed is shown with
+an `EditedTag` where its quote icon was: it no longer points at the record, and
+the reviewer is told to treat it as a stated fact. Putting a value back
+restores its quote. After saving, the header shows how many values were edited,
+with "Discard edits" to return to the extraction. Editing a sample patient
+retires its precomputed reviews, and the panel says so.
 
-**TrialCard.** Rank number (mono, ink-400) · `ScoreRing` · title (section
-title style, 2 lines max) · meta row of badges (Phase, Recruiting, `NCT…` mono,
-sponsor) · headline · counts row ("● 9 met · ● 1 not met · ● 2 to confirm").
-Actions right: Shortlist (primary-ghost), Dismiss, Flag; external link to
-ClinicalTrials.gov. Expand reveals *Why this ranks here* (reasoning), then
-*Inclusion* and *Exclusion* lists: each row = `VerdictPill` + criterion text +
-rationale (ink-500) + evidence popover trigger; `unknown` rows show the
-`actionNeeded` in `warn-700`.
+**Stage 3 — Trials.** Two views of the same run.
 
-## 6. Copy voice
+*Screening run* (shown first, replayable): how the list was made.
+- Header + pipeline strip: Registry harvest → Pre-screen → Criterion review →
+  Ranked shortlist, each with its live count.
+- **Registry harvest** panel: the request(s) made to ClinicalTrials.gov with a
+  chip per page, then the registry matrix: one 7px dot per harvested study.
+  Dots appear as pages land, dim as the gate that stops them is applied, and
+  the survivors turn accent (`accent-300` relevant, `accent-600` sent to
+  review). Hovering a dot names the study and the reason for its outcome.
+- **Pre-screen** panel: one row per gate with its count and a thin neutral bar.
+- **Criterion review** panel: a tile per reviewed study with one cell per
+  criterion (inclusion, a gap, exclusion) that fills with its verdict color;
+  the reviewer log beside it surfaces blockers, open items and quoted evidence
+  as they are revealed; the reviewer's instructions are one click away.
+- Playback only paces real data (see `run/usePlayback.ts`): a tile never
+  reveals before its review has arrived. `prefers-reduced-motion` shows the
+  finished state immediately. "Skip to results" is always available.
+
+*Results* (the dashboard): what to do with it.
+- **Patient banner** (`glass-strong`): initials, name, demographics, then a
+  definition row: diagnosis, stage and setting, systemic therapy, ECOG,
+  biomarkers. Actions: "Source record", "Edit profile".
+- **Funnel strip**: harvested → relevant → reviewed, then the hero figure
+  ("Strong or possible") with the tier bar, then open items and the link back
+  to the screening run.
+- **Worklist** (left) + **trial detail** (right, sticky, 400–460px). Worklist:
+  one filter row above the table (tier chips, shortlisted only, phase, sort,
+  copy shortlist); rows are rank · `ScoreRing` · title + NCT/phase/sponsor ·
+  tier + verdict bar + counts · next step (the blocker, or what to confirm) ·
+  decision (shortlist / flag / dismiss). The selected row carries a 2px accent
+  rule and `accent-50` wash.
+- **Trial detail**: badges, title, score ring with the score's arithmetic in
+  mono beneath the headline, verdict bar, the one primary button ("Shortlist"),
+  then *Blocking*, *To confirm before referral*, *Why it ranks here*,
+  *Criteria* (filter chips; each row = pill + confidence + criterion +
+  rationale + inline quotes + action), *About the study*, *Audit trail*
+  (reviewer, date, registry record, pre-screen rank and signals, eligibility
+  text as published). Clicking a quote opens the source record docked on the
+  left with the passage highlighted.
+- **Eligibility matrix**: trials × domains, each cell the worst verdict in the
+  domain as a tinted cell with a glyph (✓ ? ✕ –). Selecting a cell opens the
+  trial filtered to that domain.
+- **Workup that unlocks trials**: open items across strong and possible
+  matches, grouped by the test that would close them.
+
+## 6. Data marks
+
+The dashboard and the screening run draw small charts. They follow one set of
+rules so they read as part of the instrument, not decoration.
+
+- **Form first.** A single number is a stat tile, not a chart. One figure per
+  view is the hero (40px); the rest are 26px. Big standalone figures use
+  proportional numerals; `tnum` is for columns and live counters.
+- **Color by job.** Verdict marks use the status steps `pass-500`,
+  `warn-500`, `fail-500` and `ink-200` (not applicable). Tiers reuse the
+  `ScoreRing` colors. Funnel and registry dots use the accent ramp
+  (`accent-300` → `accent-600`) because the stages are ordered. Nominal bars
+  (set-aside reasons) are one neutral color, `ink-300`.
+- **Color is never the only channel.** Green and amber are close under
+  color-vision deficiency, so every bar sits beside labeled counts and every
+  matrix cell carries a glyph.
+- **Thin marks, surface gaps.** Bars are 4–6px; touching segments are separated
+  by a 2px gap in the surface color, never by a border.
+- **Text wears ink.** Labels, counts and legends use `ink-*`; identity comes
+  from the dot or bar beside them.
+- **One filter row** above the content it scopes; never inside a chart.
+- **Hover enhances, never gates.** Anything a tooltip shows is also reachable
+  in the table or the detail panel.
+
+## 7. Copy voice
 
 Short, declarative, clinical. Sentence case everywhere. No exclamation marks.
 Buttons are verbs ("Structure record", "Find trials", "Shortlist"). Empty
 states explain what will appear. Never say "AI magic"; say what was read and
 why it matched.
 
-## 7. Do / Don't
+## 8. Do / Don't
 
 - Do use `ink-*` for all text; never pure black or Tailwind gray/zinc/slate.
-- Do keep one primary button per screen.
+- Do keep one primary button per screen (on the dashboard it is "Shortlist" in the trial detail).
 - Don't use gradients on text or buttons. The only gradients are the color field and the glass sheen.
 - Don't use drop shadows on text, icons or badges.
 - Don't animate layout properties (width/height/top). Use transform/opacity.

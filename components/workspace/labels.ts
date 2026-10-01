@@ -8,9 +8,11 @@ import type {
   PatientProfile,
   Sex,
   Trial,
+  TrialMatch,
   TreatmentCategory,
   TreatmentIntent,
   TreatmentStatus,
+  VerdictStatus,
 } from "@/lib/types";
 import type { BadgeTone } from "@/components/ui";
 import { formatDate } from "@/lib/ctgov/format";
@@ -63,7 +65,7 @@ export const BIOMARKER_STATUS_LABEL: Record<BiomarkerStatus, string> = {
   unknown: "Unknown",
 };
 
-/** Semantic colour is earned: biomarkers only use neutral / accent / info. */
+/** Semantic color is earned: biomarkers only use neutral / accent / info. */
 export function biomarkerTone(status: BiomarkerStatus): BadgeTone {
   switch (status) {
     case "positive":
@@ -174,7 +176,7 @@ export function tierTone(tier: MatchTier): BadgeTone {
   }
 }
 
-/** Mirrors ScoreRing's arc colours. */
+/** Mirrors ScoreRing's arc colors. */
 export const TIER_DOT: Record<MatchTier, string> = {
   strong: "bg-accent-500",
   possible: "bg-warn-500",
@@ -260,4 +262,24 @@ export function formatInt(n: number): string {
 
 export function plural(n: number, singular: string, pluralForm = `${singular}s`): string {
   return `${formatInt(n)} ${n === 1 ? singular : pluralForm}`;
+}
+
+/* ---------------------------------------------------------------------------
+   Verdict marks (bars, cells). Color is never the only channel: every mark
+   sits next to a labeled count, a glyph or a VerdictPill.
+   --------------------------------------------------------------------------- */
+
+export const VERDICT_BG: Record<VerdictStatus, string> = {
+  pass: "bg-pass-500",
+  fail: "bg-fail-500",
+  unknown: "bg-warn-500",
+  "not-applicable": "bg-ink-200",
+};
+
+/** Engine that produced a match, for provenance lines. */
+export function engineLabel(match: Pick<TrialMatch, "source" | "modelId"> | undefined): string {
+  if (!match) return "Reviewer";
+  if (match.source === "llm") return match.modelId ?? "Live model";
+  if (match.source === "demo") return "Precomputed review (demo data)";
+  return "Offline keyword screen";
 }

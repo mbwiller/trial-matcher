@@ -1,11 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { ArrowLeft, FileText, Search } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { ArrowLeft, FileText, Info, Pencil, RotateCcw, Search } from "lucide-react";
 import {
   Badge,
   Button,
   Divider,
+  EditedTag,
   EmptyState,
   EvidencePopover,
   Eyebrow,
@@ -13,6 +14,7 @@ import {
   GlassPanel,
   cn,
 } from "@/components/ui";
+import { useEngineStatus } from "@/components/shell";
 import type { Confidence, Evidence, Extracted, PatientProfile } from "@/lib/types";
 import { formatDate } from "@/lib/ctgov/format";
 import { useWorkspace } from "./store";
@@ -20,6 +22,8 @@ import { RecordViewer } from "./RecordViewer";
 import { BiomarkerTable } from "./BiomarkerTable";
 import { TreatmentTimeline } from "./TreatmentTimeline";
 import { ActionBar } from "./ActionBar";
+import { ProfileEditor } from "./ProfileEditor";
+import { cleanProfile, countEdited } from "./profileEdits";
 import {
   CNS_LABEL,
   MENOPAUSAL_LABEL,
@@ -46,11 +50,13 @@ function lowest(...values: Array<Confidence | undefined>): Confidence {
 function combine<T>(...fields: Array<Extracted<T> | undefined>): {
   evidence: Evidence[];
   confidence: Confidence;
+  edited: boolean;
 } {
   const present = fields.filter((f): f is Extracted<T> => f !== undefined);
   return {
     evidence: present.flatMap((f) => f.evidence),
     confidence: lowest(...present.map((f) => f.confidence)),
+    edited: present.some((f) => f.edited),
   };
 }
 
@@ -74,6 +80,7 @@ function ExtractedField<T>({ label, field, render, mono, note, className, onActi
       confidence={field.confidence}
       evidence={field.evidence}
       note={note ?? field.note}
+      edited={field.edited}
       mono={mono}
       className={className}
       onActiveChange={(active) => onActive(active ? field.evidence : undefined)}
@@ -151,16 +158,22 @@ function ChipList({
               key={`${item.value}-${i}`}
               className={cn(
                 "inline-flex h-8 max-w-full items-center gap-1 rounded-chip glass-soft pl-3 text-[13px] text-ink-800",
-                item.evidence.length > 0 ? "pr-1" : "pr-3",
+                item.evidence.length > 0 && !item.edited ? "pr-1" : item.edited ? "pr-1.5" : "pr-3",
               )}
             >
               <span className="truncate">{item.value}</span>
-              <ConfidenceDot confidence={item.confidence} />
-              <EvidencePopover
-                evidence={item.evidence}
-                align="left"
-                onActiveChange={(active) => onActive(active ? item.evidence : undefined)}
-              />
+              {item.edited ? (
+                <EditedTag />
+              ) : (
+                <>
+                  <ConfidenceDot confidence={item.confidence} />
+                  <EvidencePopover
+                    evidence={item.evidence}
+                    align="left"
+                    onActiveChange={(active) => onActive(active ? item.evidence : undefined)}
+                  />
+                </>
+              )}
             </li>
           ))}
         </ul>
@@ -176,6 +189,11 @@ export function ProfileStage() {
   const activeEvidence = useWorkspace((s) => s.activeEvidence);
   const setActiveEvidence = useWorkspace((s) => s.setActiveEvidence);
   const confirmProfile = useWorkspace((s) => s.confirmProfile);
+  const saveProfile = useWorkspace((s) => s.saveProfile);
+  const resetProfile = useWorkspace((s) => s.resetProfile);
+  const engine = useEngineStatus();
+  /** The working copy while editing; `null` when the profile is being read. */
+  const [draft, setDraft] = useState<PatientProfile | null>(null);
   const searching = useWorkspace((s) => s.searching);
   const searchError = useWorkspace((s) => s.searchError);
   const goToStage = useWorkspace((s) => s.goToStage);
@@ -212,6 +230,18 @@ export function ProfileStage() {
     .filter(Boolean)
     .join(" · ");
   const abnormalLabs = profile.labs.filter((l) => l.flag === "abnormal").length;
+
+  const editing = draft !== null;
+  const editedCount = profile.editedAt ? countEdited(profile) : 0;
+  const cleaned = draft ? cleanProfile(draft) : undefined;
+  const dirty = cleaned !== undefined && JSON.stringify(cleaned) !== JSON.stringify(profile);
+  const valid = cleaned !== undefined && cleaned.diagnosis.primary.value.length > 0;
+
+  const saveDraft = () => {
+    if (cleaned && dirty && valid) saveProfile(cleaned);
+    setDraft(null);
+    setActiveEvidence(undefined);
+  };
 
   return (
     <div className="flex flex-1 flex-col">
@@ -251,12 +281,54 @@ export function ProfileStage() {
                   )}
                 </h1>
               </div>
-              <SourceBadge profile={profile} />
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                {profile.editedAt && (
+                  <Badge tone="accent" dot>
+                    {plural(editedCount, "value")} edited by you
+                  </Badge>
+                )}
+                <SourceBadge profile={profile} />
+              </div>
             </div>
-            <GlassPanel variant="soft" size="card" padding="sm" className="mt-4">
-              <p className="text-[14.5px] leading-relaxed text-ink-800 text-pretty">{profile.summary}</p>
-            </GlassPanel>
+            {!editing && (
+              <GlassPanel variant="soft" size="card" padding="sm" className="mt-4">
+                <p className="text-[14.5px] leading-relaxed text-ink-800 text-pretty">{profile.summary}</p>
+              </GlassPanel>
+            )}
+            {editing && (
+              <p className="mt-3 text-[13.5px] leading-relaxed text-ink-500 text-pretty">
+                Correct anything the extraction got wrong, or add what the record leaves out. A value you change is marked as entered by you and
+                no longer points at a quote.
+              </p>
+            )}
+            {!editing && profile.editedAt && (
+              <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2 rounded-field bg-accent-50 px-3.5 py-2.5 text-[13px] leading-snug text-accent-900">
+                <span className="flex min-w-0 items-start gap-2">
+                  <Info className="mt-[2px] size-3.5 shrink-0 text-accent-700" aria-hidden />
+                  <span>
+                    {profile.source === "demo"
+                      ? engine?.llm
+                        ? "This sample profile has been edited, so its precomputed reviews no longer apply. Trials will be reviewed again against your version."
+                        : "This sample profile has been edited, so its precomputed reviews no longer apply. Without an API key, trials are re-screened by the offline keyword screen, which is far less precise."
+                      : "Trials are screened against your edited version of the profile."}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={resetProfile}
+                  className="inline-flex shrink-0 items-center gap-1 rounded-md font-medium text-accent-800 transition-colors hover:text-accent-900"
+                >
+                  <RotateCcw className="size-3.5" aria-hidden />
+                  Discard edits
+                </button>
+              </div>
+            )}
           </GlassPanel>
+
+          {draft ? (
+            <ProfileEditor base={profile} draft={draft} setDraft={setDraft} />
+          ) : (
+            <>
 
           <SectionPanel title="Diagnosis">
             <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -267,6 +339,7 @@ export function ProfileStage() {
                   value={histologyValue}
                   confidence={histology.confidence}
                   evidence={histology.evidence}
+                  edited={histology.edited}
                   onActiveChange={(a) => onActive(a ? histology.evidence : undefined)}
                 />
               ) : (
@@ -299,6 +372,7 @@ export function ProfileStage() {
                   }
                   confidence={stage.confidence}
                   evidence={stage.evidence}
+                  edited={stage.edited}
                   note={d.stageAtDiagnosis?.note ?? d.tnm?.note}
                   onActiveChange={(a) => onActive(a ? stage.evidence : undefined)}
                 />
@@ -349,6 +423,7 @@ export function ProfileStage() {
                   value={ageSexValue}
                   confidence={ageSex.confidence}
                   evidence={ageSex.evidence}
+                  edited={ageSex.edited}
                   note={demo.age?.note ?? demo.sex?.note}
                   onActiveChange={(a) => onActive(a ? ageSex.evidence : undefined)}
                 />
@@ -454,12 +529,16 @@ export function ProfileStage() {
                       <span className="w-[84px] shrink-0 text-right font-mono text-[11.5px] tnum text-ink-400">
                         {lab.date ? formatDate(lab.date) : ""}
                       </span>
-                      <span className="flex w-6 shrink-0 justify-end">
-                        <EvidencePopover
-                          evidence={lab.evidence}
-                          align="right"
-                          onActiveChange={(a) => onActive(a ? lab.evidence : undefined)}
-                        />
+                      <span className={cn("flex shrink-0 justify-end", lab.edited ? "w-auto" : "w-6")}>
+                        {lab.edited ? (
+                          <EditedTag />
+                        ) : (
+                          <EvidencePopover
+                            evidence={lab.evidence}
+                            align="right"
+                            onActiveChange={(a) => onActive(a ? lab.evidence : undefined)}
+                          />
+                        )}
                       </span>
                     </li>
                   ))}
@@ -506,6 +585,8 @@ export function ProfileStage() {
               </>
             )}
           </SectionPanel>
+            </>
+          )}
         </div>
       </div>
 
@@ -515,17 +596,39 @@ export function ProfileStage() {
             <span role="alert" className="text-fail-700">
               {searchError}
             </span>
+          ) : editing ? (
+            valid ? (
+              "Editing the profile. Nothing is applied until you save."
+            ) : (
+              <span className="text-warn-700">A primary diagnosis is required.</span>
+            )
           ) : (
             "Review the extraction, then find trials."
           )
         }
       >
-        <Button variant="ghost" icon={<ArrowLeft />} onClick={() => goToStage("record")}>
-          Back to record
-        </Button>
-        <Button icon={<Search />} loading={searching} onClick={() => void confirmProfile()}>
-          Looks right — find trials
-        </Button>
+        {editing ? (
+          <>
+            <Button variant="ghost" onClick={() => setDraft(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveDraft} disabled={!valid}>
+              {dirty ? "Save changes" : "Done"}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="ghost" icon={<ArrowLeft />} onClick={() => goToStage("record")}>
+              Back to record
+            </Button>
+            <Button variant="secondary" icon={<Pencil />} onClick={() => setDraft(profile)} disabled={searching}>
+              Edit profile
+            </Button>
+            <Button icon={<Search />} loading={searching} onClick={() => void confirmProfile()}>
+              Looks right — find trials
+            </Button>
+          </>
+        )}
       </ActionBar>
     </div>
   );
